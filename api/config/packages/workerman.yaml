@@ -1,0 +1,17 @@
+workerman:
+    servers:
+        - name: "Workerman webserver"
+          listen: http://0.0.0.0:8004
+          processes: 8
+          local_cert: "/etc/apache2/certs/bt.in/bt.in.crt"
+          local_pk: "/etc/apache2/certs/bt.in/bt.in.key"
+
+    reload_strategy:
+        exception:
+            active: true
+
+        file_monitor:
+            active: true
+            source_dir:
+                - "%kernel.project_dir%/src"
+                - "%kernel.project_dir%/config"
