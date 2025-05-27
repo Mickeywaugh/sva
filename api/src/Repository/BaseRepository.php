@@ -2,10 +2,9 @@
 
 namespace App\Repository;
 
-use App\Service\BaseService as Util;
+use App\Service\Logger;
 use Doctrine\Bundle\DoctrineBundle\Repository\ServiceEntityRepository;
 use Doctrine\Common\Collections\ArrayCollection;
-use Doctrine\ORM\EntityManager;
 use Doctrine\ORM\PersistentCollection;
 use Doctrine\Persistence\ManagerRegistry;
 use Exception;
@@ -15,10 +14,12 @@ abstract class BaseRepository extends ServiceEntityRepository
 {
 
     private $qb;
+    private $whereCounter = 0;
     private $whereCond = "AND";
     private $entityClass;
     protected $em;
     protected $debug = false;
+    protected $isLogSql = true;
     // 支持的查询方法
     protected $expr = [
         '=',
@@ -29,25 +30,27 @@ abstract class BaseRepository extends ServiceEntityRepository
         '<=',
         'BETWEEN',
         'NOT_BETWEEN',
+        'NULL',
+        'NOT_NULL',
         'LIKE',
-        'NOTLIKE',
+        'NOT_LIKE',
         'IN',
         'NOT_IN',
         'LT_TIME',
         'GT_TIME',
         'LTE_TIME',
         'GTE_TIME',
-        'FIND_IN'
+        'FIND_IN',
+        'OR'
     ];
 
     public function __construct(ManagerRegistry $registry)
     {
         parent::__construct($registry, static::getEntityClass());
-        $this->qb = $this->createQueryBuilder('t');
         $this->entityClass = static::getEntityClass();
-        $this->debug = $_ENV['APP_DEBUG'];
-        $this->resetWhere();
-        $this->em = $this->getEntityManager();
+        $this->em = static::getEntityManager();
+        $this->qb = static::createQueryBuilder('t');
+        $this->qb->resetDQLParts(); // 重置查询条件
     }
 
     /**
@@ -56,6 +59,18 @@ abstract class BaseRepository extends ServiceEntityRepository
      * @return string
      */
     abstract protected static function getEntityClass(): string;
+
+    /**
+     * 获取 Repository 实例
+     *
+     * @param ManagerRegistry $registry
+     * @return static
+     */
+    public static function getRepository(ManagerRegistry $registry): static
+    {
+        return new static($registry);
+    }
+
 
     public function getEm()
     {
@@ -84,9 +99,15 @@ abstract class BaseRepository extends ServiceEntityRepository
                 array_push($properties, $mapping['fieldName']);
             }
         }
-        // Util::log($properties);
+        // Logger::log($properties);
         return $properties;
     }
+
+    public function getQueryBuiler()
+    {
+        return $this->qb;
+    }
+
 
     /**
      * 获取实体方法名称 parentId  => setParentId;
@@ -105,7 +126,7 @@ abstract class BaseRepository extends ServiceEntityRepository
             }
         });
 
-        // 合并单词，形成小驼峰格式
+        // 合并单词，形成小驼峰格式,首字小写
         return implode('', $words);
     }
 
@@ -115,9 +136,13 @@ abstract class BaseRepository extends ServiceEntityRepository
      * @return string parent_id
      */
 
-    public static function convertToSnakeCase(string $input): string
+    public static function rebuildField(string $input): string
     {
-        return strtolower(preg_replace(['/([a-z\d])([A-Z])/', '/([^_])([A-Z][a-z])/'], '$1_$2', $input));
+        //如何$filed中有.字符，则直接返回，如果没有则返回t.$field
+        $cmInput = self::toCamelCase($input);
+        $retField = strpos($input, '.') !== false ? $cmInput : 't.' . $cmInput;
+        // Logger::log("rebuildField: $input => $retField");
+        return $retField;
     }
 
     public function getEntity()
@@ -127,7 +152,7 @@ abstract class BaseRepository extends ServiceEntityRepository
         if ($reflectionClass->isInstantiable()) {
             $entity = $reflectionClass->newInstance();
         } else {
-            Util::log("$this->entityClass is not instantiable");
+            Logger::log("$this->entityClass is not instantiable");
             throw new Exception("$this->entityClass is not instantiable");
         }
         return $entity;
@@ -152,6 +177,28 @@ abstract class BaseRepository extends ServiceEntityRepository
         return $entity;
     }
 
+    public function cpEntity(object $sourceEntity, array $newProps = [], array $ignoreProps = [])
+    {
+        $entity = $this->getEntity();
+        // 复制属性,除开id和createTime,updateTime等属性
+        $props = $this->getEntityProperties(false);
+        $ignoreProps = $ignoreProps + ["id", "createTime", "updateTime"];
+        foreach ($props as $prop) {
+            if (in_array($prop, $ignoreProps)) {
+                continue;
+            }
+            $setter = self::toCamelCase('set' . ucfirst($prop));
+            $getter = self::toCamelCase('get' . ucfirst($prop));
+            if (method_exists($entity, $setter) && method_exists($sourceEntity, $getter)) {
+                $entity = $entity->$setter($sourceEntity->$getter());
+                // Logger::log("$prop=" . $getter);
+            }
+        }
+
+        $entity = $this->updateEntity($entity, $newProps);
+        return $entity;
+    }
+
     /** 更新单个实体，返回更新后的实体
      * @param object $entity
      * @param array $data
@@ -173,23 +220,28 @@ abstract class BaseRepository extends ServiceEntityRepository
         return $entity;
     }
 
-    public function getQueryBuiler()
-    {
-        return $this->qb;
-    }
-
     public function select(...$args): static
     {
+        $this->qb->resetDQLPart('select');
         $this->qb->select(...$args);
         return $this;
     }
 
+    /** 
+     * @param className  //属性名，大小写敏感
+     * @param alias
+     */
     public function join(...$args)
     {
+        $this->qb->resetDQLPart('join');
         $this->qb->join(...$args);
         return $this;
     }
 
+    /** 
+     * @param className  // 属性名,大小写敏感
+     * @param alias
+     */
     public function leftJoin(...$args): static
     {
         $this->qb->leftJoin(...$args);
@@ -204,16 +256,27 @@ abstract class BaseRepository extends ServiceEntityRepository
 
     public function orderBy($orderBy): static
     {
+        $this->qb->resetDQLPart('orderBy');
         if ($orderBy) {
             foreach ($orderBy as $field => $order) {
-                $this->qb->addOrderBy('t.' . $field, $order);
+                $field = self::rebuildField($field);
+                $this->qb->addOrderBy($field, $order);
             }
         }
         return $this;
     }
 
+    public function groupBy(...$groupBy): static
+    {
+        $this->qb->resetDQLPart('groupBy');
+        $this->qb->groupBy(...$groupBy);
+        return $this;
+    }
+
     public function pagination($limit, $offset): static
     {
+        //清空分页参数
+        $this->qb->setFirstResult(0)->setMaxResults(null);
         if ($limit !== null) {
             $this->qb->setMaxResults($limit);
         }
@@ -236,19 +299,19 @@ abstract class BaseRepository extends ServiceEntityRepository
      * @param int|null $offset
      * @return array ["total" => 0, 'items' => []]
      */
-    public function search($where = [], array $orderBy = null, $limit = null, $offset = null)
+    public function search($where = [], $orderBy = null, $limit = null, $offset = null)
     {
         $this->parseWhere($where);  // append where array conditions to $qb;
         $this->orderBy($orderBy);
         //在未添加分页参数前复制qb对象以获取总数；
         // 获取总数
-        $totalCount = $this->getCount();
+        $totalCount = $this->getCount(true);
         // 获取分页后的数据
         $result = $this->pagination($limit, $offset)->getResult();
         return ["total" => $totalCount, 'items' => $result];
     }
 
-    public function findEntities($where = [], array $orderBy = null)
+    public function findEntities($where = [], $orderBy = null)
     {
         $this->parseWhere($where);  // append where array conditions to $qb;
         $this->orderBy($orderBy);
@@ -260,7 +323,7 @@ abstract class BaseRepository extends ServiceEntityRepository
      * @param array|null $orderBy
      * @return array
      */
-    public function getOptionList($kv = ["id", "name"], $where = [], array $orderBy = null): ?array
+    public function getOptionList($kv = ["id", "name"], $where = [], $orderBy = null): ?array
     {
         $this->parseWhere($where);  // append where array conditions to $qb;
         $this->orderBy($orderBy);
@@ -269,7 +332,7 @@ abstract class BaseRepository extends ServiceEntityRepository
             $kv = explode(",", $kv);
         }
         if (count($kv) < 2) {
-            @Util::log("$kv is uncompliance");
+            @Logger::log("$kv is uncompliance");
             throw new Exception("$kv is uncompliance");
         }
         $result = $this->getArrayResult();
@@ -284,7 +347,7 @@ abstract class BaseRepository extends ServiceEntityRepository
                     if (array_key_exists($metaKeyItem, $value)) {
                         $meta[$metaKeyItem] = $value[$metaKeyItem];
                     } else {
-                        Util::log("$metaKeyItem is not exists");
+                        Logger::log("$metaKeyItem is not exists");
                     }
                 }
             }
@@ -295,24 +358,20 @@ abstract class BaseRepository extends ServiceEntityRepository
 
     public function getResult()
     {
-        if ($this->debug) {
-            Util::log($this->qb->getQuery()->getDQL());
-        }
+        $this->logSql();
         return $this->qb->getQuery()->getResult();
     }
 
     public function getArrayResult()
     {
-        if ($this->debug) {
-            Util::log($this->qb->getQuery()->getDQL());
-        }
+        $this->logSql();
         return $this->qb->getQuery()->getArrayResult();
     }
 
-    public function getLatest(array $filter)
+    public function getLatest(array $filter, array $orderBy = ["id" => "DESC"])
     {
-        if ($this->debug) Util::log($this->parseWhere($filter)->qb->setMaxResults(1)->getQuery()->getDQL());
-        return $this->parseWhere($filter)->qb->setMaxResults(1)->getQuery()->getOneOrNullResult();
+        if ($this->debug) Logger::log($this->parseWhere($filter)->qb->setMaxResults(1)->getQuery()->getDQL());
+        return $this->orderBy($orderBy)->parseWhere($filter)->qb->setMaxResults(1)->getQuery()->getOneOrNullResult();
     }
 
     public function findOrCreate(array $filter)
@@ -325,147 +384,124 @@ abstract class BaseRepository extends ServiceEntityRepository
         }
     }
 
-    public function getCount()
+    public function getCount(bool $clone = false)
     {
-        $countQb = clone $this->qb;
-        return  $countQb->select('COUNT(t)')->getQuery()->getSingleScalarResult();
+        $countQb = $clone ? clone $this->qb : $this->qb;
+        try {
+            $countQuery = $countQb->select('COUNT(t)')->getQuery();
+            $this->logSql($countQb);
+            return $countQuery->getSingleScalarResult();
+        } catch (Exception $e) {
+            Logger::log($e->getMessage());
+            throw $e;
+        }
     }
 
-    public function setWhereOr(): static
+    public function setMaxResult($limit): self
     {
-        $this->whereCond = "OR";
+        $this->qb->setMaxResults($limit);
         return $this;
     }
 
-    public function setWhereAnd(): static
+    public function setWhere(string $where): self
     {
-        $this->whereCond = "AND";
+        if (in_array($where, ["AND", "OR"])) {
+            $this->whereCond = $where;
+        }
         return $this;
     }
 
-    public function resetWhere(): static
-    {
-        $this->qb->resetDQLPart("where");
-        return $this;
-    }
-
-    public function parseWhere($where): static
+    public function parseWhere(array $where): self
     {
         if (empty($where)) return $this;
-        $cond = $this->whereCond;
-        $properties = $this->getEntityProperties();
         // 处理模糊搜索条件
-        foreach ($where as $key => $expr) {
-            //判断$where的数组的结构，支持[key=>val,[key,op,val]]结构
-            if (is_int($key) && is_array($expr)) {
-                // 数组元素为数组时，为模糊搜索条件
-                $argc = count($expr);
-                // 数组元素个数为1时，
-                //[key=val]
-                if ($argc == 1) {
-                    $field = key($expr);
-                    $value = current($expr);
-                    $field = self::convertToSnakeCase($field);
-                    $this->andOrWhere($cond, "$field = :$field")->setParameter($field, $value);
-                    continue;
-                };
-                // 数组元素个数为2时,使用精确查询
-                //[key,val]
-                if ($argc == 2) {
-                    list($field, $op) = $expr;
-                    $field = self::convertToSnakeCase($field);
-                    $op = strtoupper($op);
-                    if ($op === 'NULL' || $op == null) {
-                        $this->andOrWhere($cond, $this->qb->expr()->isNull("$field"));
-                    }
-                    if ($op === 'NOTNULL') {
-                        $this->andOrWhere($cond, $this->qb->expr()->isNotNull("$field"));
-                    }
-                    continue;
-                }
-                // 数组元素个数为3时，使用模糊查询
-                if ($argc == 3) {
-                    list($field, $opName, $value) = $expr;
-                    // $field = self::convertToSnakeCase($field);
-                    // if (!in_array($field, $properties)) continue;
-                    $opName = strtoupper($opName);
-                    if (!in_array($opName, $this->expr)) continue;
-
-                    //以下操作需要将value转换化数组形式
-                    if (in_array($opName, ["BETWEEN", "NOT_BETWEEN", "NOT_IN", "IN"])) {
-                        $value = is_array($value) ? $value : explode(',', $value);
-                    } else {
-                        //如果其它操作value为数组，则忽略
-                        if (is_array($value)) $value = $value[0];
-                    }
-
-                    if (in_array($opName, ["BETWEEN", "NOT_BETWEEN"])) {
-                        if (count($value) != 2) continue;
-                        if ($opName == "BETWEEN") { //包括start和end值
-                            $subQb = $this->qb->expr()->between("t.$field", ":start", ":end");
-                        } else {
-                            $subQb = $this->qb->expr()->orX($this->qb->expr()->lt("t.$field", ':start'), $this->qb->expr()->gt("t.$field", ':end'));
-                        }
-
-                        $this->andOrWhere($cond, $subQb)
-                            ->setParameter('start', $value[0])
-                            ->setParameter('end', $value[1]);
-                    } else {
-                        switch ($opName) {
-                            case "LIKE":
-                                $this->andOrWhere($cond, $this->qb->expr()->like("t.$field", ':value'))
-                                    ->setParameter('value', "%" . $value . "%");
-                                break;
-
-                            case "NOT_LIKE":
-                                $this->andOrWhere($cond, $this->qb->expr()->notLike("t.$field", ':value'))
-                                    ->setParameter('value', "%" . $value . "%");
-                                break;
-
-                            case "IN":
-                                $this->andOrWhere($cond, $this->qb->expr()->in("t.$field", ':range'))
-                                    ->setParameter('range', $value);
-                                break;
-
-                            case "NOT_IN":
-                                $this->andOrWhere($cond, $this->qb->expr()->notIn("t.$field", ':range'))
-                                    ->setParameter('range', $value);
-                                break;
-                            case "FIND_IN":
-                                $this->andOrWhere($cond, "FIND_IN_SET(:value, t.$field)")
-                                    ->setParameter('value', $value);
-                            default:
-                                $this->andOrWhere($cond, "t.$field $opName :$field")->setParameter($field, $value);
-                                break;
-                        }
+        foreach ($where as $field => $expr) {
+            $paramName = sprintf("value%d", $this->whereCounter);
+            $start = sprintf("start%d",  $this->whereCounter);
+            $end = sprintf("end%d",  $this->whereCounter);
+            //判断$where的数组的结构，只支持key=>value的形式, 如果value为数组，则认为是非精确查询条件，默认为数组第1个元素为操作符，数组第2个元素为匹配条件
+            $rfield = self::rebuildField($field);
+            if (is_array($expr)) {
+                list($op, $condtion) = $expr;
+                $op = strtoupper($op);
+                if (!in_array($op, $this->expr)) {
+                    //如果操作符不在$this->expr数组中，则默认为精确查询
+                    $this->setQbWhere("$rfield = :$paramName")->setParameter($paramName, $condtion);
+                } else {
+                    switch ($op) {
+                        case "NULL":
+                            $this->setQbWhere($this->qb->expr()->isNull("$rfield"));
+                            break;
+                        case "NOT_NULL":
+                            $this->setQbWhere($this->qb->expr()->isNotNull("$rfield"));
+                            break;
+                        case "LIKE":
+                            $this->setQbWhere($this->qb->expr()->like("$rfield", ":$paramName"))
+                                ->setParameter($paramName, "%" . $condtion . "%");
+                            break;
+                        case "NOT_LIKE":
+                            $this->setQbWhere($this->qb->expr()->notLike("$rfield", ":$paramName"))
+                                ->setParameter($paramName, "%" . $condtion . "%");
+                            break;
+                        case "IN":
+                            $this->setQbWhere($this->qb->expr()->in("$rfield", ":$paramName"))
+                                ->setParameter($paramName, $condtion);
+                            break;
+                        case "NOT_IN":
+                            $this->setQbWhere($this->qb->expr()->notIn("$rfield", ":$paramName"))
+                                ->setParameter($paramName, $condtion);
+                            break;
+                        case "FIND_IN":
+                            $this->setQbWhere("FIND_IN_SET(:$paramName, $rfield)")
+                                ->setParameter($paramName, $condtion);
+                            break;
+                        case "BETWEEN":
+                            $subQb = $this->qb->expr()->between("$rfield", ":$start", ":$end");
+                            $this->setQbWhere($subQb)->setParameter($start, $condtion[0])->setParameter($end, $condtion[1]);
+                            break;
+                        case "NOT_BETWEEN":
+                            $subQb = $this->qb->expr()->orX($this->qb->expr()->lt("$rfield", ":$start"), $this->qb->expr()->gt("$rfield", ":$end"));
+                            $this->setQbWhere($subQb)->setParameter("$start", $condtion[0])->setParameter($end, $condtion[1]);
+                            break;
+                        case "OR":
+                            // $condtion为数组,循环添加or操作
+                            foreach ($condtion as $orVal) {
+                                $paramName = sprintf("value%d", $this->whereCounter);
+                                $this->qb->orWhere("$rfield = :$paramName")->setParameter($paramName, $orVal);
+                                $this->whereCounter++;
+                            }
+                            break;
+                        default:
+                            $this->setQbWhere("$rfield $op :$paramName")->setParameter($paramName, $condtion);
+                            break;
                     }
                 }
             } else {
-                // $where=["key"=>"value"] 结构
-                // 数组元素不为数组时，默认使用精确查询
-                // 字段不在实体属性中，忽略
-                // $key = $this->convertToSnakeCase($key);
-                // if (!in_array($key, $properties)) continue;
-                // 如何搜索字符串中有%，则使用主动使用模糊搜索
-                if (is_string($expr) && strpos($expr, '%') !== false) {
-                    $this->qb->orWhere($this->qb->expr()->like("t.$key", ':keyword'))
-                        ->setParameter('keyword', $expr);
-                    continue;
-                } else {
-                    $this->andOrWhere($cond, "t.$key = :$key")->setParameter($key, $expr);
-                }
+                $this->setQbWhere("$rfield = :$paramName")->setParameter($paramName, $expr);
             }
-            // Util::log($this->qb->getDQL());
+            $this->whereCounter++;
         }
         return $this;
     }
 
-    private function andOrWhere($cond, $argv)
+    public function whereOr($where): static
     {
-        if ($cond === "AND") {
+        $this->whereCond = "OR";
+        return $this->parseWhere($where);
+    }
+
+    public function whereAnd($where): static
+    {
+        $this->whereCond = "AND";
+        return $this->parseWhere($where);
+    }
+
+    private function setQbWhere($argv)
+    {
+        if ($this->whereCond === "AND") {
             $this->qb->andWhere($argv);
         }
-        if ($cond === "OR") {
+        if ($this->whereCond === "OR") {
             $this->qb->orWhere($argv);
         }
         return $this->qb;
@@ -522,6 +558,7 @@ abstract class BaseRepository extends ServiceEntityRepository
      */
     public function list(array $filter = [],  array $names = [], array $order = ['id' => 'DESC'],): array
     {
+        unset($filter['pageNum'], $filter['pageSize']);
         $data = $this->search($filter, $order);
         $list = [];
         foreach ($data["items"] as &$entity) {
@@ -546,7 +583,7 @@ abstract class BaseRepository extends ServiceEntityRepository
             }
         } catch (\Exception $e) {
             $this->em->rollback();
-            @Util::log($e->getMessage(), "error");
+            @Logger::log($e->getMessage(), "error");
             return false;
         }
     }
@@ -572,7 +609,7 @@ abstract class BaseRepository extends ServiceEntityRepository
             return $retEntities;
         } catch (\Exception $e) {
             $this->em->rollback();
-            @Util::log($e->getMessage(), "error");
+            @Logger::log($e->getMessage(), "error");
             return false;
         }
     }
@@ -598,7 +635,7 @@ abstract class BaseRepository extends ServiceEntityRepository
             return $entities;
         } catch (\Exception $e) {
             $this->em->rollback();
-            @Util::log($e->getMessage(), "error");
+            @Logger::log($e->getMessage(), "error");
             return false;
         }
     }
@@ -614,7 +651,7 @@ abstract class BaseRepository extends ServiceEntityRepository
         // 获取更新实体
         // $filter为字符表示根据主键id查询获取实体
         if (is_array($filter)) {
-            // Util::log("filter is array");
+            // Logger::log("filter is array");
             $existEntity = $this->findOneBy($filter);
         } elseif ($filter instanceof $this->entityClass) {
             $existEntity = $filter;
@@ -622,7 +659,7 @@ abstract class BaseRepository extends ServiceEntityRepository
             $existEntity = $this->find($filter);
         }
         if (!$existEntity) {
-            Util::log("filter is $filter");
+            Logger::log("filter is $filter");
             return false;
         }
         try {
@@ -634,7 +671,7 @@ abstract class BaseRepository extends ServiceEntityRepository
             return $updatedEntity;
         } catch (\Exception $e) {
             $this->em->rollback();
-            @Util::log($e->getMessage(), "error");
+            @Logger::log($e->getMessage(), "error");
             return false;
         }
     }
@@ -653,7 +690,7 @@ abstract class BaseRepository extends ServiceEntityRepository
             foreach ($ids as $id) {
                 $entity = $this->find($id);
                 if ($entity) {
-                    $this->em->remove($entity);
+                    $this->remove($entity);
                     $deleteIds[] = $id;
                 };
             }
@@ -662,7 +699,8 @@ abstract class BaseRepository extends ServiceEntityRepository
             return $deleteIds;
         } catch (\Exception $e) {
             $this->em->rollback();
-            @Util::log($e->getMessage());
+            @Logger::log($e->getMessage());
+            $this->logSql();
             return false;
         }
     }
@@ -672,7 +710,7 @@ abstract class BaseRepository extends ServiceEntityRepository
      * @param object $entity
      * @return bool
      */
-    public function remove($entity)
+    public function remove($entity): bool
     {
         try {
             $this->em->beginTransaction();
@@ -682,7 +720,7 @@ abstract class BaseRepository extends ServiceEntityRepository
             return true;
         } catch (\Exception $e) {
             $this->em->rollback();
-            @Util::log($e->getMessage());
+            @Logger::log($e->getMessage());
             return false;
         }
     }
@@ -695,7 +733,7 @@ abstract class BaseRepository extends ServiceEntityRepository
     public function flush($entities)
     {
         if (!$this->em->isOpen()) {
-            Util::log("em is closed");
+            Logger::log("em is closed");
         }
         $this->em->beginTransaction();
         try {
@@ -710,15 +748,31 @@ abstract class BaseRepository extends ServiceEntityRepository
             $this->em->commit();
             return $entities;
         } catch (\Exception $e) {
-
-            if ($this->em->isOpen()) {
-                $this->em->clear();
-                $this->em->rollback();
-            }
-
-            @Util::log($e->getMessage());
-            // @Util::log(var_export($entity, true));
+            $this->em->rollback();
+            @Logger::log($e->getMessage());
+            // @Logger::log(var_export($entity, true));
             return false;
+        }
+    }
+
+    public function debug(bool $sql = true): self
+    {
+        $this->debug = true;
+        $this->isLogSql = $sql;
+        return $this;
+    }
+
+    private function logSql($qb = null)
+    {
+        if (!$qb) {
+            $qb = $this->qb;
+        }
+        if ($this->debug) {
+            if ($this->isLogSql) {
+                Logger::log($this->qb->getQuery()->getSQL());
+            } else {
+                Logger::log($this->qb->getQuery()->getDQL());
+            }
         }
     }
 }
