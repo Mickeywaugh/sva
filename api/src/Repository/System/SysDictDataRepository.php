@@ -33,8 +33,8 @@ class SysDictDataRepository extends BaseRepository
         $list = [];
         foreach ($data as $item) {
             $list[] = [
-                'value' => $item->getDictCode(),
-                'label' => $item->getDictCode(),
+                'value' => $item->getValue(),
+                'label' => $item->getLabel(),
             ];
         }
         return $list;

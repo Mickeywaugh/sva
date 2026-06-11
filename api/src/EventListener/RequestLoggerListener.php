@@ -9,21 +9,21 @@ use Jenssegers\Agent\Agent;
 
 class RequestLoggerListener
 {
-  private $logger;
-  private $agent;
-  private $logData;
-  protected $startTime;
-  protected $save = false;
-  public function __construct(SysLogRepository $logger)
+  private SysLogRepository $loggerRepo;
+  private Agent $agent;
+  private array $logData = [];
+  protected float $startTime;
+  protected bool $save = false;
+  public function __construct(SysLogRepository $_loggerRepo)
   {
-    $this->logger = $logger;
+    $this->loggerRepo = $_loggerRepo;
     $this->agent = new Agent();
     $this->logData = [
       "browser" => $this->agent->browser(),
       "browserVersion" => $this->agent->version($this->agent->browser()),
       "os" => sprintf("%s->%s:%s", $this->agent->device(), $this->agent->platform(), $this->agent->version($this->agent->platform()))
     ];
-    $this->save = $_ENV['APP_LOGS'] ?? $this->save;
+    $this->save = $_ENV['APP_SYSLOG'] ?? $this->save;
   }
 
   public function onKernelRequest(RequestEvent $reqEvent)
@@ -40,6 +40,7 @@ class RequestLoggerListener
     $this->startTime = microtime(true) * 1000;
     //添加请求信息
     $this->logData = $this->logData + [
+      "module" => $request->getPathInfo(),
       "requestMethod" => $request->getMethod(),
       "requestParams" => $request->getQueryString(),
       'content' => $request->getContent(),
@@ -47,6 +48,7 @@ class RequestLoggerListener
       "method" => $request->getMethod(),
       "ip" => implode(",", $request->getClientIps())
     ];
+    $this->loggerRepo->create($this->logData);
   }
 
   public function onKernelResponse(ResponseEvent $resEvent)
@@ -54,20 +56,21 @@ class RequestLoggerListener
     if (!$this->save) return;
 
     $response = $resEvent->getResponse();
-    if (!$resEvent->isMainRequest()) {
+
+    if ($response->getStatusCode() >= 400) {
       return;
     }
-
     // 添加响应信息
     $responseTime = microtime(true) * 1000;
     $this->logData = $this->logData + [
+      "requestMethod" => "Response",
       "module" => $resEvent->getRequest()->getPathInfo(),
       "responseContent" => $response->getStatusCode(),
       "executionTime" => $responseTime - $this->startTime,
-      "createBy" => "logListener"
+      "createBy" => 1
     ];
     // 记录日志
     // BaseService::log($this->logData);
-    $this->logger->create($this->logData);
+    $this->loggerRepo->create($this->logData);
   }
 }

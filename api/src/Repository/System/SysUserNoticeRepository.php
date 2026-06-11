@@ -26,7 +26,7 @@ class SysUserNoticeRepository extends BaseRepository
         return SysUserNotice::class;
     }
 
-    public function readAll($userId)
+    public function readAll(int $userId)
     {
         return  $this->createQueryBuilder('n')
             ->update()

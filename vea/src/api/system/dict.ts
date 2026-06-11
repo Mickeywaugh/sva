@@ -1,83 +1,65 @@
 import request from "@/utils/request";
 
-const DICT_BASE_URL = "/api/v1/dict";
+const DICT_BASE_URL = "/api/v1/system/dict";
 
 const DictAPI = {
+  //---------------------------------------------------
+  // 字典相关接口
+  //---------------------------------------------------
+
   /**
-   * 获取字典分页列表
+   * 字典分页列表
    *
    * @param queryParams 查询参数
    * @returns 字典分页结果
    */
-  getPage(queryParams: DictPageQuery) {
-    return request<any, PageResult<DictPageVO>>({
-      url: `${DICT_BASE_URL}/page`,
-      method: "get",
-      params: queryParams,
-    });
-  },
-
-  /**
-   * 获取字典表单数据
-   *
-   * @param id 字典ID
-   * @returns 字典表单数据
-   */
-  getFormData(id: number) {
-    return request<any, ResponseData<DictForm>>({
-      url: `${DICT_BASE_URL}/${id}/form`,
-      method: "get",
-    });
-  },
-
-  /**
-   * 新增字典
-   *
-   * @param data 字典表单数据
-   */
-  add(data: DictForm) {
-    return request({
-      url: `${DICT_BASE_URL}`,
+  page(node: DictNode, ParamsData: PageQueryParams) {
+    return request<any, PageResult<Dict | DictItem[]>>({
+      url: `${DICT_BASE_URL}/page/${node}`,
       method: "post",
-      data: data,
+      data: ParamsData,
     });
   },
 
   /**
-   * 修改字典
-   *
+   * 修改或新增
    * @param id 字典ID
    * @param data 字典表单数据
    */
-  update(id: number, data: DictForm) {
+  set(node: DictNode, id: number, data: DictForm) {
     return request({
-      url: `${DICT_BASE_URL}/${id}`,
+      url: `${DICT_BASE_URL}/${node}/${id}`,
       method: "put",
-      data: data,
+      data,
     });
   },
-
   /**
    * 删除字典
-   *
-   * @param ids 字典ID，多个以英文逗号(,)分隔
+     * @param ids 字典ID，多个以英文逗号(,)分隔
    */
-  deleteByIds(ids: string) {
+  deleteByIds(node: DictNode, ids: string) {
     return request({
-      url: `${DICT_BASE_URL}/${ids}`,
+      url: `${DICT_BASE_URL}/batchDelete/${node}/${ids}`,
       method: "delete",
     });
   },
 
   /**
-   * 获取字典列表
-   *
-   * @returns 字典列表
+   * 获取字典项列表
    */
-  getList() {
-    return request<any, DictVO[]>({
-      url: `${DICT_BASE_URL}/list`,
+  getDictOptions(dictCode: string) {
+    return request<any, OptionItem[]>({
+      url: `${DICT_BASE_URL}/item/options/${dictCode}`,
       method: "get",
+    });
+  },
+  /**
+   * 删除字典项
+   */
+  delete(node: DictNode, id: number) {
+    return request({
+      url: `${DICT_BASE_URL}/${node}/${id}`,
+      method: "delete",
     });
   },
 };
@@ -87,7 +69,7 @@ export default DictAPI;
 /**
  * 字典查询参数
  */
-export interface DictPageQuery extends PageQuery {
+export interface DictPageQuery extends PageQueryParams {
   /**
    * 关键字(字典名称/编码)
    */
@@ -102,23 +84,11 @@ export interface DictPageQuery extends PageQuery {
 /**
  * 字典分页对象
  */
-export interface DictPageVO {
-  /**
-   * 字典ID
-   */
-  id: number;
-  /**
-   * 字典名称
-   */
-  name: string;
-  /**
-   * 字典编码
-   */
-  dictCode: string;
-  /**
-   * 字典状态（1:启用，0:禁用）
-   */
-  status: number;
+export interface Dict extends DictForm {
+  createTime?: string;
+  updateTime?: string;
+  createBy?: string;
+  updateBy?: string;
 }
 
 /**
@@ -141,6 +111,8 @@ export interface DictForm {
    * 字典状态（1-启用，0-禁用）
    */
   status?: number;
+  isNumber?: number;
+  tagType?: "success" | "warning" | "info" | "primary" | "danger" | "";
   /**
    * 备注
    */
@@ -148,33 +120,60 @@ export interface DictForm {
 }
 
 /**
- * 字典数据项分页VO
- *
- * @description 字典数据分页对象
+ * 字典分页对象
  */
-export interface DictVO {
-  /** 字典名称 */
-  name: string;
-
-  /** 字典编码 */
-  dictCode: string;
-
-  /** 字典数据集合 */
-  dictDataList: DictData[];
+export interface DictItem extends DictItemForm {
+  createTime?: string;
+  createBy?: string;
+  updateTime?: string;
+  updateBy?: string;
 }
 
 /**
- * 字典数据
- *
- * @description 字典数据
+ * 字典
  */
-export interface DictData {
-  /** 字典数据值 */
-  value: string;
+export interface DictItemForm {
+  /**
+   * 字典ID
+   */
+  id?: number;
+  /**
+   * 字典编码
+   */
+  dictId?: number;
+  /**
+   * 字典数据值
+   */
+  value?: string;
+  /**
+   * 字典数据标签
+   */
+  label?: string;
+  /**
+   * 状态（1:启用，0:禁用)
+   */
+  status?: number;
+  /**
+   * 字典排序
+   */
+  sort?: number;
 
-  /** 字典数据标签 */
-  label: string;
-
-  /** 标签类型 */
-  tagType: string;
+  isDefault?: number;
+  /**
+   * 标签类型
+   */
+  tagType?: "success" | "warning" | "info" | "primary" | "danger" | "";
 }
+
+/**
+ * 字典项下拉选项
+ */
+export interface DictItemOption {
+  value: number | string;
+  label: string;
+  tagType?: "" | "success" | "info" | "warning" | "danger";
+  [key: string]: any;
+}
+
+
+export type DictNode = "dict" | "item";

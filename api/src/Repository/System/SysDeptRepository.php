@@ -4,7 +4,7 @@ namespace App\Repository\System;
 
 use App\Entity\System\SysUser;
 use App\Entity\System\SysDept;
-use App\Service\BaseService as Util;
+use App\Service\Logger;
 use App\Repository\BaseRepository;
 use Doctrine\Persistence\ManagerRegistry;
 use Exception;
@@ -32,7 +32,7 @@ class SysDeptRepository extends BaseRepository
     public function getList(int $pid = 0): array
     {
         $sysdeptTree = [];
-        $sysdeptList = $this->findBy(["parentId" => $pid, "isDeleted" => 0]);
+        $sysdeptList = $this->findBy(["parentId" => $pid, "deleteTime" => null]);
         foreach ($sysdeptList as $sysdept) {
             $child = $this->getList($sysdept->getId());
             $data = $sysdept->toArray();
@@ -47,7 +47,7 @@ class SysDeptRepository extends BaseRepository
     public function getTree(int $pid = 0): array
     {
         $sysdeptTree = [];
-        $sysdeptList = $this->findBy(["parentId" => $pid, "isDeleted" => 0]);
+        $sysdeptList = $this->findBy(["parentId" => $pid, "deleteTime" => null]);
 
         foreach ($sysdeptList as $sysdept) {
             $child = $this->getTree($sysdept->getId());
@@ -64,7 +64,7 @@ class SysDeptRepository extends BaseRepository
     }
 
     // 删除实体
-    public function delete($ids, bool $softDelete = true)
+    public function delete(array $ids, bool $softDelete = true): bool
     {
         if (!$ids) return false;
         try {
@@ -79,7 +79,7 @@ class SysDeptRepository extends BaseRepository
                         return false;
                     }
                     if ($softDelete) {
-                        $entity->setIsDeleted(1);
+                        $entity->setDeleteTime(new \DateTimeImmutable());
                         $em->persist($entity);
                     } else {
                         $em->remove($entity);
@@ -89,7 +89,7 @@ class SysDeptRepository extends BaseRepository
             $em->flush();
             return true;
         } catch (\Exception $e) {
-            @Util::log($e->getMessage());
+            @Logger::log($e->getMessage());
             return false;
         }
     }

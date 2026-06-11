@@ -1,7 +1,8 @@
 import type { App } from "vue";
 import { createRouter, createWebHashHistory, type RouteRecordRaw } from "vue-router";
+import { PublicRoutes } from "./public";
 
-export const Layout = () => import("@/layout/index.vue");
+export const Layout = () => import("@/layouts/index.vue");
 
 // 静态路由
 export const constantRoutes: RouteRecordRaw[] = [
@@ -36,10 +37,11 @@ export const constantRoutes: RouteRecordRaw[] = [
         // 参考文档: https://cn.vuejs.org/guide/built-ins/keep-alive.html#include-exclude
         name: "Dashboard",
         meta: {
-          title: "dashboard",
-          icon: "homepage",
+          title: "Dashboard",
+          icon: "bt-homepage",
           affix: true,
           keepAlive: true,
+          alwaysShow: false,
         },
       },
       {
@@ -59,11 +61,11 @@ export const constantRoutes: RouteRecordRaw[] = [
         meta: { title: "个人中心", icon: "user", hidden: true },
       },
       {
-        path: "myNotice",
+        path: "my-notice",
         name: "MyNotice",
-        component: () => import("@/views/system/notice/components/MyNotice.vue"),
+        component: () => import("@/views/profile/notice/index.vue"),
         meta: { title: "我的通知", icon: "user", hidden: true },
-      },
+      }
     ],
   },
 ];
@@ -73,7 +75,7 @@ export const constantRoutes: RouteRecordRaw[] = [
  */
 const router = createRouter({
   history: createWebHashHistory(),
-  routes: constantRoutes,
+  routes: [...constantRoutes, ...PublicRoutes],
   // 刷新时，滚动条位置还原
   scrollBehavior: () => ({ left: 0, top: 0 }),
 });

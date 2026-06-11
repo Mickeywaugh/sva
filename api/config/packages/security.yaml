@@ -24,14 +24,14 @@ security:
         api:
             pattern: ^/api/v1
             provider: app_user_provider
-            # stateless: true
+            stateless: true
             jwt: ~
+
     # Easy way to control access for large sections of your site
     # Note: Only the *first* access control that matches will be used
     access_control:
-        - { path: ^/api/v1/auth/(login|captcha|logout), roles: PUBLIC_ACCESS }
-        - { path: ^/download/(images), roles: PUBLIC_ACCESS }
-        - { path: ^/api/v1/(api_order), roles: PUBLIC_ACCESS }
+        - { path: ^/api/v1/system/auth/(login|captcha), roles: PUBLIC_ACCESS }
+        - { path: ^/api/v1/public/*, roles: PUBLIC_ACCESS }
         - { path: ^/api/v1/, roles: IS_AUTHENTICATED_FULLY }
 
 when@test:

@@ -2,14 +2,15 @@
 
 namespace App\Entity\System;
 
-use App\Entity\EntityBase;
+use App\Entity\BaseEntity;
+use App\Entity\Traits\DeleteTime;
 use App\Repository\System\SysUserNoticeRepository;
 use Doctrine\DBAL\Types\Types;
 use Doctrine\ORM\Mapping as ORM;
 
 #[ORM\Entity(repositoryClass: SysUserNoticeRepository::class)]
 #[ORM\HasLifecycleCallbacks]
-class SysUserNotice extends EntityBase
+class SysUserNotice extends BaseEntity
 {
     #[ORM\Id]
     #[ORM\GeneratedValue]
@@ -28,8 +29,7 @@ class SysUserNotice extends EntityBase
     #[ORM\Column(type: Types::DATETIME_MUTABLE, nullable: true)]
     private ?\DateTimeInterface $readTime = null;
 
-    #[ORM\Column(type: Types::SMALLINT)]
-    private ?int $isDeleted = null;
+    use DeleteTime;
 
     public function getId(): ?int
     {
@@ -84,15 +84,14 @@ class SysUserNotice extends EntityBase
         return $this;
     }
 
-    public function getIsDeleted(): ?int
+    public function toArray(): array
     {
-        return $this->isDeleted;
-    }
-
-    public function setIsDeleted(int $isDeleted): static
-    {
-        $this->isDeleted = $isDeleted;
-
-        return $this;
+        return [
+            'id' => $this->getId(),
+            'userId' => $this->getUserId(),
+            'noticeId' => $this->getNoticeId(),
+            'readTime' => $this->getReadTime(),
+            'isDeleted' => $this->getIsDeleted(),
+        ];
     }
 }

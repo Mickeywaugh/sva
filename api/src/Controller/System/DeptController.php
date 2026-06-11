@@ -8,28 +8,33 @@ use Symfony\Component\HttpFoundation\JsonResponse;
 use Symfony\Component\HttpFoundation\Request;
 use Symfony\Component\Routing\Attribute\Route;
 
-#[Route('dept')]
+#[Route('system/dept', name: "system.dept.")]
 class DeptController extends BaseController
 {
-    private $deptRepo;
+    private SysDeptRepository $deptRepo;
     public function __construct(SysDeptRepository $_deptRepo)
     {
         $this->deptRepo = $_deptRepo;
     }
 
-    #[Route('', name: 'app_dept', methods: ['GET'])]
-    public function list(): JsonResponse
+    #[Route('/page', name: 'page', methods: ['POST'])]
+    public function page(Request $request): JsonResponse
     {
-        $deptList = [];
+        $params = $request->toArray();
+        $keywords = $params['keywords'] ?? '';
+        if (!empty($keywords)) {
+            $params['name'] = ["LIKE" => $keywords];
+        }
+        unset($params['keywords']);
         try {
-            $deptList = $this->deptRepo->getList();
+            $deptList = $this->deptRepo->page($params);
             return $this->success($deptList);
         } catch (\Exception $e) {
             return $this->error("部门数据获取失败:" . $e->getMessage());
         }
     }
 
-    #[Route('/options', name: 'dept.options', methods: ['GET'])]
+    #[Route('/options', name: 'options', methods: ['GET'])]
     public function options(): JsonResponse
     {
         $deptTree = [];
@@ -41,7 +46,7 @@ class DeptController extends BaseController
         }
     }
 
-    #[Route('', name: 'dept.create', methods: ['POST'])]
+    #[Route('', name: 'create', methods: ['POST'])]
     public function create(Request $request): JsonResponse
     {
         $data = $request->toArray();
@@ -52,15 +57,11 @@ class DeptController extends BaseController
         // 关联父级部门
         if (isset($data["parentId"])) {
             $pid = $data["parentId"];
-            unset($data["parentId"]);
-            if ($pid == 0) {
-                $parentDept = $this->deptRepo->getEntity();
-            } else {
+            $parentDept = null;
+            if ($pid) {
                 $parentDept = $this->deptRepo->find($pid);
-                if ($parentDept) {
-                    $data["parent"] = $parentDept;
-                }
             }
+            $data["parent"] = $parentDept;
         }
 
         $dept = $this->deptRepo->create($data);
@@ -71,7 +72,7 @@ class DeptController extends BaseController
         }
     }
 
-    #[Route('/{id}/form', name: 'dept.get', methods: ['GET'])]
+    #[Route('/{id}/form', name: 'get', methods: ['GET'])]
     public function get($id): JsonResponse
     {
         $dept = $this->deptRepo->find($id);
@@ -82,7 +83,7 @@ class DeptController extends BaseController
         }
     }
 
-    #[Route('/{id}/status', name: 'dept.setStatus', methods: ['PUT'])]
+    #[Route('/{id}/status', name: 'setStatus', methods: ['PUT'])]
     public function setStatus(Request $request, $id): JsonResponse
     {
         $data = $request->toArray();
@@ -97,7 +98,7 @@ class DeptController extends BaseController
         }
     }
 
-    #[Route('/{id}', name: 'dept.update', methods: ['PUT'])]
+    #[Route('/{id}', name: 'update', methods: ['PUT'])]
     public function update(Request $request, $id): JsonResponse
     {
         $data = $request->toArray();
@@ -113,12 +114,16 @@ class DeptController extends BaseController
         }
     }
 
-    #[Route('/{ids}', name: 'dept.delete', methods: ['DELETE'])]
+    #[Route('/{ids}', name: 'delete', methods: ['DELETE'])]
     public function delete($ids): JsonResponse
     {
-        $result = $this->deptRepo->delete(explode(",", $ids));
+        if (empty($ids)) {
+            return $this->error("参数错误");
+        }
+        $ids = explode(",", $ids);
+        $result = $this->deptRepo->delete($ids);
         if ($result) {
-            return $this->success(["ids" => $result]);
+            return $this->success(["ids" => $ids]);
         } else {
             return $this->error("删除失败");
         }

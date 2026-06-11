@@ -2,14 +2,17 @@
 
 namespace App\Entity\System;
 
-use App\Entity\EntityBase;
+use App\Entity\BaseEntity;
+use App\Entity\Traits\DeleteTime;
 use App\Repository\System\SysRoleRepository;
+use Doctrine\Common\Collections\ArrayCollection;
+use Doctrine\Common\Collections\Collection;
 use Doctrine\DBAL\Types\Types;
 use Doctrine\ORM\Mapping as ORM;
 
 #[ORM\Entity(repositoryClass: SysRoleRepository::class)]
 #[ORM\HasLifecycleCallbacks]
-class SysRole extends EntityBase
+class SysRole extends BaseEntity
 {
     #[ORM\Id]
     #[ORM\GeneratedValue]
@@ -31,23 +34,28 @@ class SysRole extends EntityBase
     #[ORM\Column(type: Types::SMALLINT, nullable: true)]
     private ?int $dataScope = null;
 
-    #[ORM\Column(type: Types::SMALLINT, options: ['default' => 0])]
-    private ?int $isDeleted = 0;
 
-
+    /**
+     * @var Collection<int,SysMenu>;
+     */
     #[ORM\ManyToMany(targetEntity: SysMenu::class, cascade: ['persist', 'remove'])]
     #[ORM\JoinTable(name: 'sys_role_menu')]
     #[ORM\JoinColumn(name: 'role_id', referencedColumnName: 'id')]
     #[ORM\InverseJoinColumn(name: 'menu_id', referencedColumnName: 'id')]
-    private $menus;
+    private ?Collection $menus;
 
-    // 多对多单向关联
+
+    /**
+     * 多对多单向关联
+     * @var Collection<int,SysUser>;
+     */
     #[ORM\ManyToMany(targetEntity: SysUser::class, cascade: ['persist'])]
     #[ORM\JoinTable(name: "sys_user_role")]
     #[ORM\JoinColumn(name: 'role_id', referencedColumnName: 'id')]
     #[ORM\InverseJoinColumn(name: 'user_id', referencedColumnName: 'id')]
-    private $users;
+    private ?Collection $users;
 
+    use DeleteTime;
     public function getId(): ?int
     {
         return $this->id;
@@ -90,11 +98,7 @@ class SysRole extends EntityBase
 
     public function getStatus(): ?int
     {
-        if ($this->isDeleted) {
-            return 0;
-        } else {
-            return $this->status;
-        }
+        return $this->status;
     }
 
     public function setStatus(?int $status): static
@@ -116,27 +120,15 @@ class SysRole extends EntityBase
         return $this;
     }
 
-    public function getIsDeleted(): ?int
-    {
-        return $this->isDeleted;
-    }
-
-    public function setIsDeleted(int $isDeleted = 0): static
-    {
-        $this->isDeleted = $isDeleted;
-
-        return $this;
-    }
-
-    public function setMenus($menus): static
+    public function setMenus(Collection $menus): static
     {
         $this->menus = $menus;
         return $this;
     }
 
-    public function getMenus()
+    public function getMenus(): ?Collection
     {
-        return $this->menus;
+        return $this->menus ?: new ArrayCollection();
     }
 
     public function getMenuIds(): array
@@ -178,7 +170,7 @@ class SysRole extends EntityBase
             'sort' => $this->sort,
             'status' => $this->status,
             'dataScope' => $this->getDataScope(),
-            'isDeleted' => $this->isDeleted
+            'isDeleted' => $this->getIsDeleted()
         ];
     }
 }

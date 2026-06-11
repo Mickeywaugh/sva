@@ -5,25 +5,26 @@ namespace App\Controller\System;
 use App\Controller\BaseController;
 use App\Repository\System\SysDictDataRepository;
 use App\Repository\System\SysDictRepository;
-use App\Service\BaseService;
 use Symfony\Component\HttpFoundation\JsonResponse;
 use Symfony\Component\HttpFoundation\Request;
 use Symfony\Component\Routing\Attribute\Route;
 
-#[Route('dict')]
-
+#[Route('system/dict', name: 'system.dict.')]
 class DictController extends BaseController
 {
 
-    private $dictRepo;
-    private $dictDataRepo;
+    private SysDictRepository $dictRepo;
+    private SysDictDataRepository $dictDataRepo;
     public function __construct(SysDictRepository $_dictRepo, SysDictDataRepository $_dictDataRepo)
     {
         $this->dictRepo = $_dictRepo;
         $this->dictDataRepo = $_dictDataRepo;
     }
 
-    #[Route('/list', name: 'dict.list', methods: ['GET'])]
+    /**
+     * 字典列表
+     */
+    #[Route('/list', name: 'list', methods: ['GET'])]
     public function list(Request $request): JsonResponse
     {
         $params = $request->query->all();
@@ -32,94 +33,108 @@ class DictController extends BaseController
             $dictList = $this->dictRepo->list($params, ["DictData"]);
             return $this->success($dictList);
         } catch (\Exception $e) {
-            return $this->error("字典数据获取失败:" . $e->getMessage());
+            return $this->critical("字典数据获取失败:" . $e->getMessage());
         }
     }
 
-    #[Route('/page', name: 'dict.page', methods: ['GET'])]
-    public function page(Request $request): JsonResponse
+    /**
+     * 字典分页
+     * @param Request $request
+     * @return JsonResponse
+     */
+    #[Route('/page/{node}', name: 'page', methods: ['POST'], requirements: ['node' => 'dict|item'])]
+    public function page(string $node, Request $request): JsonResponse
     {
-        $params = $request->query->all();
-        $dictList = [];
+        $params = $request->toArray();
         try {
-            $dictList = $this->dictRepo->page($params);
-            return $this->success($dictList);
-        } catch (\Exception $e) {
-            return $this->error("字典数据获取失败:" . $e->getMessage());
-        }
-    }
-
-    #[Route('/{id}/form', name: 'dict.add', methods: ['GET'])]
-    public function get($id): JsonResponse
-    {
-        $dict = $this->dictRepo->find($id);
-        if ($dict) {
-            return $this->success($dict->toArray());
-        } else {
-            return $this->error("字典数据获取失败");
-        }
-    }
-
-    #[Route('', name: 'dict.create', methods: ['POST'])]
-    public function create(Request $request): JsonResponse
-    {
-        $data = $request->toArray();
-        if (empty($data)) {
-            return $this->error("参数错误");
-        }
-        try {
-            $dict = $this->dictRepo->create($data);
-            if ($dict) {
-                return $this->success($dict->toArray());
-            } else {
-                return $this->error("字典数据添加失败");
+            $repo = match ($node) {
+                'dict' => $this->dictRepo,
+                'item' => $this->dictDataRepo
+            };
+            if (!$repo) return $this->error('参数错误');
+            if (isset($params['keyword']) && !empty($params['keyword'])) {
+                $params['name|dictCode'] = ["LIKE" => $params['keyword']];
             }
+            unset($params['keyword']);
+            $page = $repo->page($params);
+            return $this->success($page);
         } catch (\Exception $e) {
-            return $this->error("字典数据更新失败:" . $e->getMessage());
+            return $this->critical("字典数据获取失败:" . $e->getMessage());
         }
     }
 
-    #[Route('/{id}', name: 'dict.update', methods: ['PUT'])]
-    public function update(Request $request, $id): JsonResponse
+    /**
+     * 字典数据表单
+     */
+    #[Route('/{node}/{id}', name: 'get', methods: ['GET'], requirements: ['node' => 'dict|item', 'id' => '\d+'])]
+    public function get(string $node, int $id): JsonResponse
     {
-        $data = $request->toArray();
-        if (empty($data)) {
-            return $this->error("参数错误");
+        if (empty($id)) {
+            return $this->error('参数错误');
         }
-        try {
-            $dict = $this->dictRepo->update($id, $data);
-            if ($dict) {
-                return $this->success($dict->toArray());
-            } else {
-                return $this->error("字典数据更新失败");
+        $repo = match ($node) {
+            'dict' => $this->dictRepo,
+            'item' => $this->dictDataRepo
+        };
+        if (!$repo) return $this->error('参数错误');
+        $entity = $repo->find($id);
+        if (!$entity) {
+            return $this->error("字典不存在");
+        }
+        return $this->success($entity->toArray());
+    }
+
+    #[Route('/{node}/{id}', name: 'set', methods: ['PUT', 'POST'], requirements: ['node' => 'dict|item', 'id' => '\d+'])]
+    public function set(string $node, int $id, Request $request): JsonResponse
+    {
+        $params = $request->toArray();
+        $repo = match ($node) {
+            'dict' => $this->dictRepo,
+            'item' => $this->dictDataRepo
+        };
+        if (!$repo) return $this->error('参数错误');
+        if (!$id) {
+            if (isset($params['dictId']) && $params['dictId']) {
+                $params['dict'] = $this->dictRepo->find($params['dictId']);
             }
-        } catch (\Exception $e) {
-            return $this->error("字典数据更新失败:" . $e->getMessage());
+            $entity = $repo->create($params);
+        } else {
+            $entity = $repo->debug(true)->update($id, $params);
         }
+        if (!$entity) {
+            return $this->error("保存失败");
+        }
+        return $this->success($entity->toArray());
     }
 
-    #[Route('/{id}/status', name: 'dict.setStatus', methods: ['PUT'])]
-    public function setStatus(Request $request, $id): JsonResponse
+
+    #[Route('/{node}/{id}', name: 'delete', methods: ['DELETE'], requirements: ['node' => 'dict|item', 'id' => '\d+'])]
+    public function delete(string $node, int $id): JsonResponse
     {
-        $data = $request->toArray();
-        if (empty($data)) {
+        $repo = match ($node) {
+            'dict' => $this->dictRepo,
+            'item' => $this->dictDataRepo
+        };
+        if (!$repo) return $this->error('参数错误');
+        if (!$id) {
             return $this->error("参数错误");
         }
-        $dept = $this->dictRepo->update($id, $data);
-        if ($dept) {
-            return $this->success($dept->toArray());
-        } else {
-            return $this->error("更新失败");
+        $entity = $repo->delete([$id]);
+        if (!$entity) {
+            return $this->error("删除失败");
         }
+        return $this->success(["id" => $id]);
     }
-
-    #[Route('/{ids}', name: 'dict.delete', methods: ['DELETE'])]
-    public function delete($ids): JsonResponse
+    /**
+     * 批量删除字典项
+     */
+    #[Route('/batchDelete/{ids}', name: 'deletes', methods: ['DELETE'])]
+    public function batchDelete(string $ids): JsonResponse
     {
         if (empty($ids)) {
             return $this->error("参数错误");
         }
-        $result = $this->dictRepo->delete(explode(',', $ids));
+        $result = $this->dictDataRepo->delete(explode(',', $ids));
         if ($result) {
             return $this->success(["ids" => $result]);
         } else {
@@ -127,34 +142,14 @@ class DictController extends BaseController
         }
     }
 
-
-    #[Route('/{code}/options', name: 'dict.options', methods: ['GET'])]
-    public function options($code): JsonResponse
+    /**
+     * 获取数据项列表
+     */
+    #[Route('/item/options/{code}', name: 'dataOptions', methods: ['GET'])]
+    public function dictOptions(string $code): JsonResponse
     {
-        if ($code == "") {
-            return $this->error("参数错误");
-        }
-        $dictList = $this->dictRepo->options($code);
-        return $this->success($dictList);
-    }
-
-    #[Route('-data/page', name: 'dict.dataPage', methods: ['GET'])]
-    public function dataPage(Request $request): JsonResponse
-    {
-
-        $params = $request->query->all();
-        BaseService::log($params);
-        $data = $this->dictDataRepo->page($params);
-        return $this->success($data);
-    }
-    #[Route('-data/{id}/form', name: 'dict.dataForm', methods: ['GET'])]
-    public function dataForm($id): JsonResponse
-    {
-        $data = $this->dictDataRepo->find($id);
-        if ($data) {
-            return $this->success($data->toArray());
-        } else {
-            return $this->error("字典数据获取失败");
-        }
+        $dict = $this->dictRepo->findOneBy(['dictCode' => $code]);
+        if (!$dict) return $this->error("字典不存在");
+        return $this->success($dict->getDictOptions());
     }
 }

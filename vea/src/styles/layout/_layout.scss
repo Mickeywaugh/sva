@@ -1,0 +1,218 @@
+/**
+ * 全局标准布局样式
+ */
+
+/* 混合布局左侧菜单 hover 样式 */
+.layout-mix .layout__sidebar--left .el-menu {
+
+  .el-menu-item:hover,
+  .el-sub-menu__title:hover {
+    background-color: var(--el-fill-color-light) !important;
+  }
+}
+
+/* 深色或深蓝侧边栏的 hover 样式 */
+html.dark .layout-mix .layout__sidebar--left .el-menu,
+html.sidebar-color-blue .layout-mix .layout__sidebar--left .el-menu {
+
+  .el-menu-item:hover,
+  .el-sub-menu__title:hover {
+    background-color: var(--menu-hover) !important;
+  }
+}
+
+/* 顶部布局菜单填充空间 */
+.layout-top .layout__header-left .el-menu--horizontal,
+.layout-mix .layout__header-menu .el-menu--horizontal {
+  display: flex;
+  flex: 1 1 0% !important;
+  align-items: center;
+  width: 100% !important;
+  min-width: 0 !important;
+  overflow: hidden;
+}
+
+/* 窄屏隐藏菜单文字，仅保留图标 */
+.hideSidebar {
+
+  &.layout-top .layout__header .el-menu--horizontal,
+  &.layout-mix .layout__header .el-menu--horizontal {
+
+    .el-menu-item,
+    .el-sub-menu__title {
+
+      .menu-title,
+      span:not([class*="i-svg"]):not(.el-icon) {
+        display: none !important;
+      }
+    }
+  }
+
+  &.layout-mix .layout__sidebar--left .el-menu {
+
+    .el-menu-item,
+    .el-sub-menu__title {
+
+      .menu-title,
+      span:not([class*="i-svg"]):not(.el-icon) {
+        display: none !important;
+      }
+    }
+  }
+}
+
+
+.iconfont {
+  margin: 0 2px;
+}
+
+.app-container {
+  padding: var(--page-padding);
+}
+
+// 数据表格卡片样式
+.table-card {
+
+  .toolbar {
+    display: flex;
+    justify-content: space-between;
+    // margin-bottom: px;
+    padding: 5px;
+
+    .left-toolbar,
+    .right-toolbar {
+      display: flex;
+      gap: 8px;
+    }
+  }
+
+  .el-table {
+    margin: 8px 0;
+  }
+
+  .el-pagination {
+    justify-content: flex-end;
+    margin: 8px;
+  }
+}
+
+
+.link-type,
+.link-type:focus {
+  color: #337ab7;
+  cursor: pointer;
+
+  &:hover {
+    color: rgb(32 160 255);
+  }
+}
+
+.scrollable-div {
+  width: 100%;
+  overflow-x: auto !important;
+
+  /* IE 和 Edge */
+  -ms-overflow-style: none;
+  /* Firefox */
+  scrollbar-width: none;
+}
+
+
+.hide {
+  display: none;
+}
+
+.show {
+  display: block;
+}
+
+.button {
+  border: none;
+  color: rgb(208, 208, 208);
+  padding: 10px;
+  text-align: center;
+  text-decoration: none;
+  display: inline-block;
+  font-size: 16px;
+  margin: 5px;
+  cursor: pointer;
+  -webkit-transition-duration: 0.4s;
+  /* Safari */
+  transition-duration: 0.4s;
+  border-radius: 10px;
+}
+
+.button:hover {
+  box-shadow:
+    0 6px 8px 0 rgba(0, 0, 0, 0.24),
+    0 7px 20px 0 rgba(0, 0, 0, 0.19);
+  color: rgb(255, 255, 255);
+}
+
+.qrcodeScannerContainer {
+  position: fixed;
+  /* 设置为固定定位 */
+  top: 50%;
+  /* 顶部偏移50% */
+  left: 50%;
+  /* 左侧偏移50% */
+  transform: translate(-50%, -50%);
+  /* 使用transform来微调位置，确保div完全居中 */
+  aspect-ratio: 1 / 1;
+  background-color: rgb(0, 0, 0);
+  /* 设置背景颜色以便看到效果 */
+  border: 1px solid black;
+  /* 边框 */
+  z-index: 9990;
+}
+
+.qrcodeScannerReader {
+  position: relative;
+  top: 0;
+  left: 0;
+  border: #000000 1px dashed;
+  width: 600px;
+  aspect-ratio: 1/1;
+}
+
+.qrcodeScannerToolbar {
+  position: absolute;
+  bottom: 5px;
+  right: 5px;
+}
+
+.table-title {
+  font-size: 16px;
+  font-weight: bold;
+  justify-content: center;
+  box-sizing: border-box;
+  display: flex;
+  flex-wrap: wrap;
+  position: relative;
+  padding: 5px 0px;
+}
+
+.card-title {
+  font-size: 14px;
+  font-weight: bold;
+  justify-content: center;
+  box-sizing: border-box;
+  display: flex;
+  flex-wrap: wrap;
+  position: relative;
+  padding: 3px;
+}
+
+
+.repeat-row {
+  background-color: #ffd4d4ff !important;
+}
+
+.w-e-bar-item {
+  height: 32px !important;
+}
+
+.w-e-bar-item button {
+  height: 24px !important; // 默认通常是 36px
+  padding: 0 2px !important;
+}

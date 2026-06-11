@@ -2,14 +2,17 @@
 
 namespace App\Entity\System;
 
-use App\Entity\EntityBase;
+use App\Entity\BaseEntity;
+use App\Entity\Traits\DeleteTime;
 use App\Repository\System\SysDeptRepository;
+use Doctrine\Common\Collections\ArrayCollection;
+use Doctrine\Common\Collections\Collection;
 use Doctrine\DBAL\Types\Types;
 use Doctrine\ORM\Mapping as ORM;
 
 #[ORM\Entity(repositoryClass: SysDeptRepository::class)]
 #[ORM\HasLifecycleCallbacks]
-class SysDept extends EntityBase
+class SysDept extends BaseEntity
 {
     #[ORM\Id]
     #[ORM\GeneratedValue]
@@ -17,9 +20,12 @@ class SysDept extends EntityBase
     private ?int $id = null;
 
     #[ORM\Column(length: 64)]
+    private ?string $code = null;
+
+    #[ORM\Column(length: 64)]
     private ?string $name = null;
 
-    #[ORM\Column]
+    #[ORM\Column(type: Types::BIGINT, options: ['default' => 0])]
     private int $parentId = 0;
 
     #[ORM\Column(nullable: true)]
@@ -28,24 +34,36 @@ class SysDept extends EntityBase
     #[ORM\Column(type: Types::SMALLINT)]
     private ?int $status = null;
 
-    #[ORM\Column(type: Types::SMALLINT, options: ['default' => 0])]
-    private ?int $isDeleted = 0;
-
-    #[ORM\Column(type: Types::BIGINT, nullable: true)]
-    private ?string $createBy = null;
-
-    #[ORM\Column(type: Types::BIGINT, nullable: true)]
-    private ?string $updateBy = null;
+    #[ORM\Column(type: Types::STRING)]
+    private ?string $treePath = null;
 
     #[ORM\ManyToOne(targetEntity: SysDept::class, inversedBy: 'children')]
     #[ORM\JoinColumn(name: 'parent_id', referencedColumnName: 'id', nullable: false, options: ['default' => 0])]
     private ?SysDept $parent = null;
 
+    /**
+     * @var Collection<int,SysDept>
+     */
     #[ORM\OneToMany(targetEntity: SysDept::class, mappedBy: 'parent')]
-    private $children;
+    private ?Collection $children;
+
+    use DeleteTime;
+
     public function getId(): ?int
     {
         return $this->id;
+    }
+
+    public function getCode(): ?string
+    {
+        return $this->code;
+    }
+
+    public function setCode(string $code): static
+    {
+        $this->code = $code;
+
+        return $this;
     }
 
     public function getName(): ?string
@@ -60,9 +78,11 @@ class SysDept extends EntityBase
         return $this;
     }
 
-    public function setParent(?SysDept $parent)
+    public function setParent(?SysDept $parent): static
     {
         $this->parent = $parent;
+        $this->setTreePath();
+        return $this;
     }
 
     public function getParent(): ?SysDept
@@ -76,6 +96,34 @@ class SysDept extends EntityBase
     public function getParentId(): int
     {
         return $this->getParent() ? $this->getParent()->getId() : 0;
+    }
+
+    public function setParentId(int $parentId): static
+    {
+        $this->parentId = $parentId;
+        return $this;
+    }
+
+    public function getChildren(): ?Collection
+    {
+        return $this->children ?: new ArrayCollection();
+    }
+
+    public function setTreePath(): static
+    {   //
+        if ($this->parentId == 0) {
+            $treePathArray = [0];
+        } else {
+            $treePathArray = $this->parent->getTreePath() + [$this->parent->getId()];
+        }
+        $this->treePath = implode(",", $treePathArray);
+
+        return $this;
+    }
+
+    public function getTreePath(): ?array
+    {
+        return explode(",", $this->parentId == 0 ? "0" : $this->treePath);
     }
 
     public function getSort(): ?int
@@ -102,46 +150,11 @@ class SysDept extends EntityBase
         return $this;
     }
 
-    public function getIsDeleted(): ?int
-    {
-        return $this->isDeleted;
-    }
-
-    public function setIsDeleted(?int $isDeleted): static
-    {
-        $this->isDeleted = $isDeleted;
-
-        return $this;
-    }
-
-    public function getCreateBy(): ?string
-    {
-        return $this->createBy;
-    }
-
-    public function setCreateBy(?int $createBy): static
-    {
-        $this->createBy = $createBy;
-
-        return $this;
-    }
-
-    public function getUpdateBy(): ?string
-    {
-        return $this->updateBy;
-    }
-
-    public function setUpdateBy(?int $updateBy): static
-    {
-        $this->updateBy = $updateBy;
-
-        return $this;
-    }
-
     public function toArray(): array
     {
         return [
             "id" => $this->getId(),
+            "code" => $this->getCode(),
             "name" => $this->getName(),
             "parentId" => $this->getParentId(),
             "status" => $this->getStatus(),

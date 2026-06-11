@@ -3,13 +3,15 @@
 namespace App\Entity\System;
 
 use App\Service\BaseService as Util;
-use App\Entity\EntityBase;
+use App\Entity\BaseEntity;
+use App\Entity\Traits\DeleteTime;
+use App\Service\DbalService;
 use App\Repository\System\SysConfigRepository;
 use Doctrine\ORM\Mapping as ORM;
 
 #[ORM\Entity(repositoryClass: SysConfigRepository::class)]
 #[ORM\HasLifecycleCallbacks]
-class SysConfig extends EntityBase
+class SysConfig extends BaseEntity
 {
     #[ORM\Id]
     #[ORM\GeneratedValue]
@@ -28,8 +30,7 @@ class SysConfig extends EntityBase
     #[ORM\Column(length: 255, nullable: true)]
     private ?string $remark = null;
 
-    #[ORM\Column]
-    private ?bool $isDeleted = null;
+    use DeleteTime;
 
     public function getId(): ?int
     {
@@ -84,19 +85,6 @@ class SysConfig extends EntityBase
         return $this;
     }
 
-
-    public function getIsDeleted(): ?bool
-    {
-        return $this->isDeleted;
-    }
-
-    public function setIsDeleted(bool $isDeleted): static
-    {
-        $this->isDeleted = $isDeleted;
-
-        return $this;
-    }
-
     public function toArray(): array
     {
         return [
@@ -106,5 +94,39 @@ class SysConfig extends EntityBase
             'configValue' => $this->configValue,
             'remark' => $this->remark
         ];
+    }
+
+
+    // 获取
+    public static function get(string $key): string
+    {
+        return DbalService::table('sys_config')->wheres(["config_key" => $key, "delete_time" => ["NULL" => NULL]])->getValue("config_value");
+    }
+
+    // 更新
+    public static function set(string $key, string $value)
+    {
+        return DbalService::table('sys_config')->wheres(["config_key" => $key])->update(["config_value" => $value, "update_time" => (new \DateTime())->format("Y-m-d H:i:s")]);
+    }
+
+    // 创建
+    public static function create(string $key, string $value = "")
+    {
+        return DbalService::table('sys_config')->insert([
+            "config_key" => $key,
+            "config_value" => $value,
+            "create_time" => (new \DateTime())->format("Y-m-d H:i:s")
+        ]);
+    }
+
+    // 删除
+    public static function delete(string $key)
+    {
+        return DbalService::table('sys_config')->wheres(["config_key" => $key])->delete();
+    }
+
+    public static function __callStatic(string $method, array $arguments)
+    {
+        return self::{$method}(...$arguments);
     }
 }

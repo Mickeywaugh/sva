@@ -2,8 +2,10 @@
 
 namespace App\Controller;
 
+use App\Entity\System\SysUser;
 use App\Service\AuthService;
 use App\Service\BaseService;
+use App\Service\Logger;
 use Symfony\Bundle\FrameworkBundle\Controller\AbstractController;
 use Symfony\Component\HttpFoundation\JsonResponse;
 
@@ -12,28 +14,53 @@ class BaseController extends AbstractController
 
     const Enable = 1;
     const Disable = 0;
-    public function success(array $data = [], string $msg = "Success"): JsonResponse
+    protected SysUser $currUser;
+
+    public function __construct(AuthService $authService)
     {
-        return BaseService::successResponse($msg, $data);
+        $this->currUser = $this->getCurrentUser($authService);
     }
 
-    public function error(string $msg = "Error", int $code = 500, array $data = []): JsonResponse
+    public function getCurrentUser(AuthService $_authService): SysUser
     {
-        return BaseService::errorResponse($msg, $code, $data);
+        return $_authService->getCurrentUser();
     }
 
-    public function forbidden(string $msg = "Forbidden", array $data = []): JsonResponse
+
+    public function success(array $data = [], string $msg = "Succeed"): JsonResponse
     {
-        return BaseService::errorResponse($msg, 403, $data);
+        return new JsonResponse([
+            'code' => 0,
+            'msg' => $msg,
+            'data' => $data
+        ]);
     }
 
-    public function notFound(string $msg = "NotFound", array $data = []): JsonResponse
+    public function error(string $msg = "Error", int $code = 1, array $data = []): JsonResponse
+    {
+        return new JsonResponse([
+            'code' => $code,
+            'msg' => $msg,
+            'data' => $data
+        ]);
+    }
+
+    public function critical(string $msg = "Critical Error", array $data = []): JsonResponse
+    {
+        Logger::critical($msg, $data);
+        return new JsonResponse([
+            'code' => 502,
+            'msg' => $msg,
+            'data' => $data
+        ]);
+    }
+    public function forbidden(string $msg, array $data = []): JsonResponse
+    {
+        return BaseService::errorResponse($msg, 401, $data);
+    }
+
+    public function notFound(string $msg, array $data = []): JsonResponse
     {
         return BaseService::errorResponse($msg, 404, $data);
-    }
-
-    public function getCurrentUser()
-    {
-        return $this->getUser();
     }
 }

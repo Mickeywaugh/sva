@@ -1,11 +1,11 @@
 import request from "@/utils/request";
 
-const ROLE_BASE_URL = "/api/v1/roles";
+const ROLE_BASE_URL = "/api/v1/system/roles";
 
 const RoleAPI = {
   /** 获取角色分页数据 */
-  getPage(postData?: RolePageQuery) {
-    return request<any, PageResult<RolePageVO>>({
+  getPage(postData?: PageQueryParams) {
+    return request<any, PageResult<RoleItem>>({
       url: `${ROLE_BASE_URL}/page`,
       method: "post",
       data: postData,
@@ -14,7 +14,7 @@ const RoleAPI = {
 
   /** 获取角色下拉数据源 */
   getOptions() {
-    return request<any, OptionType[]>({
+    return request<any, OptionItem[]>({
       url: `${ROLE_BASE_URL}/options`,
       method: "get",
     });
@@ -96,7 +96,7 @@ const RoleAPI = {
   /**
    * 更改状态
    */
-  setStatus(id: number, data: switchType) {
+  setStatus(id: number, data: any) {
     return request({
       url: `${ROLE_BASE_URL}/${id}/status`,
       method: "put",
@@ -107,14 +107,8 @@ const RoleAPI = {
 
 export default RoleAPI;
 
-/** 角色分页查询参数 */
-export interface RolePageQuery extends PageQuery {
-  /** 搜索关键字 */
-  keywords?: string;
-}
-
 /** 角色分页对象 */
-export interface RolePageVO {
+export interface RoleItem {
   /** 角色编码 */
   code?: string;
   /** 角色ID */
@@ -125,6 +119,8 @@ export interface RolePageVO {
   sort?: number;
   /** 角色状态 */
   status?: number;
+  userCount?: number;
+  dataScope?: number; // 数据权限
   /** 创建时间 */
   createTime?: Date;
   /** 修改时间 */

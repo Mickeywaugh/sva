@@ -1,37 +1,65 @@
-<!-- 汉堡按钮组件：展开/收缩菜单  -->
 <template>
-  <div
-    class="px-[15px] flex items-center justify-center color-[var(--el-text-color-regular)]"
-    @click="toggleClick"
-  >
-    <svg-icon icon-class="collapse" :class="{ hamburger: true, 'is-active': isActive }" />
+  <div class="hamburger-wrapper" @click="toggleClick">
+    <div :class="[{ hamburger: true, 'is-active': isActive }, hamburgerClass]"><ga-icon :icon-class="'ga-doubleleft'"></ga-icon></div>
   </div>
 </template>
 
 <script setup lang="ts">
-defineProps({
-  isActive: {
-    required: true,
-    type: Boolean,
-    default: false,
-  },
-});
+  import { useSettingsStore } from "@/stores";
+  import { ThemeMode, SidebarColor, LayoutMode } from "@/enums/settings";
 
-const emit = defineEmits(["toggleClick"]);
+  defineProps({
+    isActive: { type: Boolean, required: true },
+  });
 
-function toggleClick() {
-  emit("toggleClick");
-}
+  const emit = defineEmits(["toggleClick"]);
+
+  const settingsStore = useSettingsStore();
+  const layout = computed(() => settingsStore.layout);
+
+  const hamburgerClass = computed(() => {
+    // 如果暗黑主题
+    if (settingsStore.resolvedTheme === ThemeMode.DARK) {
+      return "hamburger--white";
+    }
+
+    // 如果是混合布局 && 侧边栏配色方案是经典蓝
+    if (
+      layout.value === LayoutMode.MIX &&
+      settingsStore.sidebarColorScheme === SidebarColor.CLASSIC_BLUE
+    ) {
+      return "hamburger--white";
+    }
+
+    // 默认返回空字符串
+    return "";
+  });
+
+  function toggleClick() {
+    emit("toggleClick");
+  }
 </script>
 
 <style scoped lang="scss">
-.hamburger {
-  vertical-align: middle;
-  cursor: pointer;
-  transform: scaleX(-1);
-}
+  .hamburger-wrapper {
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    padding: 0 15px;
+    cursor: pointer;
 
-.hamburger.is-active {
-  transform: scaleX(1);
-}
+    .hamburger {
+      vertical-align: middle;
+      transform: scaleX(-1);
+      transition: transform 0.3s ease;
+
+      &--white {
+        color: #fff;
+      }
+
+      &.is-active {
+        transform: scaleX(1);
+      }
+    }
+  }
 </style>

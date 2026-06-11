@@ -5,57 +5,54 @@ namespace App\Controller\System;
 use App\Controller\BaseController;
 use App\Repository\System\SysNoticeRepository;
 use App\Repository\System\SysUserNoticeRepository;
-use App\Repository\System\SysUserRepository;
 use App\Service\AuthService;
-use App\Service\BaseService;
 use Symfony\Component\HttpFoundation\JsonResponse;
 use Symfony\Component\HttpFoundation\Request;
 use Symfony\Component\Routing\Attribute\Route;
 
-#[Route('notices')]
+#[Route('system/notices', name: 'system.notice.')]
 class NoticeController extends BaseController
 {
-  private $noticeRepo;
-  private $userNoticeRepo;
-  private $userRepo;
-  public function __construct(SysNoticeRepository $_noticeRepo, SysUserNoticeRepository $_userNoticeRepo, SysUserRepository $_userRepo)
+  private SysNoticeRepository $noticeRepo;
+  private SysUserNoticeRepository $userNoticeRepo;
+  public function __construct(SysNoticeRepository $_noticeRepo, SysUserNoticeRepository $_userNoticeRepo, AuthService $_authService)
   {
+    parent::__construct($_authService);
     $this->noticeRepo = $_noticeRepo;
     $this->userNoticeRepo = $_userNoticeRepo;
-    $this->userRepo = $_userRepo;
   }
 
-  #[Route('/page', name: 'notice.page', methods: ['GET'])]
+  #[Route('/page', name: 'page', methods: ['POST'])]
   public function page(Request $request): JsonResponse
   {
-    $params = $request->query->all();
-    extract($params);
+    $params = $request->toArray();
+    if (isset($params['title'])  && !empty($params['title'])) {
+      $params['title'] = ["LIKE" => $params['title']];
+    }
     $data = $this->noticeRepo->page($params);
     return $this->success($data);
   }
 
-  #[Route('/my-page', name: 'notice.userPage', methods: ['GET'])]
+  #[Route('/my-page', name: 'userPage', methods: ['POST'])]
   public function myPage(Request $request): JsonResponse
   {
-    $params = $request->query->all();
-
-    $userName = $this->getCurrentUser()->getUserIdentifier();
-    $currUser = $this->userRepo->findOneBy(['username' => $userName]);
-    if ($currUser) {
-      $params['userId'] = $currUser->getId();
+    $params = $request->toArray();
+    if ($this->currUser) {
+      $params['userId'] = $this->currUser->getId();
     }
     $data = $this->userNoticeRepo->page($params);
     return $this->success($data);
   }
 
-  #[Route('', name: 'notice.create', methods: ['POST'])]
-  public function create(Request $request, AuthService $auth): JsonResponse
+  #[Route('', name: 'create', methods: ['POST'])]
+  public function create(Request $request): JsonResponse
   {
     $data = $request->toArray();
     if (empty($data)) {
       return $this->error("参数错误");
     }
-    $data["create_by"] = $auth->getCurrentUser()->getId();
+    $data["createBy"] = $this->currUser->getId();
+    $data["publisher"] = $this->currUser;
     $role = $this->noticeRepo->create($data);
     if ($role) {
       return $this->success($role->toArray());
@@ -64,8 +61,8 @@ class NoticeController extends BaseController
     }
   }
 
-  #[Route('/{id}', name: 'notice.update', methods: ['PUT'])]
-  public function update(Request $request, $id): JsonResponse
+  #[Route('/{id}', name: 'update', methods: ['PUT'])]
+  public function update(Request $request, int $id): JsonResponse
   {
     $data = $request->toArray();
     if (empty($data)) {
@@ -79,8 +76,8 @@ class NoticeController extends BaseController
     }
   }
 
-  #[Route('/{id}/status', name: 'notice.setStatus', methods: ['PUT'])]
-  public function setStatus(Request $request, $id): JsonResponse
+  #[Route('/{id}/status', name: 'setStatus', methods: ['PUT'])]
+  public function setStatus(int $id, Request $request): JsonResponse
   {
     $data = $request->toArray();
     if (empty($data)) {
@@ -94,8 +91,8 @@ class NoticeController extends BaseController
     }
   }
 
-  #[Route('/{id}/form', name: 'notice.getFormData', methods: ['GET'])]
-  public function getFormData($id): JsonResponse
+  #[Route('/{id}/form', name: 'getFormData', methods: ['GET'])]
+  public function getFormData(int $id): JsonResponse
   {
     $data = $this->noticeRepo->find($id);
     if ($data) {
@@ -106,8 +103,8 @@ class NoticeController extends BaseController
   }
 
 
-  #[Route('/{id}/detail', name: 'notice.getFormData', methods: ['GET'])]
-  public function getDetail($id): JsonResponse
+  #[Route('/{id}/detail', name: 'getFormData', methods: ['GET'])]
+  public function getDetail(int $id): JsonResponse
   {
     $data = $this->noticeRepo->find($id);
     if ($data) {
@@ -117,22 +114,21 @@ class NoticeController extends BaseController
     }
   }
 
-  #[Route('/read-all', name: 'notice.read', methods: ['PUT'])]
+  #[Route('/read-all', name: 'read', methods: ['PUT'])]
   public function read(): JsonResponse
   {
-    $currUser = $this->getCurrentUser();
-    if (!$currUser) {
+    if (!$this->currUser) {
       return $this->error("用户不存在");
     }
 
-    $this->userNoticeRepo->readAll($currUser->getUserIdentifier());
+    $this->userNoticeRepo->readAll($this->currUser->getId());
 
     return $this->success();
   }
 
 
-  #[Route('/{id}/publish', name: 'notice.publish', methods: ['PATCH'])]
-  public function publish($id): JsonResponse
+  #[Route('/{id}/publish', name: 'publish', methods: ['PATCH'])]
+  public function publish(int $id): JsonResponse
   {
     $notice = $this->noticeRepo->find($id);
     $notice->setPublishStatus(1);
@@ -140,8 +136,8 @@ class NoticeController extends BaseController
     return $this->success();
   }
 
-  #[Route('/{id}/revoke', name: 'notice.revoke', methods: ['PATCH'])]
-  public function revoke($id): JsonResponse
+  #[Route('/{id}/revoke', name: 'revoke', methods: ['PATCH'])]
+  public function revoke(int $id): JsonResponse
   {
     $notice = $this->noticeRepo->find($id);
     $notice->setPublishStatus(0);
@@ -150,8 +146,8 @@ class NoticeController extends BaseController
   }
 
 
-  #[Route('/{ids}', name: 'notice.delete', methods: ['DELETE'])]
-  public function delete($ids): JsonResponse
+  #[Route('/{ids}', name: 'delete', methods: ['DELETE'], requirements: ['ids' => '\w+'])]
+  public function delete(string $ids): JsonResponse
   {
     $result = $this->noticeRepo->delete(explode(",", $ids));
     if ($result) {

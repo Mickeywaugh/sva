@@ -1,6 +1,6 @@
 import request from "@/utils/request";
 
-const LOG_BASE_URL = "/api/v1/logs";
+const LOG_BASE_URL = "/api/v1/system/logs";
 
 const LogAPI = {
   /**
@@ -8,11 +8,11 @@ const LogAPI = {
    *
    * @param queryParams 查询参数
    */
-  getPage(queryParams: LogPageQuery) {
-    return request<any, PageResult<LogPageVO>>({
+  getPage(queryParams: PageQueryParams) {
+    return request<any, PageResult<SysLogItem>>({
       url: `${LOG_BASE_URL}/page`,
-      method: "get",
-      params: queryParams,
+      method: "post",
+      data: queryParams,
     });
   },
 
@@ -47,19 +47,9 @@ const LogAPI = {
 export default LogAPI;
 
 /**
- * 日志分页查询对象
- */
-export interface LogPageQuery extends PageQuery {
-  /** 搜索关键字 */
-  keywords?: string;
-  /** 操作时间 */
-  createTime?: [string, string];
-}
-
-/**
  * 系统日志分页VO
  */
-export interface LogPageVO {
+export interface SysLogItem {
   /** 主键 */
   id: number;
   /** 日志模块 */

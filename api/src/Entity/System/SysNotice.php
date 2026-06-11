@@ -2,14 +2,15 @@
 
 namespace App\Entity\System;
 
-use App\Entity\EntityBase;
+use App\Entity\BaseEntity;
+use App\Entity\Traits\DeleteTime;
 use App\Repository\System\SysNoticeRepository;
 use Doctrine\DBAL\Types\Types;
 use Doctrine\ORM\Mapping as ORM;
 
 #[ORM\Entity(repositoryClass: SysNoticeRepository::class)]
 #[ORM\HasLifecycleCallbacks]
-class SysNotice extends EntityBase
+class SysNotice extends BaseEntity
 {
     #[ORM\Id]
     #[ORM\GeneratedValue]
@@ -43,22 +44,20 @@ class SysNotice extends EntityBase
     #[ORM\Column(type: Types::DATETIME_MUTABLE, nullable: true)]
     private ?\DateTimeInterface $publishTime = null;
 
-    #[ORM\Column(length: 63, nullable: true)]
-    private ?string $createBy = null;
-
-    #[ORM\Column(type: Types::SMALLINT)]
-    private ?int $isDeleted = null;
+    #[ORM\Column(type: Types::INTEGER, nullable: true)]
+    private ?int $createBy = null;
 
     #[ORM\ManyToOne(targetEntity: SysUser::class)]
     #[ORM\JoinColumn(name: 'publisher_id', referencedColumnName: 'id')]
     private ?SysUser $publisher = null;
+
+    use DeleteTime;
 
     #[ORM\PrePersist]
     public function onPrePersist(): void
     {
         parent::onPrePersist();
         $this->setPublishStatus();
-        $this->setIsDeleted();
     }
 
     public function getId(): ?int
@@ -131,9 +130,9 @@ class SysNotice extends EntityBase
         return $this->targetUserIds;
     }
 
-    public function setTargetUserIds(?string $targetUserIds): static
+    public function setTargetUserIds(?array $targetUserIds): static
     {
-        $this->targetUserIds = $targetUserIds;
+        $this->targetUserIds = implode(",", $targetUserIds);
 
         return $this;
     }
@@ -191,25 +190,12 @@ class SysNotice extends EntityBase
         return $this;
     }
 
-    public function getIsDeleted(): ?int
-    {
-        return $this->isDeleted;
-    }
-
-    public function setIsDeleted(int $isDeleted = 0): static
-    {
-        $this->isDeleted = $isDeleted;
-
-        return $this;
-    }
-
-    public function setCreateBy(?string $createBy = null): static
+    public function setCreateBy(int $createBy): static
     {
         $this->createBy = $createBy;
 
         return $this;
     }
-
     public function getCreateBy(): ?string
     {
         return $this->createBy;
@@ -228,11 +214,11 @@ class SysNotice extends EntityBase
             'revokeTime' => $this->getRevokeTime(),
             'publishTime' => $this->getPublishTime(),
             'createBy' => $this->getCreateBy(),
-            'publisherName' => $this->getPublisher()->getUsername(),
+            'publisherName' => $this->getPublisher()?->getUsername(),
             'isDeleted' => $this->getIsDeleted(),
             'createTime' => $this->getCreateTime(),
             'updateTime' => $this->getUpdateTime(),
         ];
-        return $this->spliceArray($retArray, $splices);
+        return $this->mergeArray($retArray, $splices);
     }
 }

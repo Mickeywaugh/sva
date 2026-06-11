@@ -2,15 +2,16 @@
 
 namespace App\Entity\System;
 
-use App\Entity\EntityBase;
+use App\Entity\BaseEntity;
 use App\Repository\System\SysDictRepository;
+use Doctrine\Common\Collections\ArrayCollection;
 use Doctrine\DBAL\Types\Types;
 use Doctrine\ORM\Mapping as ORM;
-use Doctrine\ORM\PersistentCollection;
+use Doctrine\Common\Collections\Collection;;
 
 #[ORM\Entity(repositoryClass: SysDictRepository::class)]
 #[ORM\HasLifecycleCallbacks]
-class SysDict extends EntityBase
+class SysDict extends BaseEntity
 {
     #[ORM\Id]
     #[ORM\GeneratedValue]
@@ -32,13 +33,11 @@ class SysDict extends EntityBase
     #[ORM\Column(type: Types::SMALLINT)]
     private ?int $isNumber = 1;
 
-    #[ORM\Column(type: Types::SMALLINT)]
-    private ?int $isDeleted = null;
-
-    #[ORM\OneToMany(targetEntity: SysDictData::class, mappedBy: 'dictCode', cascade: ['persist', 'remove'])]
-    #[ORM\JoinColumn(name: 'dict_code', referencedColumnName: 'id', nullable: true)]
-    private $dictData;
-
+    /**
+     * @var Collection<int,SysDictData>
+     */
+    #[ORM\OneToMany(targetEntity: SysDictData::class, mappedBy: 'dict', cascade: ['persist', 'remove'])]
+    private ?Collection $dictData;
     public function getId(): ?int
     {
         return $this->id;
@@ -99,25 +98,17 @@ class SysDict extends EntityBase
         return $this;
     }
 
-    public function setIsDeleted(int $isDeleted): static
-    {
-        $this->isDeleted = $isDeleted;
-        return $this;
-    }
-
-    public function getIsDeleted(): ?int
-    {
-        return $this->isDeleted;
-    }
-
     public function getRemark(): ?string
     {
         return $this->remark;
     }
 
-    public function getDictData(): ?PersistentCollection
+    /**
+     * @return ?Collection<int,SysDictData>
+     */
+    public function getDictData(): ?Collection
     {
-        return $this->dictData;
+        return $this->dictData ?: new ArrayCollection();
     }
 
     public function setDictData(?SysDictData $dictData): static
@@ -127,13 +118,13 @@ class SysDict extends EntityBase
         return $this;
     }
 
-    public function getDictDataArray(): array
+    public function getDictOptions(): array
     {
         $retArray = [];
         foreach ($this->getDictData() as $dictData) {
-            $retArray[] = $dictData->toArray();
+            $retArray[] = ["value" => $dictData->getValue(), "label" => $dictData->getLabel()];
         }
-        return ["dictDataList" => $retArray];
+        return $retArray;
     }
 
     public function toArray(array $splices = []): array
@@ -141,14 +132,13 @@ class SysDict extends EntityBase
         $retArray = [
             'id' => $this->getId(),
             'name' => $this->getName(),
-            "dictCode" => $this->getdictCode(),
+            "dictCode" => $this->getDictCode(),
             'status' => $this->getStatus(),
             'remark' => $this->getRemark(),
             'isNumber' => $this->getIsNumber(),
             'createTime' => $this->getCreateTime(),
-            'updateTime' => $this->getUpdateTime(),
-            'isDeleted' => $this->getIsDeleted()
+            'updateTime' => $this->getUpdateTime()
         ];
-        return $this->spliceArray($retArray, $splices);
+        return $this->mergeArray($retArray, $splices);
     }
 }

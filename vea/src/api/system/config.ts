@@ -1,14 +1,14 @@
 import request from "@/utils/request";
 
-const CONFIG_BASE_URL = "/api/v1/config";
+const CONFIG_BASE_URL = "/api/v1/system/config";
 
 const ConfigAPI = {
   /** 获取系统配置分页数据 */
-  getPage(queryParams?: ConfigPageQuery) {
-    return request<any, PageResult<ConfigPageVO>>({
+  getPage(queryParams?: PageQueryParams) {
+    return request<any, PageResult<ConfigItem>>({
       url: `${CONFIG_BASE_URL}/page`,
-      method: "get",
-      params: queryParams,
+      method: "post",
+      data: queryParams,
     });
   },
   /**
@@ -29,7 +29,7 @@ const ConfigAPI = {
     return request({
       url: `${CONFIG_BASE_URL}`,
       method: "post",
-      data: data,
+      data,
     });
   },
 
@@ -43,7 +43,7 @@ const ConfigAPI = {
     return request({
       url: `${CONFIG_BASE_URL}/${id}`,
       method: "put",
-      data: data,
+      data,
     });
   },
 
@@ -69,12 +69,6 @@ const ConfigAPI = {
 
 export default ConfigAPI;
 
-/** $系统配置分页查询参数 */
-export interface ConfigPageQuery extends PageQuery {
-  /** 搜索关键字 */
-  keywords?: string;
-}
-
 /** 系统配置表单对象 */
 export interface ConfigForm {
   /** 主键 */
@@ -90,7 +84,7 @@ export interface ConfigForm {
 }
 
 /** 系统配置分页对象 */
-export interface ConfigPageVO {
+export interface ConfigItem {
   /** 主键 */
   id?: number;
   /** 配置名称 */

@@ -5,20 +5,20 @@ namespace App\Repository\System;
 use App\Entity\System\SysUser;
 use App\Repository\BaseRepository;
 use App\Service\BaseService as Util;
+use App\Service\Logger;
 use Doctrine\Persistence\ManagerRegistry;
 
 /**
- * @extends BaseRepository<User>
- *
- * @method User|null find($id, $lockMode = null, $lockVersion = null)
- * @method User|null findOneBy(array $criteria, array $orderBy = null)
- * @method User[]    findAll()
- * @method User[]    findBy(array $criteria, array $orderBy = null, $limit = null, $offset = null)
+ * @extends BaseRepository<SysUser>
+ * @method SysUser|null find($id, $lockMode = null, $lockVersion = null)
+ * @method SysUser|null findOneBy(array $criteria, array $orderBy = null)
+ * @method SysUser[]    findAll()
+ * @method SysUser[]    findBy(array $criteria, array $orderBy = null, $limit = null, $offset = null)
  */
 class SysUserRepository extends BaseRepository
 {
-    private $deptRepo;
-    private $roleRepo;
+    private SysDeptRepository $deptRepo;
+    private SysRoleRepository $roleRepo;
 
     public function __construct(ManagerRegistry $register, SysDeptRepository $_deptRepo, SysRoleRepository $_roleRepo)
     {
@@ -46,7 +46,9 @@ class SysUserRepository extends BaseRepository
 
     /**
      * 获取用户列表
-     * @param array $filters
+     * @param array $filter
+     * @param array $names
+     * @param array $orders
      * @return array
      */
     public function list(array $filter = [], array $names = [], $orders = ['id' => 'DESC']): array
@@ -58,7 +60,7 @@ class SysUserRepository extends BaseRepository
         return parent::list($filter, $orders);
     }
 
-    public function create($data)
+    public function create(array $data): ?SysUser
     {
         $user = new SysUser();
         try {
@@ -93,12 +95,17 @@ class SysUserRepository extends BaseRepository
             $user = parent::create($data);
             return $user;
         } catch (\Exception $e) {
-            Util::log($e->getMessage());
-            return false;
+            Logger::log($e->getMessage());
+            return null;
         }
     }
 
-    public function updateUser($id, $data)
+    /**
+     * 更新用户信息
+     * @param int $id
+     * @param array $data
+     */
+    public function updateUser(int $id, array $data)
     {
         $id = $id ?: $data['id'];
         try {
@@ -123,19 +130,8 @@ class SysUserRepository extends BaseRepository
             }
             return parent::update($id, $data);
         } catch (\Exception $e) {
-            Util::log($e->getMessage());
+            Logger::log($e->getMessage());
             return false;
         }
-    }
-
-    public function resetPassword($id, $password)
-    {
-        $updatedUser = $this->update($id, ["password" => $password]);
-        if ($updatedUser) {
-            return true;
-        } else {
-            return true;
-        }
-        return true;
     }
 }

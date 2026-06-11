@@ -2,14 +2,14 @@
 
 namespace App\Entity\System;
 
-use App\Entity\EntityBase;
+use App\Entity\BaseEntity;
 use App\Repository\System\SysDictDataRepository;
 use Doctrine\DBAL\Types\Types;
 use Doctrine\ORM\Mapping as ORM;
 
 #[ORM\Entity(repositoryClass: SysDictDataRepository::class)]
 #[ORM\HasLifecycleCallbacks]
-class SysDictData extends EntityBase
+class SysDictData extends BaseEntity
 {
     #[ORM\Id]
     #[ORM\GeneratedValue]
@@ -25,8 +25,8 @@ class SysDictData extends EntityBase
     #[ORM\Column(length: 100, nullable: true)]
     private ?string $label = null;
 
-    #[ORM\Column(length: 100, nullable: true)]
-    private ?string $tagType = null;
+    #[ORM\Column(type: Types::SMALLINT)]
+    private ?int $isDefault = null;
 
     #[ORM\Column(type: Types::INTEGER)]
     private ?int $sort = null;
@@ -34,9 +34,15 @@ class SysDictData extends EntityBase
     #[ORM\Column(length: 255, nullable: true)]
     private ?string $remark = null;
 
-    #[ORM\ManyToOne(targetEntity: SysDict::class)]
-    #[ORM\JoinColumn(name: 'dict_code', referencedColumnName: 'id', nullable: true)]
-    private $dictCode = null;
+    #[ORM\Column(length: 255, nullable: true)]
+    private ?string $tagType = null;
+
+    #[ORM\Column(type: Types::INTEGER)]
+    private ?int $dictId = null;
+
+    #[ORM\ManyToOne(targetEntity: SysDict::class, inversedBy: 'dictData')]
+    #[ORM\JoinColumn(name: 'dict_id', referencedColumnName: 'id', nullable: true)]
+    private ?SysDict $dict = null;
 
     public function getId(): ?int
     {
@@ -79,6 +85,12 @@ class SysDictData extends EntityBase
         return $this;
     }
 
+
+    public function getDictId(): ?int
+    {
+        return $this->dictId;
+    }
+
     public function getRemark(): ?string
     {
         return $this->remark;
@@ -91,14 +103,14 @@ class SysDictData extends EntityBase
         return $this;
     }
 
-    public function getTagType(): ?string
+    public function getIsDefault(): ?int
     {
-        return $this->tagType;
+        return $this->isDefault ?: 0;
     }
 
-    public function setTagType(string $tagType): static
+    public function setIsDefault(int $isDefault): static
     {
-        $this->tagType = $tagType;
+        $this->isDefault = $isDefault;
 
         return $this;
     }
@@ -115,14 +127,26 @@ class SysDictData extends EntityBase
         return $this;
     }
 
-    public function getDictCode(): ?SysDict
+    public function getDict(): ?SysDict
     {
-        return $this->dictCode;
+        return $this->dict;
     }
 
-    public function setDictCode(?SysDict $dictCode): static
+    public function setDict(?SysDict $dict): static
     {
-        $this->dictCode = $dictCode;
+        $this->dict = $dict;
+
+        return $this;
+    }
+
+    public function getTagType(): ?string
+    {
+        return $this->tagType;
+    }
+
+    public function setTagType(?string $tagType): static
+    {
+        $this->tagType = $tagType;
 
         return $this;
     }
@@ -133,11 +157,11 @@ class SysDictData extends EntityBase
             'id' => $this->getId(),
             'value' => $this->getValue(),
             'label' => $this->getLabel(),
-            'tagType' => $this->getTagType(),
+            'isDefault' => $this->getIsDefault(),
             'sort' => $this->getSort(),
-            'dictCode' => $this->getDictCode()?->toArray(),
             'status' => $this->getStatus(),
             'remark' => $this->getRemark(),
+            'tagType' => $this->getTagType()
         ];
     }
 }

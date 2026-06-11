@@ -1,6 +1,6 @@
 import request from "@/utils/request";
 
-const DEPT_BASE_URL = "/api/v1/dept";
+const DEPT_BASE_URL = "/api/v1/system/dept";
 
 const DeptAPI = {
   /**
@@ -9,17 +9,17 @@ const DeptAPI = {
    * @param queryParams 查询参数（可选）
    * @returns 部门树形表格数据
    */
-  getList(queryParams?: DeptQuery) {
+  page(queryParams?: PageQueryParams ) {
     return request<any, DeptVO[]>({
-      url: `${DEPT_BASE_URL}`,
-      method: "get",
-      params: queryParams,
+      url: `${DEPT_BASE_URL}/page`,
+      method: "post",
+      data: queryParams,
     });
   },
 
   /** 获取部门下拉列表 */
   getOptions() {
-    return request<any, OptionType[]>({
+    return request<any, OptionItem[]>({
       url: `${DEPT_BASE_URL}/options`,
       method: "get",
     });
@@ -48,7 +48,7 @@ const DeptAPI = {
     return request({
       url: `${DEPT_BASE_URL}`,
       method: "post",
-      data: data,
+      data,
     });
   },
 
@@ -63,7 +63,7 @@ const DeptAPI = {
     return request({
       url: `${DEPT_BASE_URL}/${id}`,
       method: "put",
-      data: data,
+      data,
     });
   },
 
@@ -82,11 +82,11 @@ const DeptAPI = {
   /**
    * 更改状态
    */
-  setStatus(id: number, data: switchType) {
+  setStatus(id: number, data: any) {
     return request({
       url: `${DEPT_BASE_URL}/${id}/status`,
       method: "put",
-      data: data,
+      data,
     });
   },
 };

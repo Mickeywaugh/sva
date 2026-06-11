@@ -1,6 +1,6 @@
 import request from "@/utils/request";
 
-const USER_BASE_URL = "/api/v1/users";
+const USER_BASE_URL = "/api/v1/system/users";
 
 const UserAPI = {
   /**
@@ -20,8 +20,8 @@ const UserAPI = {
    *
    * @param queryParams 查询参数
    */
-  getPage(queryParams: UserPageQuery) {
-    return request<any, PageResult<UserPageVO>>({
+  getPage(queryParams: PageQueryParams) {
+    return request<any, PageResult<SysUserItem>>({
       url: `${USER_BASE_URL}/page`,
       method: "post",
       data: queryParams,
@@ -48,9 +48,9 @@ const UserAPI = {
    */
   add(data: UserForm) {
     return request({
-      url: `${USER_BASE_URL}`,
+      url: `${USER_BASE_URL}/create`,
       method: "post",
-      data: data,
+      data,
     });
   },
 
@@ -64,7 +64,7 @@ const UserAPI = {
     return request({
       url: `${USER_BASE_URL}/${id}`,
       method: "put",
-      data: data,
+      data,
     });
   },
 
@@ -76,9 +76,9 @@ const UserAPI = {
    */
   resetPassword(id: number, password: string) {
     return request({
-      url: `${USER_BASE_URL}/${id}/password/reset`,
+      url: `${USER_BASE_URL}/${id}/resetPassword`,
       method: "put",
-      params: { password: password },
+      data: { password: password },
     });
   },
 
@@ -108,7 +108,7 @@ const UserAPI = {
    *
    * @param queryParams 查询参数
    */
-  export(queryParams: UserPageQuery) {
+  export(queryParams: PageQueryParams) {
     return request({
       url: `${USER_BASE_URL}/export`,
       method: "get",
@@ -129,7 +129,7 @@ const UserAPI = {
     return request<any, ExcelResult>({
       url: `${USER_BASE_URL}/import`,
       method: "post",
-      params: { deptId: deptId },
+      params: { deptId },
       data: formData,
       headers: {
         "Content-Type": "multipart/form-data",
@@ -146,11 +146,11 @@ const UserAPI = {
   },
 
   /** 修改个人中心用户信息 */
-  updateProfile(data: UserProfileForm) {
+  updateProfile(data: any) {
     return request({
       url: `${USER_BASE_URL}/profile`,
       method: "put",
-      data: data,
+      data,
     });
   },
 
@@ -159,7 +159,7 @@ const UserAPI = {
     return request({
       url: `${USER_BASE_URL}/password`,
       method: "put",
-      data: data,
+      data,
     });
   },
 
@@ -168,7 +168,7 @@ const UserAPI = {
     return request({
       url: `${USER_BASE_URL}/mobile/code`,
       method: "post",
-      params: { mobile: mobile },
+      params: { mobile },
     });
   },
 
@@ -177,7 +177,7 @@ const UserAPI = {
     return request({
       url: `${USER_BASE_URL}/mobile`,
       method: "put",
-      data: data,
+      data,
     });
   },
 
@@ -186,7 +186,7 @@ const UserAPI = {
     return request({
       url: `${USER_BASE_URL}/email/code`,
       method: "post",
-      params: { email: email },
+      params: { email },
     });
   },
 
@@ -195,7 +195,7 @@ const UserAPI = {
     return request({
       url: `${USER_BASE_URL}/email`,
       method: "put",
-      data: data,
+      data,
     });
   },
 
@@ -203,7 +203,7 @@ const UserAPI = {
    *  获取用户下拉列表
    */
   getOptions() {
-    return request<any, OptionType[]>({
+    return request<any, OptionItem[]>({
       url: `${USER_BASE_URL}/options`,
       method: "get",
     });
@@ -211,11 +211,11 @@ const UserAPI = {
   /**
    * 更改状态
    */
-  setStatus(id: number, data: switchType) {
+  setStatus(id: number, data: any) {
     return request({
       url: `${USER_BASE_URL}/${id}/status`,
       method: "put",
-      data: data,
+      data,
     });
   },
   /**
@@ -228,7 +228,7 @@ const UserAPI = {
     return request({
       url: `${USER_BASE_URL}/${id}/password`,
       method: "patch",
-      params: { password: password },
+      params: { password },
     });
   },
 };
@@ -237,92 +237,74 @@ export default UserAPI;
 
 /** 登录用户信息 */
 export interface UserInfo {
-  /** 用户ID */
   userId?: number;
-
-  /** 用户名 */
   username?: string;
-
-  /** 昵称 */
+  deptname?: string;
   nickname?: string;
-
-  /** 头像URL */
   avatar?: string;
-
-  /** 角色 */
   roles: string[];
-
-  /** 权限 */
   perms: string[];
-}
-
-/**
- * 用户分页查询对象
- */
-export interface UserPageQuery extends PageQuery {
-  /** 搜索关键字 */
-  keywords?: string;
-
-  /** 用户状态 */
-  status?: number;
-
-  /** 部门ID */
-  dept?: number;
-
-  /** 开始时间 */
-  createTime?: [string, string];
+  sseTopics: string[];
 }
 
 /** 用户分页对象 */
-export interface UserPageVO {
-  /** 用户ID */
+export interface SysUserItem {
   id: number;
-  /** 用户头像URL */
+  username: string;
   avatar?: string;
-  /** 创建时间 */
   createTime?: Date;
-  /** 部门名称 */
   deptName?: string;
-  /** 用户邮箱 */
   email?: string;
-  /** 性别 */
   gender?: number;
-  /** 手机号 */
   mobile?: string;
-  /** 用户昵称 */
   nickname?: string;
-  /** 角色名称，多个使用英文逗号(,)分割 */
   roleNames?: string;
-  /** 用户状态(1:启用;0:禁用) */
   status?: number;
-  /** 用户名 */
-  username?: string;
 }
 
 /** 用户表单类型 */
 export interface UserForm {
-  /** 用户头像 */
+  /**
+   * 用户头像
+   */
   avatar?: string;
-  /** 部门ID */
+  /**
+   * 部门ID
+   */
   dept?: number;
-  /** 邮箱 */
+  /**
+   * 邮箱
+   */
   email?: string;
-  /** 性别 */
+  /**
+   * 性别
+   */
   gender?: number;
-  /** 用户ID */
+  /**
+   * 用户ID
+   */
   id?: number;
-  /** 手机号 */
   mobile?: string;
-  /** 昵称 */
+  /**
+   * 昵称
+   */
   nickname?: string;
-  /** 角色ID集合 */
+  /**
+   * 角色ID集合
+   */
   roleIds?: number[];
-  /** 用户状态(1:正常;0:禁用) */
+  /**
+   * 用户状态(1:正常;0:禁用)
+   */
   status?: number;
-  /** 用户名 */
+  /**
+   * 用户名
+   */
   username?: string;
-  /** 工号 */
   employeeId?: string;
+  factory?: number;
+  machine?: number;
+  oaLoginName: string;
 }
 
 /** 个人中心用户信息 */
@@ -356,6 +338,7 @@ export interface UserProfileVO {
 
   /** 创建时间 */
   createTime?: Date;
+  oaLoginName?: string;
 }
 
 /** 个人中心用户信息表单 */

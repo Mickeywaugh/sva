@@ -1,6 +1,6 @@
 import request from "@/utils/request";
 // 菜单基础URL
-const MENU_BASE_URL = "/api/v1/menus";
+const MENU_BASE_URL = "/api/v1/system/menus";
 
 const MenuAPI = {
   /**
@@ -11,7 +11,7 @@ const MenuAPI = {
    * @returns 路由列表
    */
   getRoutes() {
-    return request<any, RouteVO[]>({
+    return request<any, RouteItem[]>({
       url: `${MENU_BASE_URL}/routes`,
       method: "get",
     });
@@ -24,7 +24,7 @@ const MenuAPI = {
    * @returns 菜单树形列表
    */
   getList(queryParams: MenuQuery) {
-    return request<any, MenuVO[]>({
+    return request<any, MenuItem[]>({
       url: `${MENU_BASE_URL}`,
       method: "get",
       params: queryParams,
@@ -37,10 +37,10 @@ const MenuAPI = {
    * @returns 菜单下拉数据源
    */
   getOptions(onlyParent?: boolean) {
-    return request<any, OptionType[]>({
+    return request<any, OptionItem[]>({
       url: `${MENU_BASE_URL}/options`,
       method: "get",
-      params: { onlyParent: onlyParent },
+      params: { onlyParent },
     });
   },
 
@@ -48,7 +48,7 @@ const MenuAPI = {
    * 获取菜单下拉数据源,不包括按钮
    */
   getMenuOptions() {
-    return request<any, OptionType[]>({
+    return request<any, OptionItem[]>({
       url: `${MENU_BASE_URL}/menuOptions`,
       method: "get",
     });
@@ -75,7 +75,7 @@ const MenuAPI = {
     return request({
       url: `${MENU_BASE_URL}`,
       method: "post",
-      data: data,
+      data,
     });
   },
 
@@ -90,7 +90,7 @@ const MenuAPI = {
     return request({
       url: `${MENU_BASE_URL}/${id}`,
       method: "put",
-      data: data,
+      data,
     });
   },
 
@@ -109,18 +109,18 @@ const MenuAPI = {
   /**
    * 更改状态
    */
-  setStatus(id: number, data: switchType) {
+  setStatus(id: number, data: any) {
     return request({
       url: `${MENU_BASE_URL}/${id}/status`,
       method: "put",
-      data: data,
+      data,
     });
   },
 };
 
 export default MenuAPI;
 
-import type { MenuTypeEnum } from "@/enums/MenuTypeEnum";
+import type { MenuTypeEnum } from "@/enums/business";
 
 /** 菜单查询参数 */
 export interface MenuQuery {
@@ -129,9 +129,9 @@ export interface MenuQuery {
 }
 
 /** 菜单视图对象 */
-export interface MenuVO {
+export interface MenuItem {
   /** 子菜单 */
-  children?: MenuVO[];
+  children?: MenuItem[];
   /** 组件路径 */
   component?: string;
   /** ICON */
@@ -181,17 +181,19 @@ export interface MenuForm {
   /** 跳转路由路径 */
   redirect?: string;
   /** 菜单 */
-  type?: MenuTypeEnum;
+  type: MenuTypeEnum;
   /** 权限标识 */
   perm?: string;
   /** 【菜单】是否开启页面缓存 */
-  keepAlive?: number;
+  keepAlive?: boolean;
   /** 【目录】只有一个子路由是否始终显示 */
   alwaysShow?: number;
   /** 参数 */
   params?: KeyValue[];
   /** 是否新窗口打开 */
   blank?: number;
+  t: string;
+  isPublic?: number;
 }
 
 interface KeyValue {
@@ -199,10 +201,10 @@ interface KeyValue {
   value: string;
 }
 
-/** RouteVO，路由对象 */
-export interface RouteVO {
+/** RouteItem，路由对象 */
+export interface RouteItem {
   /** 子路由列表 */
-  children: RouteVO[];
+  children: RouteItem[];
   /** 组件路径 */
   component?: string;
   /** 路由属性 */
@@ -227,4 +229,9 @@ export interface Meta {
   keepAlive?: boolean;
   /** 路由title */
   title?: string;
+  /** 是否新窗口打开 */
+  blank?: boolean;
+  /** 权限标识 */
+  params?: {};
+  isPublic?: number;
 }

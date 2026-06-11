@@ -2,6 +2,7 @@
 
 namespace App\Command;
 
+use App\Service\Logger;
 use Symfony\Component\Console\Attribute\AsCommand;
 use Symfony\Component\Console\Command\Command;
 use Symfony\Component\Console\Input\InputArgument;
@@ -14,7 +15,10 @@ use Symfony\Component\Filesystem\Filesystem;
 #[AsCommand(name: 'app:basecmd', description: 'base class for daemon process')]
 class BaseCommand extends Command
 {
-  protected $pidFile = '';
+  protected string $pidFile = 'var/run/basecmd.pid';
+  protected string $channelName = 'basecmd';
+  protected SymfonyStyle $io;
+  protected bool $verbose = false;
   public function __construct()
   {
     parent::__construct();
@@ -25,69 +29,86 @@ class BaseCommand extends Command
   {
     $this
       ->addArgument('action', InputArgument::REQUIRED, 'Action: start|stop|restart')
-      ->addOption('begin', 'b', InputOption::VALUE_OPTIONAL, 'An option parameter')
+      ->addOption('startDate', 'd', InputOption::VALUE_OPTIONAL, 'An option parameter')
       ->addOption('startId', 'i', InputOption::VALUE_OPTIONAL, 'An option parameter')
     ;
   }
 
+  protected function initialize(InputInterface $input, OutputInterface $output): void
+  {
+    $this->verbose = $input->getOption('verbose');
+    $this->io = new SymfonyStyle($input, $output);
+  }
+
   protected function execute(InputInterface $input, OutputInterface $output): int
   {
-    $io = new SymfonyStyle($input, $output);
     $action = $input->getArgument('action');
-    $options = ["beginDate" => $input->getOption('begin'), "startId" => $input->getOption('startId')];
-    $io->note("options is " . json_encode($options));
+    $options = ["startDate" => $input->getOption('startDate'), "startId" => $input->getOption('startId')];
+    $this->note("options is " . json_encode($options));
     switch ($action) {
       case 'start':
-        $this->startDaemon($io, $options);
+        $this->startDaemon($options);
         break;
       case 'stop':
-        $this->stopDaemon($io);
+        $this->stopDaemon();
         break;
       case 'restart':
-        $this->restartDeamon($io, $options);
+        $this->restartDaemon($options);
         break;
       default:
-        $io->error('Invalid action. Use "start|stop|restart".');
-        return Command::FAILURE;
+        if (method_exists($this, $action)) {
+          $this->{$action}($options);
+        } else {
+          $this->error('Invalid action. Use "start|stop|restart".');
+          return Command::FAILURE;
+        }
     }
 
     return Command::SUCCESS;
   }
 
-  protected function startDaemon(SymfonyStyle $io, array $options): void
+  protected function startDaemon(array $options): void
   {
     if ($this->isRunning()) {
-      $io->warning('Daemon is already running.');
+      $this->warning('Daemon is already running.');
       return;
     }
 
     $pid = pcntl_fork();
 
     if ($pid == -1) {
-      $io->error('Could not fork.');
+      $this->error('Could not fork.');
       exit(1);
     } elseif ($pid) {
       // Parent process
       file_put_contents($this->pidFile, $pid);
-      $io->success('Daemon started with PID: ' . $pid);
+      $this->success('Daemon started with PID: ' . $pid);
     } else {
       // Child process
-      $this->process($io, $options);
+      // Detach from the parent process group
+      posix_setsid();
+      $this->process($options);
     }
   }
 
-  protected function stopDaemon(SymfonyStyle $io): void
+  protected function stopDaemon(): void
   {
     if (!$this->isRunning()) {
-      $io->warning('Daemon is not running.');
+      $this->warning('Daemon is not running.');
       return;
     }
 
     $pid = (int)file_get_contents($this->pidFile);
     posix_kill($pid, SIGTERM);
+
+    // Wait for the process to terminate
+    while (posix_kill($pid, 0)) {
+      usleep(100000); // Sleep for 100ms
+    }
+
     $fileSystem = new Filesystem();
     $fileSystem->remove($this->pidFile);
-    $io->success('Daemon stopped.');
+    $this->success('Daemon stopped.');
   }
 
   public function isRunning(): bool
@@ -100,16 +121,68 @@ class BaseCommand extends Command
     return posix_kill($pid, 0);
   }
 
-  protected function restartDeamon(SymfonyStyle $io, array $options): void
+  protected function restartDaemon(array $options): void
   {
     if ($this->isRunning()) {
-      $this->stopDaemon($io);
+      $this->stopDaemon();
     }
-    $this->startDaemon($io, $options);
+    $this->startDaemon($options);
+  }
+
+  protected function note(string $message)
+  {
+    if (!$message) {
+      return;
+    }
+    $date = date('Y-m-d H:i:s');
+    $this->verbose && $this->io->note(sprintf('%s %s', $date, $message));
+    Logger::log($message, channel: $this->channelName);
+  }
+
+  protected function info(string $message)
+  {
+    if (!$message) {
+      return;
+    }
+    $date = date('Y-m-d H:i:s');
+    $this->verbose && $this->io->info(sprintf('%s %s', $date, $message));
+    Logger::log($message, channel: $this->channelName);
+  }
+
+  protected function warning(string $message)
+  {
+    if (!$message) {
+      return;
+    }
+    $date = date('Y-m-d H:i:s');
+    $this->verbose && $this->io->warning(sprintf('%s %s', $date, $message));
+    Logger::log($message, channel: $this->channelName);
+  }
+
+  protected function error(string $message, string $logName = "")
+  {
+    if (!$message) {
+      return;
+    }
+    $logName = $logName ?: $this->channelName;
+    $date = date('Y-m-d H:i:s');
+    $this->verbose && $this->io->error(sprintf('%s %s', $date, $message));
+    Logger::error($message, channel: $this->channelName);
+  }
+
+  protected function success(string $message, string $logName = "")
+  {
+    if (!$message) {
+      return;
+    }
+    $logName = $logName ?: $this->channelName;
+    $date = date('Y-m-d H:i:s');
+    $this->verbose && $this->io->success(sprintf('%s %s', $date, $message));
+    Logger::log($message, channel: $this->channelName);
   }
 
   /**
    * Manage your daemon logic here
    */
-  protected function process(SymfonyStyle $io, $options = null) {}
+  protected function process(array $options = []) {}
 }

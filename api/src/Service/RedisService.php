@@ -3,43 +3,81 @@
 namespace App\Service;
 
 use Predis\Client;
+use Predis\Connection\ConnectionException;
 
 class RedisService
 {
-  protected $client;
-  protected $dbIndex;
-  public function __construct(int $dbIndex = 1)
-  {
-    $this->dbIndex = $dbIndex;
-    $this->client = new Client($this->getCofing());
-  }
+  private static $pool = [];
+  private static $maxConnections = 10; // 最大连接数
+  private static $timeout = 5;         // 超时时间（秒）
 
-  public function getClient(): Client
+  // 从环境变量中读取redis配置信息，每个项目.env中配置的DBINDEX不能相同
+  public static function getCofing(): array
   {
-    return $this->client;
-  }
-  public function getCofing(): array
-  {
-    $config = [
+    $config =  [
+      "scheme" => "tcp",
       "host" => $_ENV['REDIS_HOST'],
       "port" => $_ENV['REDIS_PORT'],
       "password" => $_ENV['REDIS_PASSWORD'],
-      "database" => $this->dbIndex
+      "database" => $_ENV['REDIS_DBINDEX']
     ];
     return $config;
   }
 
-  public function setDbIndex(int $dbIndex): static
+
+  /**
+   * 获取 Redis 连接
+   */
+  public static function getConnection(): Client
   {
-    $this->dbIndex = $dbIndex;
-    $this->client->select($dbIndex);
-    return $this;
+    // 检查是否有空闲连接
+    foreach (self::$pool as $key => $connection) {
+      if ($connection['inUse'] === false) {
+        self::$pool[$key]['inUse'] = true;
+        return $connection['client'];
+      }
+    }
+
+    // 如果没有空闲连接且未达到最大连接数，则创建新连接
+    if (count(self::$pool) < self::$maxConnections) {
+      $client = new Client(self::getCofing());
+      try {
+        $client->connect();
+        self::$pool[] = [
+          'client' => $client,
+          'inUse' => true,
+        ];
+        return $client;
+      } catch (ConnectionException $e) {
+        throw new \RuntimeException("Failed to connect to Redis: " . $e->getMessage());
+      }
+    }
+
+    // 如果连接池已满，等待或抛出异常
+    throw new \RuntimeException("Redis connection pool is full.");
   }
 
-  public static function init(int $dbIndex = 1)
+  /**
+   * 归还 Redis 连接到池中
+   */
+  public static function releaseConnection(Client $client): void
   {
-    $instance = new static($dbIndex); // 创建一个新的实例
-    $instance->setDbIndex($dbIndex);
-    return $instance->getClient();
+    foreach (self::$pool as &$connection) {
+      if ($connection['client'] === $client) {
+        $connection['inUse'] = false;
+        break;
+      }
+    }
+  }
+
+  /**
+   * 关闭所有连接
+   */
+  public static function closeAll(): void
+  {
+    foreach (self::$pool as $connection) {
+      $connection['client']->disconnect();
+    }
+    self::$pool = [];
   }
 }

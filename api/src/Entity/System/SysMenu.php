@@ -2,31 +2,31 @@
 
 namespace App\Entity\System;
 
-use App\Entity\EntityBase;
+use App\Entity\BaseEntity;
 use App\Repository\System\SysMenuRepository;
+use Doctrine\Common\Collections\ArrayCollection;
+use Doctrine\Common\Collections\Collection;
 use Doctrine\DBAL\Types\Types;
 use Doctrine\ORM\Mapping as ORM;
+use EasyWeChat\Kernel\Support\Arr;
 
 #[ORM\Entity(repositoryClass: SysMenuRepository::class)]
 #[ORM\HasLifecycleCallbacks]
-class SysMenu extends EntityBase
+class SysMenu extends BaseEntity
 {
     #[ORM\Id]
     #[ORM\GeneratedValue]
     #[ORM\Column]
     private ?int $id = null;
 
-    #[ORM\Column(type: Types::INTEGER)]
+    #[ORM\Column(type: Types::INTEGER, options: ['default' => 0])]
     private ?int $parentId = 0;
 
     #[ORM\Column(length: 64)]
     private ?string $name = null;
 
-    #[ORM\Column(length: 255)]
-    private ?string $i18nIndex = null;
-
-    #[ORM\Column(type: Types::SMALLINT)]
-    private ?int $type = null;
+    #[ORM\Column(type: Types::STRING)]
+    private ?string $type = null;
 
     #[ORM\Column(length: 128)]
     private ?string $routePath = null;
@@ -36,6 +36,9 @@ class SysMenu extends EntityBase
 
     #[ORM\Column(length: 128, nullable: true)]
     private ?string $component = null;
+
+    #[ORM\Column(length: 128, nullable: true)]
+    private ?string $treePath = null;
 
     #[ORM\Column(length: 128, nullable: true)]
     private ?string $perm = null;
@@ -61,15 +64,28 @@ class SysMenu extends EntityBase
     #[ORM\Column(type: Types::SMALLINT, nullable: true)]
     private ?int $blank = null;
 
-    #[ORM\ManyToOne(targetEntity: self::class, inversedBy: 'child')]
+    #[ORM\Column(type: Types::SMALLINT, nullable: true)]
+    private ?int $isPublic = null;
+
+    #[ORM\Column(length: 255, nullable: true)]
+    private ?string $params = null;
+
+    #[ORM\ManyToOne(targetEntity: self::class, inversedBy: 'children')]
     #[ORM\JoinColumn(name: 'parent_id', referencedColumnName: 'id')]
     private ?SysMenu $parent = null;
 
+    /**
+     * @var Collection<int,SysMenu>;
+     */
     #[ORM\OneToMany(targetEntity: self::class, mappedBy: 'parent', cascade: ["remove"])]
     #[ORM\OrderBy(["sort" => "ASC"])]
-    private $child = [];
+    private ?Collection $children = null;
 
-    const TypeMap = [1 => 'CATALOG', 2 => 'MENU', 3 => 'EXTLINK', 4 => 'BUTTON'];
+    public static function create(array $data): SysMenu
+    {
+        $menu = new self();
+        return $menu->_setProps($data);
+    }
 
     public function getId(): ?int
     {
@@ -81,7 +97,7 @@ class SysMenu extends EntityBase
         return $this->parentId;
     }
 
-    public function setParentId(int $parentId): static
+    public function setParentId(int $parentId = 0): static
     {
         $this->parentId = $parentId;
 
@@ -107,35 +123,20 @@ class SysMenu extends EntityBase
     public function setParent(?SysMenu $parent): static
     {
         $this->parent = $parent;
-
-        return $this;
-    }
-    public function getI18nIndex(): ?string
-    {
-        return $this->i18nIndex ?: $this->name;
-    }
-
-    public function setI18nIndex(string $t): static
-    {
-        $this->i18nIndex = $t;
-
+        $this->setParentId($parent ? $parent->getId() : 0);
+        $this->setTreePath();
         return $this;
     }
 
-    public function getType(): ?int
+    public function getType(): ?string
     {
         return $this->type;
     }
 
-    public function getTypeCode(): ?string
-    {
-
-        return  $this->type ? self::TypeMap[$this->type] : "NULL";
-    }
 
     public function setType(string $type): static
     {
-        $this->type = array_search($type, self::TypeMap);
+        $this->type = $type;
 
         return $this;
     }
@@ -147,28 +148,66 @@ class SysMenu extends EntityBase
 
     public function setRoutePath(string $path): static
     {
-        //如果是新窗体打开页面，则不使用路由嵌套，路径自身需要加‘/’
-        //如果不是新窗体打开，则使用路由嵌套，去掉路径前缀
-        if ($this->blank || $this->getParentId() == 0) {
-            if ($path && $path[0] != "/") $path = "/" . $path;
-        } else {
-            //去掉路由前缀
-            $path = rtrim($path, '/');
-            $path = strpos($path, "/") === 0 ? ltrim($path, '/') : $path;
+        //如果是子菜单，路由需要加上父级路由，如果不是，则路由确保路由前缀是‘/’
+
+        //拆分$path为数组，并去掉数组值为空的元素
+        $pathArray = array_filter(explode('/', $path));
+        $path = implode('/', $pathArray);
+        if ($this->getParentId() == 0) {
+            $path = '/' . $path;
         }
         $this->routePath = $path;
         return $this;
     }
 
+
+    public function setParams(array $params): static
+    {
+        $this->params = json_encode($params);
+        return $this;
+    }
+
+    public function getParams(): array
+    {
+        return $this->params ? json_decode($this->params, true) : [];
+    }
+
+    public function getParamsObj(): array
+    {
+        $params = $this->getParams();
+        $newArray = [];
+        if (!$params) return $newArray;
+        foreach ($params as $p) {
+            $newArray[$p['key']] = $p['value'];
+        }
+        return $newArray;
+    }
+
+    public function setTreePath(): static
+    {   //
+        if (!$this->parent) {
+            $treePathArray = [0];
+        } else {
+            $treePathArray = $this->parent->getTreePath() + [$this->parent->getId()];
+        }
+        $this->treePath = implode(",", $treePathArray);
+
+        return $this;
+    }
+
+    public function getTreePath(): ?array
+    {
+        return explode(",", $this->parentId == 0 ? "0" : $this->treePath);
+    }
+
     public function getComponent(): ?string
     {
-        return $this->type == 1 && $this->getParentId() == 1 ?  $this->component : "Layout";
+        return $this->component ?: ($this->type == "C" ? "Layout" : "");
     }
 
     public function setComponent(?string $component): static
     {
         $this->component = $component;
-
         return $this;
     }
 
@@ -234,7 +273,7 @@ class SysMenu extends EntityBase
 
     public function getAlwaysShow(): ?int
     {
-        return $this->alwaysShow;
+        return $this->alwaysShow ?: 1;
     }
 
     public function setAlwaysShow(?int $alwaysShow): static
@@ -258,12 +297,25 @@ class SysMenu extends EntityBase
 
     public function getBlank(): ?int
     {
-        return $this->blank ? true : false;
+        return $this->blank;
     }
 
     public function setBlank(?int $blank): static
     {
-        $this->blank = $blank;
+        $this->blank = $blank ? 1 : 0;
+
+        return $this;
+    }
+
+
+    public function getIsPublic(): ?int
+    {
+        return $this->isPublic ?: 0;
+    }
+
+    public function setIsPublic(?int $isPublic): static
+    {
+        $this->isPublic = $isPublic;
 
         return $this;
     }
@@ -275,12 +327,13 @@ class SysMenu extends EntityBase
             "component" => $this->getComponent(),
             "name" => $this->getRouteName(),
             "meta" => [
-                "name" => $this->getName(),
-                "title" => $this->getI18nIndex(),
+                "title" => $this->getName(),
+                "params" => $this->getParamsObj(),
                 "icon" => $this->getIcon(),
                 "hidden" => $this->getVisible() ? false : true,
                 "keepAlive" => $this->getKeepAlive() ? true : false,
-                "blank" => $this->getBlank() ? true : false,
+                "blank" => $this->getBlank(),
+                "isPublic" => $this->getisPublic(),
             ],
         ];
         if ($this->getRedirect())  $retRoute["redirect"] = $this->getRedirect();
@@ -289,32 +342,35 @@ class SysMenu extends EntityBase
     }
 
 
-    public function setRouteName(string $routeName): self
+    public function setRouteName(?string $routeName = ""): static
     {
 
-        $route = $routeName ?? implode(".", array_filter(explode("/", $this->getRoutePath())));
-        $this->routeName = $route;
+        $this->routeName = $routeName ?: implode(".", array_filter(explode("/", $this->getRoutePath())));
         return $this;
     }
 
     //根据路由路径获取路由名称,去掉路由参数，然后将'/'替换为'.';
     public function getRouteName()
     {
-        return $this->routeName;
+        // return $this->routeName;
+        // //获取:左边的部分
+        $rawName = explode(":", $this->getRoutePath())[0];
+        $name = implode(".", array_filter(explode("/", $rawName)));
+        return $this->routeName ?: $name;
     }
 
-    public function getChild()
+    public function getChildren(): Collection
     {
-        return  $this->child ?: false;
+        return  $this->children ?: new ArrayCollection();
     }
 
-    public function setChild($menu): static
+    public function setChildren(?Collection $menu): static
     {
-        $this->child = $menu;
+        $this->children = $menu;
         return $this;
     }
 
-    public function toArray()
+    public function toArray(): array
     {
         return [
             "id" => $this->getId(),
@@ -322,7 +378,7 @@ class SysMenu extends EntityBase
             "name" => $this->getName(),
             "sort" => $this->getSort(),
             "icon" => $this->getIcon(),
-            "title" => $this->getI18nIndex(),
+            "title" => $this->getName(),
             "routePath" => $this->getRoutePath(),
             "routeName" => $this->getRouteName(),
             "alwaysShow" => $this->getAlwaysShow(),
@@ -330,8 +386,11 @@ class SysMenu extends EntityBase
             "component" => $this->getComponent(),
             "visible" => $this->getVisible(),
             "redirect" => $this->getRedirect(),
-            "type" => $this->getTypeCode(),
-            "perm" => $this->getPerm()
+            "type" => $this->getType(),
+            "perm" => $this->getPerm(),
+            "keepAlive" => $this->getKeepAlive(),
+            "params" => $this->getParams(),
+            "isPublic" => $this->getisPublic()
         ];
     }
 }

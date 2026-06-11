@@ -1,9 +1,11 @@
+# yaml-language-server: $schema=../vendor/symfony/dependency-injection/Loader/schema/services.schema.json
+
 # This file is the entry point to configure your own services.
 # Files in the packages/ subdirectory configure your dependencies.
+# See also https://symfony.com/doc/current/service_container/import.html
 
 # Put parameters here that don't need to change on each machine where the app is deployed
 # https://symfony.com/doc/current/best_practices.html#use-parameters-for-application-configuration
-parameters:
 
 services:
     # default configuration for services in *this* file
@@ -15,23 +17,35 @@ services:
     # this creates a service per class whose id is the fully-qualified class name
     App\:
         resource: "../src/"
-        exclude:
-            - "../src/DependencyInjection/"
-            - "../src/Entity/"
-            - "../src/Kernel.php"
+
     # add more service definitions when explicit configuration is needed
     # please note that last definitions always *replace* previous ones
 
     #请求和响应日志监听器
-    App\EventListener\RequestLoggerListener:
+    # App\EventListener\RequestLoggerListener:
+    #     tags:
+    #         - {
+    #               name: kernel.event_listener,
+    #               event: kernel.request,
+    #               method: onKernelRequest,
+    #           }
+    #         - {
+    #               name: kernel.event_listener,
+    #               event: kernel.response,
+    #               method: onKernelResponse,
+    #           }
+
+    # App\EventListener\JwtAuthListener:
+    #     tags:
+    #         - { name: kernel.event_listener }
+    #     arguments:
+    #         $accessControlConfig: "%security.access_control%"
+
+    # #JWT AccessToken失效监听器
+    App\EventListener\AuthFailureListener:
         tags:
             - {
                   name: kernel.event_listener,
-                  event: kernel.request,
-                  method: onKernelRequest,
-              }
-            - {
-                  name: kernel.event_listener,
-                  event: kernel.response,
-                  method: onKernelResponse,
+                  event: lexik_jwt_authentication.on_authentication_failure,
+                  method: onAuthenticationFailure,
               }

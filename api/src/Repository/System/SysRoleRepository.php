@@ -4,7 +4,7 @@ namespace App\Repository\System;
 
 use App\Entity\System\SysRole;
 use App\Repository\BaseRepository;
-use App\Service\BaseService;
+use App\Service\Logger;
 use Doctrine\Persistence\ManagerRegistry;
 use Exception;
 
@@ -31,7 +31,7 @@ class SysRoleRepository extends BaseRepository
     public function getTree()
     {
         $roleTree = [];
-        $roleList = $this->findBy(["status" => 1, "isDeleted" => 0]);
+        $roleList = $this->findBy(["status" => 1, "deleteTime" => null]);
 
         foreach ($roleList as $role) {
             $data = [
@@ -44,7 +44,7 @@ class SysRoleRepository extends BaseRepository
     }
 
     // 删除ROLE实体
-    public function delete($ids, bool $softDelete = true)
+    public function delete($ids, bool $softDelete = true): bool
     {
         if (!$ids) return false;
         try {
@@ -54,10 +54,9 @@ class SysRoleRepository extends BaseRepository
                 if ($entity) {
                     if (count($entity->getUsers()) > 0) {
                         throw new Exception("该角色下存在用户，不能删除");
-                        return false;
                     }
                     if ($softDelete) {
-                        $entity->setIsDeleted(1);
+                        $entity->setDeleteTime();
                         $entity->setUpdateTime();
                         $em->persist($entity);
                     } else {
@@ -68,7 +67,7 @@ class SysRoleRepository extends BaseRepository
             $em->flush();
             return true;
         } catch (\Exception $e) {
-            BaseService::log($e->getMessage());
+            Logger::log($e->getMessage());
             return false;
         }
     }

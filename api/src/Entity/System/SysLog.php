@@ -5,6 +5,7 @@ namespace App\Entity\System;
 use App\Entity\Base;
 use App\Repository\System\SysLogRepository;
 use DateTimeImmutable;
+use DateTimeInterface;
 use Doctrine\DBAL\Types\Types;
 use Doctrine\ORM\Mapping as ORM;
 
@@ -29,7 +30,7 @@ class SysLog extends Base
     #[ORM\Column(type: Types::TEXT, nullable: true)]
     private ?string $responseContent = null;
 
-    #[ORM\Column(length: 255, nullable: true)]
+    #[ORM\Column(type: Types::TEXT, nullable: true)]
     private ?string $content = null;
 
     #[ORM\Column(length: 255, nullable: true)]
@@ -60,7 +61,7 @@ class SysLog extends Base
     private ?string $os = null;
 
     #[ORM\Column(type: Types::SMALLINT)]
-    private ?int $isDeleted = null;
+    private ?\DateTimeInterface $deleteTime = null;
 
     #[ORM\Column(length: 63, nullable: true)]
     private ?string $createBy = null;
@@ -71,10 +72,7 @@ class SysLog extends Base
     #[ORM\PrePersist]
     public function onPrePersist(): void
     {
-        if (property_exists($this, 'createTime')) {
-            $this->setCreateTime();
-        }
-        $this->setIsDeleted(0);
+        $this->setCreateTime();
     }
 
     public function getId(): ?int
@@ -250,14 +248,14 @@ class SysLog extends Base
         return $this;
     }
 
-    public function getIsDeleted(): ?int
+    public function getDeleteTime(): ?DateTimeInterface
     {
-        return $this->isDeleted;
+        return $this->deleteTime;
     }
 
-    public function setIsDeleted(int $isDeleted): static
+    public function setDeleteTime(DateTimeInterface $deleteTime): static
     {
-        $this->isDeleted = $isDeleted;
+        $this->deleteTime = $deleteTime;
 
         return $this;
     }
@@ -301,6 +299,6 @@ class SysLog extends Base
             'operator' => $this->getCreateBy(),
             'createTime' => $this->getCreateTime(),
         ];
-        return $this->spliceArray($retArray, $splices);
+        return $this->mergeArray($retArray, $splices);
     }
 }

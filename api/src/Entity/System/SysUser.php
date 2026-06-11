@@ -4,16 +4,22 @@ namespace App\Entity\System;
 
 use App\Service\BaseService as Util;
 use App\Entity\System\SysRole;
-use App\Entity\EntityBase;
+use App\Entity\System\SysDept;
+use App\Entity\BaseEntity;
+use App\Entity\Traits\CUTime;
+use App\Entity\Traits\DeleteTime;
 use App\Repository\System\SysUserRepository;
 use Doctrine\DBAL\Types\Types;
 use Doctrine\ORM\Mapping as ORM;
+use Doctrine\Common\Collections\Collection;;
+
 use Symfony\Component\Security\Core\User\UserInterface;
 use Symfony\Component\Security\Core\User\PasswordAuthenticatedUserInterface;
 
+#[ORM\Table(name: 'sys_user')]
 #[ORM\Entity(repositoryClass: SysUserRepository::class)]
 #[ORM\HasLifecycleCallbacks]
-class SysUser extends EntityBase implements UserInterface, PasswordAuthenticatedUserInterface
+class SysUser extends BaseEntity implements UserInterface, PasswordAuthenticatedUserInterface
 {
 
     #[ORM\Id]
@@ -45,22 +51,26 @@ class SysUser extends EntityBase implements UserInterface, PasswordAuthenticated
     #[ORM\Column(length: 128, nullable: true)]
     private ?string $email = null;
 
-    #[ORM\Column(type: Types::SMALLINT, options: ['default' => 0])]
-    private ?int $isDeleted = 0;
-
-    #[ORM\Column(length: 32)]
-    private ?string $employeeId = null;
+    #[ORM\Column(type: Types::INTEGER, nullable: true)]
+    private ?int $deptId = null;
 
     #[ORM\ManyToOne(targetEntity: SysDept::class)]
-    #[ORM\JoinColumn(name: 'dept', referencedColumnName: 'id', nullable: true)]
-    private $dept;
+    #[ORM\JoinColumn(name: 'dept_id', referencedColumnName: 'id', nullable: true)]
+    private ?SysDept $dept;
 
-    // 多对多单向关联
+    use DeleteTime;
+
+    /**
+     * 多对多关联角色
+     * @var Collection<int,SysRole>;
+     */
     #[ORM\ManyToMany(targetEntity: SysRole::class, cascade: ['persist'])]
-    #[ORM\JoinTable(name: "sys_user_role")]
-    #[ORM\JoinColumn(name: 'user_id', referencedColumnName: 'id')]
-    #[ORM\InverseJoinColumn(name: 'role_id', referencedColumnName: 'id')]
-    private $role;
+    #[ORM\JoinTable(
+        name: 'sys_user_role',
+        joinColumns: [new ORM\JoinColumn(name: 'user_id', referencedColumnName: 'id')],
+        inverseJoinColumns: [new ORM\JoinColumn(name: 'role_id', referencedColumnName: 'id')]
+    )]
+    private $userRoles;
 
     public function getId(): ?int
     {
@@ -116,11 +126,11 @@ class SysUser extends EntityBase implements UserInterface, PasswordAuthenticated
 
     public function verifyPassword(string $password): bool
     {
-        // Util::log("输入密码:" . $password . "动态hash密码：" . password_hash($password, PASSWORD_DEFAULT) . ",数据库中的" . $this->password);
+        // Logger::log("输入密码:" . $password . "动态hash密码：" . password_hash($password, PASSWORD_DEFAULT) . ",数据库中的" . $this->password);
         return password_verify($password, $this->password);
     }
 
-    public function setDept(?SysDept $dept): static
+    public function setDept(?SysDept $dept): self
     {
         $this->dept = $dept;
         return $this;
@@ -131,6 +141,16 @@ class SysUser extends EntityBase implements UserInterface, PasswordAuthenticated
         return $this->dept;
     }
 
+    public function getDeptId(): ?int
+    {
+        return $this->deptId;
+    }
+
+    public function setDeptId(?int $deptId): self
+    {
+        $this->deptId = $deptId;
+        return $this;
+    }
 
     public function getDeptName(): ?string
     {
@@ -142,7 +162,7 @@ class SysUser extends EntityBase implements UserInterface, PasswordAuthenticated
         return $this->avatar;
     }
 
-    public function setAvatar(string $avatarBase64): static
+    public function setAvatar(?string $avatarBase64): static
     {
         if ($avatarBase64) {
             $filePath = sprintf("userData/avatar/avatar_%s.png", $this->id);
@@ -167,11 +187,7 @@ class SysUser extends EntityBase implements UserInterface, PasswordAuthenticated
 
     public function getStatus(): ?int
     {
-        if ($this->isDeleted) {
-            return 0;
-        } else {
-            return $this->status;
-        }
+        return $this->status;
     }
 
     public function setStatus(?int $status): static
@@ -193,40 +209,19 @@ class SysUser extends EntityBase implements UserInterface, PasswordAuthenticated
         return $this;
     }
 
-    public function getIsDeleted(): ?int
+    public function setUserRoles(Collection $roles): static
     {
-        return $this->isDeleted;
-    }
 
-    public function setIsDeleted(?int $isDeleted): static
-    {
-        $this->isDeleted = $isDeleted;
-
+        $this->userRoles = $roles;
         return $this;
     }
 
-    public function getEmployeeId(): ?string
+    /**
+     * @return Collection<int,SysRole>
+     */
+    public function getUserRoles(): Collection
     {
-        return $this->employeeId;
-    }
-
-    public function setEmployeeId(?string $employeeId): static
-    {
-        $this->employeeId = $employeeId;
-
-        return $this;
-    }
-
-    public function setRole($roles): static
-    {
-
-        $this->role = $roles;
-        return $this;
-    }
-
-    public function getRole()
-    {
-        return $this->role;
+        return $this->userRoles;
     }
 
     /**
@@ -235,9 +230,9 @@ class SysUser extends EntityBase implements UserInterface, PasswordAuthenticated
     public function getRoles(): array
     {
         // guarantees that a user always has at least one role for security
-        if ($this->role->isEmpty()) return ["ROLE_GUEST"];
-
-        foreach ($this->role as $role) {
+        if ($this->userRoles->isEmpty()) return ["ROLE_GUEST"];
+        $roles = [];
+        foreach ($this->userRoles as $role) {
             $roles[] = $role->getCode();
         }
 
@@ -247,9 +242,9 @@ class SysUser extends EntityBase implements UserInterface, PasswordAuthenticated
     public function getRoleIds(): array
     {
         $roles = [];
-        if ($this->role->isEmpty()) return $roles;
+        if ($this->userRoles->isEmpty()) return $roles;
 
-        foreach ($this->role as $role) {
+        foreach ($this->userRoles as $role) {
             $roles[] = $role->getId();
         }
 
@@ -259,8 +254,8 @@ class SysUser extends EntityBase implements UserInterface, PasswordAuthenticated
     public function getFlatMenus(): array
     {
         $menuRoutes = [];
-        if ($this->role->isEmpty()) return $menuRoutes;
-        foreach ($this->role as $role) {
+        if ($this->userRoles->isEmpty()) return $menuRoutes;
+        foreach ($this->userRoles as $role) {
             foreach ($role->getMenus() as $menu) {
                 $menuRoutes[] = $menu->getId();
             }
@@ -270,9 +265,9 @@ class SysUser extends EntityBase implements UserInterface, PasswordAuthenticated
 
     public function getRolesName(): string
     {
-        if ($this->role->isEmpty()) return "";
-
-        foreach ($this->role as $role) {
+        if ($this->userRoles->isEmpty()) return "";
+        $roles = [];
+        foreach ($this->userRoles as $role) {
             $roles[] = $role->getName();
         }
 
@@ -282,8 +277,8 @@ class SysUser extends EntityBase implements UserInterface, PasswordAuthenticated
     public function getPermissions(): array
     {
         $permissions = [];
-        if ($this->role->isEmpty()) return $permissions;
-        foreach ($this->role as $role) {
+        if ($this->userRoles->isEmpty()) return $permissions;
+        foreach ($this->userRoles as $role) {
             foreach ($role->getPermissions() as $permission) {
                 array_push($permissions, $permission);
             }
@@ -297,25 +292,44 @@ class SysUser extends EntityBase implements UserInterface, PasswordAuthenticated
         return (string) $this->username;
     }
 
+    #[\Deprecated(message: 'eraseCredentials() is deprecated since Symfony 7.3', since: '7.3')]
     public function eraseCredentials(): void
     {
-        return;
+        // Credentials are handled externally, no sensitive data stored
     }
 
-    public function getDeptId(): ?int
-    {
-        return $this->getDept() ? $this->getDept()->getId() : 0;
-    }
-
-
-    public function toArray(): array
+    public function getTimeArray(): array
     {
         return [
-            'id' => $this->id,
-            'username' => $this->username,
-            'nickname' => $this->nickname,
+            'createTime' => $this->getCreateTime(),
+            'updateTime' => $this->getCreateTime(),
+        ];
+    }
+
+    public function getTopics(): array
+    {
+        return [
+            "user.{$this->getId()}.notices",
+        ];
+    }
+
+    public function getUserInfo(): array
+    {
+        return [
+            "username" => $this->getUsername(),
+            "nickname" => $this->getNickname(),
             'gender' => $this->gender,
-            'avatar' => $this->avatar,
+            "avatar" => $this->getAvatar(),
+            "roles" => $this->getRoles(),
+            "perms" => $this->getPermissions(),
+            "sseTopics" => $this->getTopics()
+        ];
+    }
+
+    public function toArray(array $splices = []): array
+    {
+        $retArray = $this->getUserInfo() + [
+            'id' => $this->id,
             'mobile' => $this->mobile,
             'status' => $this->getStatus(),
             'email' => $this->email,
@@ -324,5 +338,7 @@ class SysUser extends EntityBase implements UserInterface, PasswordAuthenticated
             'rolesNames' => $this->getRolesName(),
             'deptName' => $this->getDeptName()
         ];
+
+        return $this->mergeArray($retArray, $splices);
     }
 }
