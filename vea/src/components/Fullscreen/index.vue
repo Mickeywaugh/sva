@@ -1,7 +1,7 @@
 <template>
   <div class="fullscreen-trigger" @click="toggle">
     <div>
-      <ga-icon :icon-class="(isFullscreen ? 'bt-fullscreen-exit' : 'bt-fullscreen')" />
+      <vea-icon :icon-class="(isFullscreen ? 'bt-fullscreen-exit' : 'bt-fullscreen')" />
     </div>
   </div>
 </template>

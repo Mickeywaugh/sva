@@ -446,30 +446,6 @@
       "generate": "确认生成{s}?",
       "operation": "确认执行此操作?",
       "operations": "确认对{s}项执行操作?"
-    },
-    "stages": {
-      "Undefined": "未定义",
-      "Initialized": "初始化",
-      "Running": "运行中",
-      "Producing": "生产中",
-      "Preparing": "准备中",
-      "Sealed": "封存",
-      "Pause": "暂停",
-      "Finished": "完成",
-      "Archived": "归档",
-      "Locked": "锁定",
-      "Unlock": "解锁",
-      "Canceled": "取消",
-      "StockIn": "入库",
-      "StockOut": "出库",
-      "Normal": "正常",
-      "Abnormal": "异常",
-      "Printing": "打印",
-      "Packing": "打包",
-      "Shipped": "发货",
-      "Draft": "草稿",
-      "Released": "发布",
-      "Deleted": "删除"
     }
   }
 }

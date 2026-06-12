@@ -45,7 +45,7 @@
         <div flex>
           <el-input v-model.trim="model.captchaCode" :placeholder="t('login.captchaCode')" @keyup.enter="submit">
             <template #prefix>
-              <ga-icon icon-class="ga-security-fill" />
+              <vea-icon icon-class="vea-security-fill" />
             </template>
           </el-input>
           <div cursor-pointer h="[40px]" w="[120px]" flex-center ml-10px @click="getCaptcha">

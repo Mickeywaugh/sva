@@ -33,7 +33,7 @@
     <div class="navbar-actions__item">
       <el-dropdown trigger="click">
         <div class="user-profile">
-          <ga-icon icon-class="ga-o-user"> {{ userStore.userInfo.username }}</ga-icon>
+          <vea-icon icon-class="vea-o-user"> {{ userStore.userInfo.username }}</vea-icon>
         </div>
         <template #dropdown>
           <el-dropdown-menu>
@@ -50,7 +50,7 @@
 
     <!-- 系统设置 -->
     <div v-if="defaults.showSettings" class="navbar-actions__item" @click="handleSettingsClick">
-      <div v-icon="'ga-setting'" />
+      <div v-icon="'vea-setting'" />
     </div>
   </div>
 </template>

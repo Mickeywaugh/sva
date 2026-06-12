@@ -2,7 +2,7 @@
   <div class="flex-inline gap-2">
     <div v-if="!editable">
       {{ inputValue }}
-      <el-button type="primary" size="small" @click="showInput"><ga-icon icon-class="ga-o-edit" /></el-button>
+      <el-button type="primary" size="small" @click="showInput"><vea-icon icon-class="vea-o-edit" /></el-button>
     </div>
     <div v-else>
       <el-input-number v-if="isNumber" v-model="inputValue" :step="step" ref="InputRef" size="small" :style="inputStyle"
@@ -10,7 +10,7 @@
       <el-input v-else v-model="inputValue" ref="InputRef" :style="inputStyle" size="small"
         @change="(val: string) => handleInputConfirm(val)" />
     </div>
-    <ga-icon v-if="tips" icon-class="ga-o-info" :title="tips" />
+    <vea-icon v-if="tips" icon-class="vea-o-info" :title="tips" />
   </div>
 </template>
 <script lang="ts" setup>

@@ -4,7 +4,7 @@
       <template #reference>
         <el-input v-model="selectedIcon" class="reference" readonly placeholder="点击选择图标" @click="popoverVisible = !popoverVisible">
           <template #prepend>
-            <ga-icon v-if="selectedIcon" :icon-class="selectedIcon" />
+            <vea-icon v-if="selectedIcon" :icon-class="selectedIcon" />
           </template>
           <template #suffix>
             <el-icon :style="{
@@ -21,12 +21,12 @@
       <div ref="popoverContentRef">
         <el-input v-model="searchText" placeholder="搜索图标" clearable @input="(val: string) => handleSearch(val)" />
         <el-tabs v-model="activeTab">
-          <el-tab-pane label="BoingTech Icons" name="bt">
+          <el-tab-pane label="BoingTech Icons" name="vea">
             <el-scrollbar height="300px">
               <ul class="icon-container">
                 <li v-for="icon in filteredIcons" :key="icon" class="icon-item" @click="selectIcon(icon)">
                   <el-tooltip :content="icon" placement="bottom" effect="light">
-                    <ga-icon :icon-class="icon" />
+                    <vea-icon :icon-class="icon" />
                   </el-tooltip>
                 </li>
               </ul>
@@ -69,20 +69,20 @@
   const emit = defineEmits(["update:modelValue"]);
   const selectedIcon = toRef(props, "modelValue");
 
-  const activeTab = ref("bt"); // 默认激活的Tab
+  const activeTab = ref("vea"); // 默认激活的Tab
   const searchText = ref(""); // 筛选的值
   const popoverVisible = ref(false); // 弹窗显示状态
 
   const epIcons: string[] = Object.keys(ElementPlusIconsVue); // Element Plus图标集合
-  const GaIconsTemp: object[] = Object.values(IconStore.glyphs); //
-  const GaIcons: string[] = [];
+  const VeaIconsTemp: object[] = Object.values(IconStore.glyphs); //
+  const VeaIcons: string[] = [];
   const currIcons = ref<string[]>([]); //当前选项卡下的图标集合
   const filteredIcons = ref<string[]>([]);
   onMounted(() => {
-    GaIconsTemp.forEach((icon: any) => {
-      GaIcons.push(`bt-${icon.font_class}`);
+    VeaIconsTemp.forEach((icon: any) => {
+      VeaIcons.push(`vea-${icon.font_class}`);
     });
-    currIcons.value = GaIcons;
+    currIcons.value = VeaIcons;
   });
 
   /**
@@ -94,7 +94,7 @@
         iconName.toLowerCase().includes(searchText.toLowerCase())
       );
     } else {
-      currIcons.value = activeTab.value === "bt" ? GaIcons : epIcons;
+      currIcons.value = activeTab.value === "vea" ? VeaIcons : epIcons;
     }
   }
 
@@ -102,7 +102,7 @@
   watch(activeTab, (newVal) => {
     activeTab.value = newVal;
     currIcons.value = [];
-    currIcons.value = filteredIcons.value = newVal === "bt" ? GaIcons : epIcons;
+    currIcons.value = filteredIcons.value = newVal === "vea" ? VeaIcons : epIcons;
   });
 
   /**

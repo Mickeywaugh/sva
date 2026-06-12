@@ -6,19 +6,18 @@ use App\Kernel;
 use Symfony\Component\HttpFoundation\Request;
 use Symfony\Component\HttpFoundation\Response;
 use Symfony\Component\HttpFoundation\JsonResponse;
-
+use App\Service\DbService as DB;
 class BaseService
 {
-    public static string $INITIALPASSWORD = "123456";
-    public static string $APISUFFIX = "/api/v1/";
 
     public static function getInstance(): static
     {
         return new static();
     }
 
-    public static function errorResponse(string $msg, int $code = 1, ?array $data = null): JsonResponse
+    public static function errorResponse(string $msg, int $code = 1, array $data = []): JsonResponse
     {
+        Logger::error($msg, $data);
         return new JsonResponse([
             'code' => $code,
             'msg' => $msg,
@@ -26,7 +25,7 @@ class BaseService
         ]);
     }
 
-    public static function successResponse(string $msg, ?array $data = null): JsonResponse
+    public static function successResponse(string $msg, array $data = []): JsonResponse
     {
         return new JsonResponse([
             'code' => 0,
@@ -35,7 +34,7 @@ class BaseService
         ]);
     }
 
-    public static function criticalResponse(string $msg, ?array $data = null): JsonResponse
+    public static function criticalResponse(string $msg, array $data = []): JsonResponse
     {
         Logger::critical($msg, $data);
         return new JsonResponse([
@@ -78,15 +77,17 @@ class BaseService
         }
     }
 
-    public static function getPublicStaticPath(string $param)
+    /**
+     * 数据文件夹
+     * @param string $subPath order.roll
+     * @return string|null
+     */
+    public static function getDataFolder(string $subPath)
     {
-        return match ($param) {
-            'userQrcode' => 'download/images/QrCode/user/',
-            'orderQrcode' => 'download/images/QrCode/order/',
-            'rawmatQrcode' => 'download/images/QrCode/rawmat/',
-            'machineQrcode' => 'download/images/QrCode/machine/',
-            default => null,
-        };
+        //如果右边没有/则添加/
+        $path = sprintf("data/%s", $subPath);
+        self::mkdirP($path);
+        return $path;
     }
 
     // 创建文件，路径相对于public目录,(index.php所在的目录)
@@ -127,6 +128,20 @@ class BaseService
         return strtolower(preg_replace(['/([a-z\d])([A-Z])/', '/([^_])([A-Z][a-z])/'], '$1_$2', $input));
     }
 
+    public static function filterParams(array $params, array $filter = []): array
+    {
+        $result = [];
+        $keywordKeys = ["keywords", "keyword"];
+        if (empty($filter) || empty($params)) {
+            return $params;
+        }
+        foreach ($filter as $key) {
+            if (isset($params[$key])) {
+                $result[self::convertToSnakeCase($key)] = in_array(strtolower($key), $keywordKeys) ? '%' . $params[$key] :  $params[$key];
+            }
+        }
+        return $result;
+    }
 
     public static function getRequest()
     {
@@ -190,6 +205,21 @@ class BaseService
         return ucfirst($camelCase);
     }
 
+    // 字典助手函数,根据字典组code 获取字典值 [value=>label]
+    public static function getDictMap(string $code): array
+    {
+        $maps = Db::table('sys_dict')
+            ->select('d.label', 'd.value')
+            ->join('t', 'sys_dict_data', 'd', 't.id = d.dict_id')
+            ->wheres(["t.dict_code" => $code])
+            ->orderBy('sort', 'ASC')
+            ->getResult();
+        $types = [];
+        foreach ($maps as $item) {
+            $types[$item['value']] = $item['label'];
+        }
+        return $types;
+    }
 
     /**
      * 保存base64图片到路径，并加入异常处理
@@ -220,22 +250,17 @@ class BaseService
     /**
      * 输出文件
      * @param string $filePath 相对于项目目录的文件路径
-     * @param bool $inline 是否以内联方式显示文件，默认为true
-     * @return Response|null
+     * @param bool $inline 是否内联显示文件
+     * @return Response
      */
-    public static function responseFile(string $filePath, bool $inline = true): ?Response
+    public static function responseFile(string $filePath, bool $inline = true): Response
     {
-        $extension = pathinfo($filePath, PATHINFO_EXTENSION);
-        $headerContentType = SELF::getContentType($extension);
-        if (!$filePath) {
-            SELF::errorResponse("Filepath empty", 404);
-        }
-        $projectFilePath = self::getProjectPath($filePath);
         try {
-            Logger::log("文件读取：" . $projectFilePath);
             ob_start();
-            $fileName = basename($projectFilePath);
-            $fileContent = file_get_contents($projectFilePath);
+            $fileName = pathinfo($filePath, PATHINFO_BASENAME);
+            $extension = pathinfo($filePath, PATHINFO_EXTENSION);
+            $headerContentType = SELF::getContentType($extension);
+            $fileContent = file_get_contents($filePath);
             $response = new Response($fileContent);
             // 输出文件头信息
             $response->headers->set("Content-Type", $headerContentType);
@@ -265,5 +290,19 @@ class BaseService
             'xlsx' => 'application/vnd.openxmlformats-officedocument.spreadsheetml.sheet',
             default => 'application/octet-stream',
         };
+    }
+
+    public static function getApiUrl(): string
+    {
+        return sprintf("%s/api/v1", self::getHostName(":8000"));
+    }
+
+    public static function getPageUrl(): string
+    {
+        return sprintf("%s/api/v1", self::getHostName());
+    }
+    public static function getHostName(string $port = ":3000"): string
+    {
+        return $_ENV["APP_ENV"] == "dev" ? sprintf("http://localhost%s", $port) : "http://example.com";
     }
 }

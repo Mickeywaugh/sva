@@ -44,22 +44,22 @@ class Logger
     $msg = sprintf("%s=>%s", $msg, $callerInfo);
   }
 
-  public static function log($msg, array $context = [], string $channel = "app"): void
+  public static function log(string $msg, array $context = [], string $channel = "app"): void
   {
     self::__callStatic("info", [$msg, $context, $channel, false]);
   }
 
-  public static function error($msg, array $context = [], string $channel = "app"): void
+  public static function error(string $msg, array $context = [], string $channel = "app"): void
   {
     self::__callStatic("error", [$msg, $context, $channel, true]);
   }
 
-  public static function debug($msg, array $context = [], string $channel = "app"): void
+  public static function debug(string $msg, array $context = [], string $channel = "app"): void
   {
     self::__callStatic("debug", [$msg, $context, $channel, true]);
   }
 
-  public static function critical($msg, array $context = [], string $channel = "app"): void
+  public static function critical(string $msg, array $context = [], string $channel = "app"): void
   {
     self::__callStatic("critical", [$msg, $context, $channel, true]);
   }

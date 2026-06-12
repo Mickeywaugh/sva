@@ -1,0 +1,947 @@
+@font-face {
+  font-family: "iconfont"; /* Project id 5194539 */
+  src: url('iconfont.woff2?t=1781226091922') format('woff2'),
+       url('iconfont.woff?t=1781226091922') format('woff'),
+       url('iconfont.ttf?t=1781226091922') format('truetype');
+}
+
+.iconfont {
+  font-family: "iconfont" !important;
+  font-size: 16px;
+  font-style: normal;
+  -webkit-font-smoothing: antialiased;
+  -moz-osx-font-smoothing: grayscale;
+}
+
+.vea-join:before {
+  content: "\e600";
+}
+
+.vea-link:before {
+  content: "\e6d9";
+}
+
+.vea-o-phone:before {
+  content: "\e6db";
+}
+
+.vea-o-phone-fill:before {
+  content: "\e6dc";
+}
+
+.vea-palette:before {
+  content: "\e6dd";
+}
+
+.vea-palette-fill:before {
+  content: "\e6de";
+}
+
+.vea-o-test:before {
+  content: "\e6df";
+}
+
+.vea-o-test-fill:before {
+  content: "\e6e0";
+}
+
+.vea-global:before {
+  content: "\e6e6";
+}
+
+.vea-size:before {
+  content: "\e60c";
+}
+
+.vea-tree:before {
+  content: "\e616";
+}
+
+.vea-language:before {
+  content: "\e61b";
+}
+
+.vea-moon:before {
+  content: "\e623";
+}
+
+.vea-female-avatar:before {
+  content: "\e62f";
+}
+
+.vea-male-avatar:before {
+  content: "\e666";
+}
+
+.vea-female:before {
+  content: "\e66a";
+}
+
+.vea-male:before {
+  content: "\e66b";
+}
+
+.vea-process:before {
+  content: "\e63d";
+}
+
+.vea-order:before {
+  content: "\e658";
+}
+
+.vea-packing:before {
+  content: "\e6a5";
+}
+
+.vea-stock-in:before {
+  content: "\e6a7";
+}
+
+.vea-package:before {
+  content: "\e6a9";
+}
+
+.vea-stock-out:before {
+  content: "\e6bc";
+}
+
+.vea-week:before {
+  content: "\e6cc";
+}
+
+.vea-month:before {
+  content: "\e6d5";
+}
+
+.vea-dict:before {
+  content: "\e6eb";
+}
+
+.vea-onroad:before {
+  content: "\e6ec";
+}
+
+.vea-o-push:before {
+  content: "\e6ee";
+}
+
+.vea-production:before {
+  content: "\e6ef";
+}
+
+.vea-media:before {
+  content: "\e6f1";
+}
+
+.vea-qrCode:before {
+  content: "\e6f3";
+}
+
+.vea-recycle:before {
+  content: "\e660";
+}
+
+.vea-file-exception:before {
+  content: "\e7f7";
+}
+
+.vea-fileprotect:before {
+  content: "\e7fb";
+}
+
+.vea-file-add:before {
+  content: "\e7fc";
+}
+
+.vea-file-excel:before {
+  content: "\e7fd";
+}
+
+.vea-file-pdf:before {
+  content: "\e7ff";
+}
+
+.vea-file:before {
+  content: "\e802";
+}
+
+.vea-file-zip:before {
+  content: "\e803";
+}
+
+.vea-file-text:before {
+  content: "\e804";
+}
+
+.vea-file-copy:before {
+  content: "\e805";
+}
+
+.vea-snippets:before {
+  content: "\e806";
+}
+
+.vea-audit:before {
+  content: "\e807";
+}
+
+.vea-folder-add-fill:before {
+  content: "\e8aa";
+}
+
+.vea-folder-fill:before {
+  content: "\e8ab";
+}
+
+.vea-folder-open-fill:before {
+  content: "\e8ac";
+}
+
+.vea-home-fill:before {
+  content: "\e8b8";
+}
+
+.vea-location-fill:before {
+  content: "\e8b9";
+}
+
+.vea-api-fill:before {
+  content: "\e8c2";
+}
+
+.vea-zoomout:before {
+  content: "\e8df";
+}
+
+.vea-zoomin:before {
+  content: "\e8e4";
+}
+
+.vea-syslogs-fill:before {
+  content: "\e611";
+}
+
+.vea-subnode:before {
+  content: "\e907";
+}
+
+.vea-Report:before {
+  content: "\e918";
+}
+
+.vea-view:before {
+  content: "\e919";
+}
+
+.vea-network:before {
+  content: "\e693";
+}
+
+.vea-ha-config:before {
+  content: "\e697";
+}
+
+.vea-rebuild-fill:before {
+  content: "\e698";
+}
+
+.vea-rebuild:before {
+  content: "\e634";
+}
+
+.vea-deployment-unit:before {
+  content: "\e6b9";
+}
+
+.vea-node-tree:before {
+  content: "\e6d8";
+}
+
+.vea-disconnect:before {
+  content: "\e6e1";
+}
+
+.vea-process-log:before {
+  content: "\e694";
+}
+
+.vea-fo:before {
+  content: "\e692";
+}
+
+.vea-sysdict:before {
+  content: "\e6f0";
+}
+
+.vea-write:before {
+  content: "\e6e5";
+}
+
+.vea-assignTask:before {
+  content: "\e6f9";
+}
+
+.vea-EnterKey:before {
+  content: "\e6e2";
+}
+
+.vea-EscKey:before {
+  content: "\e6d6";
+}
+
+.vea-shipment:before {
+  content: "\e6a6";
+}
+
+.vea-loading:before {
+  content: "\e962";
+}
+
+.vea-message:before {
+  content: "\e790";
+}
+
+.vea-setting:before {
+  content: "\e796";
+}
+
+.vea-location:before {
+  content: "\e798";
+}
+
+.vea-control:before {
+  content: "\e79f";
+}
+
+.vea-folder:before {
+  content: "\e821";
+}
+
+.vea-folder-open:before {
+  content: "\e822";
+}
+
+.vea-folder-add:before {
+  content: "\e823";
+}
+
+.vea-table:before {
+  content: "\e83a";
+}
+
+.vea-star:before {
+  content: "\e83d";
+}
+
+.vea-verticalright:before {
+  content: "\e855";
+}
+
+.vea-verticalleft:before {
+  content: "\e856";
+}
+
+.vea-right:before {
+  content: "\e857";
+}
+
+.vea-left:before {
+  content: "\e858";
+}
+
+.vea-up:before {
+  content: "\e859";
+}
+
+.vea-down:before {
+  content: "\e85a";
+}
+
+.vea-doubleleft:before {
+  content: "\e85d";
+}
+
+.vea-doubleright:before {
+  content: "\e85e";
+}
+
+.vea-arrowright:before {
+  content: "\e85f";
+}
+
+.vea-arrowup:before {
+  content: "\e860";
+}
+
+.vea-arrowleft:before {
+  content: "\e861";
+}
+
+.vea-arrowdown:before {
+  content: "\e862";
+}
+
+.vea-left-circle-fill:before {
+  content: "\e875";
+}
+
+.vea-down-circle-fill:before {
+  content: "\e876";
+}
+
+.vea-minus-circle-fill:before {
+  content: "\e877";
+}
+
+.vea-up-circle-fill:before {
+  content: "\e87a";
+}
+
+.vea-right-circle-fill:before {
+  content: "\e87b";
+}
+
+.vea-poweroff-circle-fill:before {
+  content: "\e880";
+}
+
+.vea-dashboard-fill:before {
+  content: "\e887";
+}
+
+.vea-message-fill:before {
+  content: "\e888";
+}
+
+.vea-save-fill:before {
+  content: "\e895";
+}
+
+.vea-control-fill:before {
+  content: "\e896";
+}
+
+.vea-safety-certificate-fill:before {
+  content: "\e898";
+}
+
+.vea-securityscan-fill:before {
+  content: "\e899";
+}
+
+.vea-file-exclamation-fil:before {
+  content: "\e89a";
+}
+
+.vea-cloud-disk-fill:before {
+  content: "\e601";
+}
+
+.vea-all-attest-fill:before {
+  content: "\e602";
+}
+
+.vea-identify:before {
+  content: "\e629";
+}
+
+.vea-customer-support:before {
+  content: "\e67e";
+}
+
+.vea-system-repair:before {
+  content: "\e6ea";
+}
+
+.vea-system:before {
+  content: "\e642";
+}
+
+.vea-clock-fill:before {
+  content: "\e6e8";
+}
+
+.vea-o-user:before {
+  content: "\e60e";
+}
+
+.vea-o-install:before {
+  content: "\e637";
+}
+
+.vea-o-delete:before {
+  content: "\e63b";
+}
+
+.vea-o-conversion:before {
+  content: "\e609";
+}
+
+.vea-o-rejoin:before {
+  content: "\e60a";
+}
+
+.vea-o-install-fill:before {
+  content: "\e60f";
+}
+
+.vea-o-menu:before {
+  content: "\e613";
+}
+
+.vea-o-menu-dots:before {
+  content: "\e63e";
+}
+
+.vea-snapshot-fill:before {
+  content: "\e63f";
+}
+
+.vea-o-delete-fill:before {
+  content: "\e622";
+}
+
+.vea-o-menu-dots-fill:before {
+  content: "\e621";
+}
+
+.vea-o-login-fill:before {
+  content: "\e612";
+}
+
+.vea-o-menu-fill:before {
+  content: "\e641";
+}
+
+.vea-o-stop-fill:before {
+  content: "\e643";
+}
+
+.vea-o-stop:before {
+  content: "\e644";
+}
+
+.vea-o-edit:before {
+  content: "\e62e";
+}
+
+.vea-o-edit-fill:before {
+  content: "\e645";
+}
+
+.vea-o-recovery:before {
+  content: "\e615";
+}
+
+.vea-o-close:before {
+  content: "\e618";
+}
+
+.vea-o-check:before {
+  content: "\e61d";
+}
+
+.vea-o-close-fill:before {
+  content: "\e647";
+}
+
+.vea-o-check-fill:before {
+  content: "\e648";
+}
+
+.vea-o-time-fill:before {
+  content: "\e64a";
+}
+
+.vea-o-time:before {
+  content: "\e64b";
+}
+
+.vea-o-trademark-fill:before {
+  content: "\e64c";
+}
+
+.vea-o-meh-fill:before {
+  content: "\e64f";
+}
+
+.vea-o-trademark:before {
+  content: "\e652";
+}
+
+.vea-o-meh:before {
+  content: "\e653";
+}
+
+.vea-o-play:before {
+  content: "\e654";
+}
+
+.vea-o-play-fill:before {
+  content: "\e656";
+}
+
+.vea-o-conversion-fill:before {
+  content: "\e638";
+}
+
+.vea-o-user-fill:before {
+  content: "\e646";
+}
+
+.vea-o-login:before {
+  content: "\e640";
+}
+
+.vea-o-logout:before {
+  content: "\e65a";
+}
+
+.vea-o-logout-fill:before {
+  content: "\e65d";
+}
+
+.vea-clear:before {
+  content: "\e64e";
+}
+
+.vea-o-upgrade:before {
+  content: "\e65c";
+}
+
+.vea-o-sync-fill:before {
+  content: "\e65f";
+}
+
+.vea-o-sync:before {
+  content: "\e661";
+}
+
+.vea-refresh:before {
+  content: "\e651";
+}
+
+.vea-db-cloud:before {
+  content: "\e60b";
+}
+
+.vea-o-upgrade-fill:before {
+  content: "\e626";
+}
+
+.vea-o-recovery-fill:before {
+  content: "\e665";
+}
+
+.vea-o-left-fill:before {
+  content: "\e667";
+}
+
+.vea-o-info:before {
+  content: "\e668";
+}
+
+.vea-o-frown:before {
+  content: "\e669";
+}
+
+.vea-delete:before {
+  content: "\e620";
+}
+
+.vea-multi-check:before {
+  content: "\e632";
+}
+
+.vea-o-up:before {
+  content: "\e606";
+}
+
+.vea-o-minus:before {
+  content: "\e671";
+}
+
+.vea-o-pause:before {
+  content: "\e674";
+}
+
+.vea-o-plus:before {
+  content: "\e675";
+}
+
+.vea-o-issue-close:before {
+  content: "\e676";
+}
+
+.vea-o-right:before {
+  content: "\e678";
+}
+
+.vea-o-down:before {
+  content: "\e67a";
+}
+
+.vea-o-left:before {
+  content: "\e67b";
+}
+
+.vea-o-warning:before {
+  content: "\e681";
+}
+
+.vea-share-folder:before {
+  content: "\e630";
+}
+
+.vea-share-folder-fill:before {
+  content: "\e66f";
+}
+
+.vea-update:before {
+  content: "\e625";
+}
+
+.vea-o-plus-fill:before {
+  content: "\e679";
+}
+
+.vea-o-crontab:before {
+  content: "\e67c";
+}
+
+.vea-o-activate:before {
+  content: "\e677";
+}
+
+.vea-o-force-active:before {
+  content: "\e67d";
+}
+
+.vea-o-force-active-fill:before {
+  content: "\e680";
+}
+
+.vea-o-restart:before {
+  content: "\e670";
+}
+
+.vea-o-info-fill:before {
+  content: "\e685";
+}
+
+.vea-o-warning-fill:before {
+  content: "\e686";
+}
+
+.vea-ring:before {
+  content: "\e683";
+}
+
+.vea-dot:before {
+  content: "\e684";
+}
+
+.vea-sunny:before {
+  content: "\e687";
+}
+
+.vea-insecurity:before {
+  content: "\e689";
+}
+
+.vea-security-fill:before {
+  content: "\e68c";
+}
+
+.vea-locked:before {
+  content: "\e68d";
+}
+
+.vea-insecurity-fill:before {
+  content: "\e68e";
+}
+
+.vea-security:before {
+  content: "\e68f";
+}
+
+.vea-unlock:before {
+  content: "\e690";
+}
+
+.vea-authority:before {
+  content: "\e67f";
+}
+
+.vea-auto-refresh:before {
+  content: "\e695";
+}
+
+.vea-search:before {
+  content: "\e696";
+}
+
+.vea-cloud-upload:before {
+  content: "\e69d";
+}
+
+.vea-cloud-download:before {
+  content: "\e69e";
+}
+
+.vea-cloud-sync:before {
+  content: "\e69f";
+}
+
+.vea-cloud-server:before {
+  content: "\e6a0";
+}
+
+.vea-o-question:before {
+  content: "\e6a1";
+}
+
+.vea-o-question-fill:before {
+  content: "\e6a2";
+}
+
+.vea-email:before {
+  content: "\e63c";
+}
+
+.vea-test-email:before {
+  content: "\e64d";
+}
+
+.vea-maximize:before {
+  content: "\e61a";
+}
+
+.vea-restore:before {
+  content: "\e61e";
+}
+
+.vea-minimize:before {
+  content: "\e61f";
+}
+
+.vea-pin:before {
+  content: "\e6aa";
+}
+
+.vea-unpin:before {
+  content: "\e6ab";
+}
+
+.vea-setting-fill:before {
+  content: "\e6ac";
+}
+
+.vea-warning:before {
+  content: "\e682";
+}
+
+.vea-share:before {
+  content: "\e6ad";
+}
+
+.vea-branches:before {
+  content: "\e6ae";
+}
+
+.vea-merge:before {
+  content: "\e6af";
+}
+
+.vea-fork:before {
+  content: "\e6b0";
+}
+
+.vea-fullscreen:before {
+  content: "\e6b1";
+}
+
+.vea-fullscreen-exit:before {
+  content: "\e6b2";
+}
+
+.vea-user:before {
+  content: "\e6b3";
+}
+
+.vea-team:before {
+  content: "\e6b5";
+}
+
+.vea-delete-user:before {
+  content: "\e6b4";
+}
+
+.vea-add-user:before {
+  content: "\e6b6";
+}
+
+.vea-delete-team:before {
+  content: "\e6b7";
+}
+
+.vea-switch-user:before {
+  content: "\e6b8";
+}
+
+.vea-add-team:before {
+  content: "\e6bf";
+}
+
+.vea-eye-open:before {
+  content: "\e6c2";
+}
+
+.vea-eye-close:before {
+  content: "\e6c3";
+}
+
+.vea-bulb-on:before {
+  content: "\e6bd";
+}
+
+.vea-bulb-off-fill:before {
+  content: "\e6c9";
+}
+
+.vea-bulb-off:before {
+  content: "\e6ca";
+}
+
+.vea-bulb-on-fill:before {
+  content: "\e6cb";
+}
+
+.vea-security-on:before {
+  content: "\e6ce";
+}
+
+.vea-group-by:before {
+  content: "\e6d0";
+}
+
+.vea-warning-fill:before {
+  content: "\e6d1";
+}
+
+.vea-calendar:before {
+  content: "\e6d2";
+}
+
+.vea-o-error:before {
+  content: "\e6d3";
+}
+
+.vea-o-error-fill:before {
+  content: "\e6d4";
+}
+
+.vea-camera:before {
+  content: "\e6d7";
+}
+

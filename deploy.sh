@@ -7,7 +7,12 @@ git pull
 
 cd api/
 
-composer config -g repo.packagist composer https://mirrors.cloud.tencent.com/composer/
+# 还原镜像
+# composer config -g --unset repo.packagist
+
+# composer config -g repo.packagist composer https://mirrors.cloud.tencent.com/composer/
+# composer config -g repo.packagist composer https://mirrors.aliyun.com/composer/
+
 composer update
 php bin/console lexik:jwt:generate-keypair
 

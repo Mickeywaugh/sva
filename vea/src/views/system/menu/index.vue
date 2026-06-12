@@ -3,7 +3,7 @@
     <el-card shadow="never" class="table-card">
       <div class="toolbar">
         <div class="left-toolbar">
-          <el-button v-hasPerm="['sys:menu:add']" type="success" v-icon="'ga-o-plus'" @click="handleOpenDialog(0)">
+          <el-button v-hasPerm="['sys:menu:add']" type="success" v-icon="'vea-o-plus'" @click="handleOpenDialog(0)">
             {{ $t("common.create") }}
           </el-button>
         </div>
@@ -14,8 +14,8 @@
             </el-form-item>
             <el-form-item>
               <el-button-group>
-                <el-button type="primary" v-icon="'ga-search'" @click="handleQuery">{{ t('common.search') }}</el-button>
-                <el-button v-icon="'ga-refresh'" @click="handleResetQuery">{{ t('common.reset') }}</el-button>
+                <el-button type="primary" v-icon="'vea-search'" @click="handleQuery">{{ t('common.search') }}</el-button>
+                <el-button v-icon="'vea-refresh'" @click="handleResetQuery">{{ t('common.reset') }}</el-button>
               </el-button-group>
             </el-form-item>
           </el-form>
@@ -28,7 +28,7 @@
       }" @row-click="handleRowClick">
         <el-table-column :label="t('sys.menu.name')" min-width="150" prop="title">
           <template v-slot="{ row }">
-            <ga-icon :icon-class="row.icon">{{ t(row.title) }}</ga-icon>
+            <vea-icon :icon-class="row.icon">{{ t(row.title) }}</vea-icon>
           </template>
         </el-table-column>
         <el-table-column :label="t('sys.menu.type')" align="center" width="100">
@@ -60,13 +60,13 @@
             <el-button-group>
               <el-button v-if="[MenuTypeEnum.CATALOG, MenuTypeEnum.MENU].includes(row.type)" v-hasPerm="['sys:menu:add']" type="primary"
                 size="small" @click.stop="handleOpenDialog(row.id)">
-                <ga-icon icon-class="ga-o-plus" />{{ $t("common.create") }}
+                <vea-icon icon-class="vea-o-plus" />{{ $t("common.create") }}
               </el-button>
               <el-button v-hasPerm="['sys:menu:edit']" type="primary" size="small" @click.stop="handleOpenDialog(undefined, row.id)">
-                <ga-icon icon-class="ga-o-edit" />{{ $t("common.edit") }}
+                <vea-icon icon-class="vea-o-edit" />{{ $t("common.edit") }}
               </el-button>
-              <el-button v-hasPerm="['sys:menu:delete']" type="warning" size="small" @click.stop="handleDelete(row.id)"><ga-icon
-                  icon-class="ga-o-delete" />
+              <el-button v-hasPerm="['sys:menu:delete']" type="warning" size="small" @click.stop="handleDelete(row.id)"><vea-icon
+                  icon-class="vea-o-delete" />
                 {{ $t("common.delete") }}
               </el-button>
             </el-button-group>
@@ -145,7 +145,7 @@
                 <template #content>
                   组件页面完整路径，相对于 src/views/，如 system/user/index，缺省后缀 .vue
                 </template>
-                <ga-icon icon-class="ga-o-question ml-1 cursor-pointer"></ga-icon>
+                <vea-icon icon-class="vea-o-question ml-1 cursor-pointer"></vea-icon>
               </el-tooltip>
             </div>
           </template>
@@ -164,7 +164,7 @@
                 <template #content>
                   组件页面使用 `useRoute().query.参数名` 获取路由参数值。
                 </template>
-                <ga-icon icon-class="ga-o-question ml-1 cursor-pointer"></ga-icon>
+                <vea-icon icon-class="vea-o-question ml-1 cursor-pointer"></vea-icon>
               </el-tooltip>
             </div>
           </template>
@@ -213,7 +213,7 @@
                 </template>
 
                 <div>
-                  <GaIcon icon-class="ga-o-question-fill"></GaIcon>
+                  <GaIcon icon-class="vea-o-question-fill"></GaIcon>
                 </div>
               </el-tooltip>
             </div>

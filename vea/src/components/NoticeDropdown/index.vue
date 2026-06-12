@@ -2,9 +2,9 @@
   <el-dropdown class="notice__dropdown" trigger="click">
     <div class="notice__trigger">
       <el-badge v-if="unreadTotal > 0" :value="unreadTotal" :max="99">
-        <div v-icon="'ga-message'" />
+        <div v-icon="'vea-message'" />
       </el-badge>
-      <div v-else v-icon="'ga-message'" />
+      <div v-else v-icon="'vea-message'" />
     </div>
 
     <template #dropdown>
@@ -25,7 +25,7 @@
           <div class="flex-x-between">
             <el-link type="primary" underline="never" @click="goMore">
               <span class="text-xs">查看更多</span>
-              <ga-icon icon-class="ga-ellipsis"></ga-icon>
+              <vea-icon icon-class="vea-ellipsis"></vea-icon>
             </el-link>
             <el-link v-if="list.length > 0" type="primary" underline="never" @click="readAll">
               <span class="text-xs">全部已读</span>
@@ -51,7 +51,7 @@
           {{ detail.publisherName }}
         </span>
         <span class="ml-2 flex-y-center">
-          <ga-icon icon-class="ga-clock"> {{ detail.publishTime }}</ga-icon>
+          <vea-icon icon-class="vea-clock"> {{ detail.publishTime }}</vea-icon>
         </span>
       </div>
       <div class="max-h-60vh pt-16px mb-24px overflow-y-auto border-t border-solid border-color">

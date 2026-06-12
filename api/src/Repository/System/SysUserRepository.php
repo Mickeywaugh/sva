@@ -91,7 +91,7 @@ class SysUserRepository extends BaseRepository
                 unset($data['roleIds']);
             }
             //设置初始密码
-            $data["password"] = Util::$INITIALPASSWORD;
+            $data["password"] = '123456';
             $user = parent::create($data);
             return $user;
         } catch (\Exception $e) {

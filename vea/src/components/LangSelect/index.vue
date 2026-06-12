@@ -1,7 +1,7 @@
 <template>
   <el-dropdown trigger="click" @command="handleLanguageChange">
     <div>
-      <ga-icon icon-class="ga-global" :size="size" />
+      <vea-icon icon-class="vea-global" :size="size" />
     </div>
     <template #dropdown>
       <el-dropdown-menu>

@@ -6,7 +6,6 @@ use App\Service\BaseService as Util;
 use App\Entity\System\SysRole;
 use App\Entity\System\SysDept;
 use App\Entity\BaseEntity;
-use App\Entity\Traits\CUTime;
 use App\Entity\Traits\DeleteTime;
 use App\Repository\System\SysUserRepository;
 use Doctrine\DBAL\Types\Types;
@@ -292,11 +291,6 @@ class SysUser extends BaseEntity implements UserInterface, PasswordAuthenticated
         return (string) $this->username;
     }
 
-    #[\Deprecated(message: 'eraseCredentials() is deprecated since Symfony 7.3', since: '7.3')]
-    public function eraseCredentials(): void
-    {
-        // Credentials are handled externally, no sensitive data stored
-    }
 
     public function getTimeArray(): array
     {

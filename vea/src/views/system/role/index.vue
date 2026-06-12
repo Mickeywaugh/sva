@@ -5,8 +5,8 @@
       <div class="toolbar">
         <div class="left-toolbar">
           <el-button-group>
-            <el-button type="success" v-icon="'ga-o-plus'" @click="handleOpenDialog()">新增</el-button>
-            <el-button type="danger" :disabled="ids.length === 0" v-icon="'ga-o-delete'" @click="handleDelete()">删除</el-button>
+            <el-button type="success" v-icon="'vea-o-plus'" @click="handleOpenDialog()">新增</el-button>
+            <el-button type="danger" :disabled="ids.length === 0" v-icon="'vea-o-delete'" @click="handleDelete()">删除</el-button>
           </el-button-group>
         </div>
         <div class="right-toolbar">
@@ -16,8 +16,8 @@
             </el-form-item>
             <el-form-item>
               <el-button-group>
-                <el-button type="primary" v-icon="'ga-search'" @click="handleQuery">{{ t('common.search') }}</el-button>
-                <el-button v-icon="'ga-refresh'" @click="handleResetQuery">{{ t('common.reset') }}</el-button>
+                <el-button type="primary" v-icon="'vea-search'" @click="handleQuery">{{ t('common.search') }}</el-button>
+                <el-button v-icon="'vea-refresh'" @click="handleResetQuery">{{ t('common.reset') }}</el-button>
               </el-button-group>
             </el-form-item>
           </el-form>
@@ -38,13 +38,13 @@
         <el-table-column label="排序" align="center" prop="sort" />
         <el-table-column fixed="right" label="操作">
           <template #default="scope">
-            <el-button type="primary" size="small" v-icon="'ga-aim'" @click="handleOpenAssignPermDialog(scope.row)">
+            <el-button type="primary" size="small" v-icon="'vea-aim'" @click="handleOpenAssignPermDialog(scope.row)">
               分配权限
             </el-button>
-            <el-button type="primary" size="small" v-icon="'ga-o-edit'" @click="handleOpenDialog(scope.row.id)">
+            <el-button type="primary" size="small" v-icon="'vea-o-edit'" @click="handleOpenDialog(scope.row.id)">
               编辑
             </el-button>
-            <el-button :disabled="scope.row.userCount > 0" type="danger" size="small" v-icon="'ga-o-delete'"
+            <el-button :disabled="scope.row.userCount > 0" type="danger" size="small" v-icon="'vea-o-delete'"
               @click="handleDelete(scope.row.id)">
               删除
             </el-button>

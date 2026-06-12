@@ -3,7 +3,7 @@
   <el-tooltip :content="t('sizeSelect.tooltip')" effect="dark" placement="bottom">
     <el-dropdown trigger="click" @command="handleSizeChange">
       <div class="size-trigger">
-        <ga-icon icon-class="ga-size" />
+        <vea-icon icon-class="vea-size" />
       </div>
       <template #dropdown>
         <el-dropdown-menu>

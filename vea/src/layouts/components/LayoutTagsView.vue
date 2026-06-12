@@ -13,13 +13,13 @@
           })
           " @click.middle="handleMiddleClick(tag)" @contextmenu.prevent="openContextMenu(tag, $event)">
           <template v-if="tag.icon">
-            <ga-icon :icon-class="tag.icon"></ga-icon>
+            <vea-icon :icon-class="tag.icon"></vea-icon>
           </template>
           <span class="tags-item__text">
             {{ translateRouteTitle(tag.title) }}
           </span>
           <span v-if="!tag.affix" class="tags-item__close" @click.stop="closeSelectedTag(tag)">
-            <ga-icon icon-class="ga-o-close"></ga-icon>
+            <vea-icon icon-class="vea-o-close"></vea-icon>
           </span>
         </div>
       </div>
@@ -94,22 +94,22 @@
     <Teleport to="body">
       <ul v-show="contextMenu.visible" class="contextmenu" :style="{ left: contextMenu.x + 'px', top: contextMenu.y + 'px' }">
         <li @click="refreshSelectedTag(selectedTag)">
-          <div v-icon="'ga-refresh'">刷新</div>
+          <div v-icon="'vea-refresh'">刷新</div>
         </li>
         <li v-if="!selectedTag?.affix" @click="closeSelectedTag(selectedTag)">
-          <div v-icon="'ga-o-close'">关闭</div>
+          <div v-icon="'vea-o-close'">关闭</div>
         </li>
         <li @click="closeOtherTags">
-          <div v-icon="'ga-aim'">关闭其它</div>
+          <div v-icon="'vea-aim'">关闭其它</div>
         </li>
         <li v-if="!isFirstView" @click="closeLeftTags">
-          <div v-icon="'ga-doubleleft'">关闭左侧</div>
+          <div v-icon="'vea-doubleleft'">关闭左侧</div>
         </li>
         <li v-if="!isLastView" @click="closeRightTags">
-          <div v-icon="'ga-doubleright'">关闭右侧</div>
+          <div v-icon="'vea-doubleright'">关闭右侧</div>
         </li>
         <li @click="closeAllTags(selectedTag)">
-          <div v-icon="'ga-close'">关闭所有</div>
+          <div v-icon="'vea-close'">关闭所有</div>
         </li>
       </ul>
     </Teleport>

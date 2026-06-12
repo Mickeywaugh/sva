@@ -5,10 +5,10 @@
       <div class="toolbar">
         <div class="left-toolbar">
           <el-button-group>
-            <el-button v-hasPerm="['sys:config:add']" type="success" v-icon="'ga-o-plus'" @click="handleOpenDialog()">
+            <el-button v-hasPerm="['sys:config:add']" type="success" v-icon="'vea-o-plus'" @click="handleOpenDialog()">
               {{ t('common.add') }}
             </el-button>
-            <el-button v-hasPerm="['sys:config:refresh']" color="#626aef" v-icon="'ga-o-refresh'" @click="handleRefreshCache">
+            <el-button v-hasPerm="['sys:config:refresh']" color="#626aef" v-icon="'vea-o-refresh'" @click="handleRefreshCache">
               {{ t('common.refresh') }}
             </el-button>
           </el-button-group>
@@ -20,8 +20,8 @@
             </el-form-item>
             <el-form-item>
               <el-button-group>
-                <el-button type="primary" v-icon="'ga-search'" @click="handleQuery">{{ t('common.search') }}</el-button>
-                <el-button v-icon="'ga-refresh'" @click="handleResetQuery">{{ t('common.reset') }}</el-button>
+                <el-button type="primary" v-icon="'vea-search'" @click="handleQuery">{{ t('common.search') }}</el-button>
+                <el-button v-icon="'vea-refresh'" @click="handleResetQuery">{{ t('common.reset') }}</el-button>
               </el-button-group>
             </el-form-item>
           </el-form>
@@ -37,11 +37,11 @@
         <el-table-column fixed="right" label="Operations" width="220">
           <template #default="scope">
             <el-button-group>
-              <el-button v-hasPerm="['sys:config:update']" type="primary" size="small" v-icon="'ga-o-edit'"
+              <el-button v-hasPerm="['sys:config:update']" type="primary" size="small" v-icon="'vea-o-edit'"
                 @click="handleOpenDialog(scope.row.id)">
                 {{ t('common.edit') }}
               </el-button>
-              <el-button v-hasPerm="['sys:config:delete']" type="danger" size="small" v-icon="'ga-o-delete'"
+              <el-button v-hasPerm="['sys:config:delete']" type="danger" size="small" v-icon="'vea-o-delete'"
                 @click="handleDelete(scope.row.id)">
                 {{ t('common.delete') }}
               </el-button>

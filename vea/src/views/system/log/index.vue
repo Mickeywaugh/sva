@@ -14,8 +14,8 @@
             </el-form-item>
             <el-form-item>
               <el-button-group>
-                <el-button type="primary" v-icon="'ga-search'" @click="handleQuery">{{ t('common.search') }}</el-button>
-                <el-button v-icon="'ga-refresh'" @click="handleResetQuery">{{ t('common.reset') }}</el-button>
+                <el-button type="primary" v-icon="'vea-search'" @click="handleQuery">{{ t('common.search') }}</el-button>
+                <el-button v-icon="'vea-refresh'" @click="handleResetQuery">{{ t('common.reset') }}</el-button>
               </el-button-group>
             </el-form-item>
           </el-form>

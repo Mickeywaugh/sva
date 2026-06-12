@@ -1,6 +1,6 @@
 <template>
-  <el-tag v-bind="statusTag" :v-bind="props"><ga-icon v-if="statusTag.icon"
-      :icon-class="statusTag.icon"></ga-icon>{{ t(statusTag.label) }}{{ extraLabel }}</el-tag>
+  <el-tag v-bind="statusTag" :v-bind="props"><vea-icon v-if="statusTag.icon"
+      :icon-class="statusTag.icon"></vea-icon>{{ t(statusTag.label) }}{{ extraLabel }}</el-tag>
 </template>
 <script setup lang="ts">
   import { StatusMap, StatusTag } from "@/enums/app";

@@ -1,4 +1,4 @@
-import { ref, computed, readonly, watch } from "vue";
+import { ref, computed, readonly } from "vue";
 import { useUserStoreHook } from "@/stores/user";
 
 export interface UseSseOptions {

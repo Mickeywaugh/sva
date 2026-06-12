@@ -8,7 +8,7 @@ use Doctrine\DBAL\Query\QueryBuilder;
 use Doctrine\DBAL\Schema\AbstractSchemaManager;
 use Doctrine\DBAL\Connection;
 
-class DbalService
+class DbService
 {
   private Connection $conn;
   private mixed $table;
@@ -42,18 +42,22 @@ class DbalService
     'FIND_IN',
     'OR'
   ];
-  public function __construct()
+  public function __construct(?string $dsn = null)
   {
-    $this->conn = self::getConnection();
+    $this->conn = self::getConnection($dsn);
     $this->schemaManager = $this->conn->createSchemaManager();
     $this->qb = $this->conn->createQueryBuilder();
     $this->resetQueryBuilder();
   }
 
-  public static function getConnection()
+  public static function getConnection(?string $dsn = null)
   {
     //获取数据库配置信息
-    $conf = parse_url($_ENV['DATABASE_URL']);
+    if (!$dsn) $dsn = 'DATABASE_URL';
+    $conf = (array) parse_url($_ENV[$dsn]);
+    if (!$conf) {
+      throw new \Exception("Invalid DSN configuration");
+    }
     $attrs = [
       'driver' => "pdo_" . $conf['scheme'],
       'host' => $conf['host'],
@@ -62,14 +66,17 @@ class DbalService
       'user' => $conf['user'],
       'password' => $conf['pass']
     ];
-
+    //将query参数转换为数组
+    if (isset($conf['query'])) {
+      parse_str($conf['query'], $queryParams);
+      $attrs["driverOptions"] = $queryParams;
+    }
     return DriverManager::getConnection($attrs);
   }
 
-  public static function table(string $table, ?string $alias = 't')
+  public static function table(string $table, ?string $alias = 't', ?string $dsn = null)
   {
-    $table = self::toSnakeCase($table);
-    $instance = new static; // 创建一个新的实例
+    $instance = new static($dsn); // 创建一个新的实例
     $instance->table = $table;
     $instance->qb->from($table, $alias); // 设置表名
     $instance->qb->select('*');
@@ -193,15 +200,39 @@ class DbalService
   }
 
   /**
-   * 执行sql
+   * 执行sql并返回结果集对象
    * 
    * @param string $sql SQL语句
    * @param array $params 参数数组
-   * @return mixed 执行结果
+   * @return \Doctrine\DBAL\Result 结果集对象
    */
-  public function execSql(string $sql, array $params = []): mixed
+  public static function execSql(string $sql, array $params = [], ?string $dsn = null): mixed
   {
-    return $this->conn->executeStatement($sql, $params);
+    return self::getConnection($dsn)->executeQuery($sql, $params);
+  }
+
+  /**
+   * 执行sql并返回多行关联数组
+   */
+  public static function fetchAll(string $sql, array $params = [], ?string $dsn = null): array
+  {
+    return self::execSql($sql, $params, $dsn)->fetchAllAssociative();
+  }
+
+  /**
+   * 执行sql并返回单行关联数组
+   */
+  public static function fetchOne(string $sql, array $params = [], ?string $dsn = null): array|false
+  {
+    return self::execSql($sql, $params, $dsn)->fetchAssociative();
+  }
+
+  /**
+   * 执行sql并返回单个值
+   */
+  public static function fetchScalar(string $sql, array $params = [], ?string $dsn = null): mixed
+  {
+    return self::execSql($sql, $params, $dsn)->fetchOne();
   }
 
   public function setWhere(string $where): static
@@ -422,10 +453,10 @@ class DbalService
 
   public function getDbTables(string $prefix = ""): array
   {
-    $tableObjs = $this->schemaManager->listTables();
+    $tableObjs = $this->schemaManager->introspectTables();
     $tables = [];
     foreach ($tableObjs as $tableObj) {
-      $tableName = $tableObj->getName();
+      $tableName = $tableObj->getObjectName()->toString();
       // 根据表名前缀搜索
       if (!empty($prefix) && strpos($tableName, $prefix) === 0) {
         $tables[] = $tableName;

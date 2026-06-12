@@ -13,7 +13,7 @@
     <!-- 返回顶部按钮 -->
     <el-backtop target=".app-main">
       <div>
-        <ga-icon class="text-gray" icon-class="ga-arrowup" size="1.25rem"></ga-icon>
+        <vea-icon class="text-gray" icon-class="vea-arrowup" size="1.25rem"></vea-icon>
       </div>
     </el-backtop>
   </section>
