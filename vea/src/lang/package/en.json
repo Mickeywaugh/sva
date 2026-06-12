@@ -95,6 +95,7 @@
     "resetConfigDescription": "Restore all settings to system default values"
   },
   "sys": {
+    "node": "System",
     "admin": "System Settings",
     "home": "Home",
     "document": "Project Documentation",
