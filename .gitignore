@@ -3,7 +3,7 @@
 .git/
 api/api/config/jwt/public.pem
 api/api/config/jwt/private.pem
-api/.env*
+api/.env
 api/var/
 api/vendor/
 
