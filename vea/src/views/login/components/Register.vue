@@ -17,7 +17,7 @@
       <el-tooltip :visible="isCapsLock" :content="t('login.capsLock')" placement="right">
         <el-form-item prop="password">
           <el-input v-model.trim="model.password" :placeholder="t('login.password')" type="password" show-password @keyup="checkCapsLock"
-            @keyup.enter="submit">
+            @keydown.enter="submit">
             <template #prefix>
               <el-icon>
                 <Lock />
@@ -30,7 +30,7 @@
       <el-tooltip :visible="isCapsLock" :content="t('login.capsLock')" placement="right">
         <el-form-item prop="confirmPassword">
           <el-input v-model.trim="model.confirmPassword" :placeholder="t('login.message.password.confirm')" type="password" show-password
-            @keyup="checkCapsLock" @keyup.enter="submit">
+            @keyup="checkCapsLock" @keydown.enter="submit">
             <template #prefix>
               <el-icon>
                 <Lock />
@@ -101,11 +101,11 @@
     confirmPassword: string;
   }
 
-  const model = ref<Model>({
+  const model = reactive<Model>({
     username: "admin",
     password: "123456",
     confirmPassword: "",
-    captchaId: "",
+    captchaKey: "",
     captchaCode: "",
   });
 
@@ -143,7 +143,7 @@
         },
         {
           validator: (_: any, value: string) => {
-            return value === model.value.password;
+            return value === model.password;
           },
           trigger: "blur",
           message: t("login.message.password.inconformity"),
@@ -165,7 +165,7 @@
     codeLoading.value = true;
     AuthAPI.getCaptcha()
       .then((data) => {
-        model.value.captchaId = data.captchaId;
+        model.captchaKey = data.captchaKey;
         captchaBase64.value = data.captchaBase64;
       })
       .finally(() => (codeLoading.value = false));

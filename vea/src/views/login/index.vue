@@ -47,14 +47,14 @@
               <el-tooltip :visible="isCapsLock" :content="t('login.capsLock')" placement="right">
                 <el-form-item prop="password">
                   <el-input v-model.trim="loginFormData.password" :placeholder="t('login.password')" type="password" show-password
-                    @keyup="checkCapsLock" @keyup.enter="handleLoginSubmit">
+                    @keyup="checkCapsLock" @keydown.enter="handleLoginSubmit">
                     <template #prefix>
                       <vea-icon icon-class="vea-locked"></vea-icon>
                     </template>
                   </el-input>
                 </el-form-item>
               </el-tooltip>
-              <el-form-item prop="captchaCode">
+              <el-form-item v-if="captchaEnabled" prop="captchaCode">
                 <div flex items-center gap-10px>
                   <el-input v-model.trim="loginFormData.captchaCode" :placeholder="t('login.captchaCode')" clearable class="flex-1"
                     @keyup.enter="handleLoginSubmit">
@@ -122,6 +122,7 @@
   const component = ref<LayoutMap>("login");
 
   const tenantEnabled = appConfig.tenantEnabled;
+  const captchaEnabled = appConfig.captchaEnabled;
 
   const formComponents = {
     register: defineAsyncComponent(() => import("./components/Register.vue")),
@@ -150,6 +151,7 @@
   }));
 
   function getCaptcha() {
+    if (codeLoading.value || !captchaEnabled) return;
     codeLoading.value = true;
     AuthAPI.getCaptcha()
       .then((data) => {

@@ -192,11 +192,7 @@
     email: "",
     roleIds: [],
     gender: 1,
-    avatar: "",
-    employeeId: "",
-    factory: undefined,
-    machine: undefined,
-    oaLoginName: ""
+    avatar: ""
   });
 
   const rules = reactive({
