@@ -59,7 +59,7 @@
                   <el-input v-model.trim="loginFormData.captchaCode" :placeholder="t('login.captchaCode')" clearable class="flex-1"
                     @keyup.enter="handleLoginSubmit">
                     <template #prefix>
-                      <div class="i-svg:captcha" />
+                      <div v-icon="'vea-captcha'" />
                     </template>
                   </el-input>
                   <div cursor-pointer h-44px w-140px flex-center @click="getCaptcha">
@@ -95,7 +95,7 @@
 
         <footer class="login-card__footer">
           <el-text size="small">
-            www.mickeywu.cc 2026~
+           example.com 2026~
           </el-text>
         </footer>
       </section>
@@ -150,7 +150,8 @@
     ]
   }));
 
-  function getCaptcha() {
+  const getCaptcha = async () => {
+    console.log(codeLoading.value, captchaEnabled);
     if (codeLoading.value || !captchaEnabled) return;
     codeLoading.value = true;
     AuthAPI.getCaptcha()
@@ -176,6 +177,7 @@
           await router.push(decodeURIComponent(redirectPath));
         },
         () => {
+          getCaptcha();
         }
       );
     } finally {
@@ -192,7 +194,7 @@
   function showForm(type: "register" | "resetPwd") {
     component.value = type;
   }
-
+  onMounted(() => getCaptcha());
 </script>
 
 <style lang="scss" scoped>

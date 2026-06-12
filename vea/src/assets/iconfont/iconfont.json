@@ -6,6 +6,34 @@
   "description": "专为sva前后端分离框架准备的图标字体库。",
   "glyphs": [
     {
+      "icon_id": "45191096",
+      "name": "subscriber",
+      "font_class": "subscriber",
+      "unicode": "e610",
+      "unicode_decimal": 58896
+    },
+    {
+      "icon_id": "45768582",
+      "name": "barCode",
+      "font_class": "barCode",
+      "unicode": "e6f4",
+      "unicode_decimal": 59124
+    },
+    {
+      "icon_id": "45768585",
+      "name": "binaryFile",
+      "font_class": "binaryFile",
+      "unicode": "e6f8",
+      "unicode_decimal": 59128
+    },
+    {
+      "icon_id": "11305597",
+      "name": "captcha",
+      "font_class": "captcha",
+      "unicode": "e603",
+      "unicode_decimal": 58883
+    },
+    {
       "icon_id": "29999049",
       "name": "join",
       "font_class": "join",

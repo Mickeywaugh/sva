@@ -119,7 +119,7 @@ declare module 'vue' {
     UserDeptTree: typeof import('./../views/system/user/components/UserDeptTree.vue')['default']
     UserImportDialog: typeof import('./../views/system/user/components/UserImportDialog.vue')['default']
     WangEditor: typeof import('./../components/WangEditor/index.vue')['default']
-    
+    VeaIcon: typeof import('./../components/VeaIcon/index.vue')['default']
   }
   export interface GlobalDirectives {
     vLoading: typeof import('element-plus/es')['ElLoadingDirective']
