@@ -9,3 +9,10 @@
 
 controllers:
     resource: routing.controllers
+    prefix: "/api/v1/"
+    format: json
+    type: attribute
+
+root:
+    path: /
+    controller: App\Controller\Public\IndexController::index
