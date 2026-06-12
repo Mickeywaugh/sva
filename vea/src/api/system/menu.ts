@@ -193,7 +193,7 @@ export interface MenuForm {
   /** 是否新窗口打开 */
   blank?: number;
   t: string;
-  isPublic?: number;
+  noAuth?: number;
 }
 
 interface KeyValue {

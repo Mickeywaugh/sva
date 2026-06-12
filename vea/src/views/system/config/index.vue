@@ -82,7 +82,7 @@
 
 <script setup lang="ts">
   defineOptions({
-    name: "SysConfig",
+    name: "SystemConfig",
     inheritAttrs: false,
   });
 

@@ -95,7 +95,7 @@
 
 <script setup lang="ts">
   defineOptions({
-    name: "SysDept",
+    name: "SystemDept",
     inheritAttrs: false,
   });
 

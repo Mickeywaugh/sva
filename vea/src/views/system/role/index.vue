@@ -145,7 +145,7 @@
 
 <script setup lang="ts">
   defineOptions({
-    name: "SysRole",
+    name: "SystemRole",
     inheritAttrs: false,
   });
 

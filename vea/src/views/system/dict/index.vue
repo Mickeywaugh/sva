@@ -194,7 +194,7 @@
   const t = useI18n().t;
 
   defineOptions({
-    name: "SysDict",
+    name: "SystemDict",
     inherititems: false,
   });
 

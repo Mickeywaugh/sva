@@ -179,7 +179,7 @@
 
 <script setup lang="ts">
   defineOptions({
-    name: "SysNotice",
+    name: "SystemNotice",
     inheritAttrs: false,
   });
 

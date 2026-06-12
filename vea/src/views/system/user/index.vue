@@ -158,7 +158,7 @@
   import { downloadBolb } from "@/utils/function";
 
   defineOptions({
-    name: "SysUser",
+    name: "SystemUser",
     inheritAttrs: false,
   });
 

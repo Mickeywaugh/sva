@@ -42,7 +42,7 @@
 
 <script setup lang="ts">
   defineOptions({
-    name: "SysLog",
+    name: "SystemLog",
     inheritAttrs: false,
   });
 
