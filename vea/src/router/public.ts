@@ -7,7 +7,7 @@ export const PublicRoutes: RouteRecordRaw[] = [
     component: () => import("@/views/public/index.vue"),
     meta: {
       title: "公共页面",
-      icon: "ga-doc",
+      icon: "vea-doc",
     },
   },
 ];

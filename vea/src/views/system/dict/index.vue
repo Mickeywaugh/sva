@@ -14,7 +14,7 @@
       <div class="toolbar">
         <div class="left-toolbar">
           <el-button-group>
-            <el-button type="primary" v-icon="'ga-o-plus'" @click="openDialog('dict')">{{ $t('common.create') }}</el-button>
+            <el-button type="primary" v-icon="'vea-o-plus'" @click="openDialog('dict')">{{ $t('common.create') }}</el-button>
           </el-button-group>
         </div>
         <div class="right-toolbar">
@@ -24,7 +24,7 @@
             </el-form-item>
             <el-form-item>
               <el-button-group>
-                <el-button type="primary" v-icon="'ga-search'" GaIcon="" @click="handleQuery('dict')">{{ $t('common.search') }}</el-button>
+                <el-button type="primary" v-icon="'vea-search'" GaIcon="" @click="handleQuery('dict')">{{ $t('common.search') }}</el-button>
               </el-button-group>
             </el-form-item>
           </el-form>
@@ -44,8 +44,8 @@
         <el-table-column label="操作" align="center">
           <template #default="scope">
             <el-button-group>
-              <el-button type="primary" v-icon="'ga-o-edit'" @click="openDialog('dict', scope.row)">{{ $t('common.edit') }}</el-button>
-              <el-button type="primary" v-icon="'ga-detail'" @click="switchNode('item', scope.row)">{{ $t('common.detail') }} </el-button>
+              <el-button type="primary" v-icon="'vea-o-edit'" @click="openDialog('dict', scope.row)">{{ $t('common.edit') }}</el-button>
+              <el-button type="primary" v-icon="'vea-detail'" @click="switchNode('item', scope.row)">{{ $t('common.detail') }} </el-button>
             </el-button-group>
           </template>
         </el-table-column>
@@ -88,7 +88,7 @@
       <div class="toolbar">
         <div class="left-toolbar">
           <el-button-group>
-            <el-button type="primary" v-icon="'ga-o-plus'" @click="openDialog('item')">{{ $t('common.create') }}</el-button>
+            <el-button type="primary" v-icon="'vea-o-plus'" @click="openDialog('item')">{{ $t('common.create') }}</el-button>
           </el-button-group>
         </div>
         <div class="right-toolbar">
@@ -116,8 +116,8 @@
         <el-table-column label="操作" align="center">
           <template #default="scope">
             <el-button-group>
-              <el-button type="primary" v-icon="'ga-o-edit'" @click="openDialog('item', scope.row)">{{ $t('common.edit') }}</el-button>
-              <el-button type="primary" v-icon="'ga-o-delete'" @click="handleDelete('item', scope.row)">{{ $t('common.delete') }}</el-button>
+              <el-button type="primary" v-icon="'vea-o-edit'" @click="openDialog('item', scope.row)">{{ $t('common.edit') }}</el-button>
+              <el-button type="primary" v-icon="'vea-o-delete'" @click="handleDelete('item', scope.row)">{{ $t('common.delete') }}</el-button>
             </el-button-group>
           </template>
         </el-table-column>
@@ -194,7 +194,7 @@
   const t = useI18n().t;
 
   defineOptions({
-    name: "SysDict",
+    name: "SystemDict",
     inherititems: false,
   });
 

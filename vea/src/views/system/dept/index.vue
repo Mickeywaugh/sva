@@ -5,9 +5,9 @@
       <div class="toolbar">
         <div class="left-toolbar">
           <el-button-group>
-            <el-button v-hasPerm="['sys:dept:add']" type="success" v-icon="'ga-o-plus'"
+            <el-button v-hasPerm="['sys:dept:add']" type="success" v-icon="'vea-o-plus'"
               @click="handleOpenDialog()">{{ t('common.create') }}</el-button>
-            <el-button v-hasPerm="['sys:dept:delete']" type="danger" :disabled="selectIds.length === 0" v-icon="'ga-o-delete'"
+            <el-button v-hasPerm="['sys:dept:delete']" type="danger" :disabled="selectIds.length === 0" v-icon="'vea-o-delete'"
               @click="handleDelete()">{{ t('common.delete') }}</el-button>
           </el-button-group>
         </div>
@@ -24,8 +24,8 @@
             </el-form-item>
             <el-form-item>
               <el-button-group>
-                <el-button class="filter-item" type="primary" v-icon="'ga-search'" @click="handleQuery">{{ t('common.search') }}</el-button>
-                <el-button v-icon="'ga-refresh'" @click="handleResetQuery">重置</el-button>
+                <el-button class="filter-item" type="primary" v-icon="'vea-search'" @click="handleQuery">{{ t('common.search') }}</el-button>
+                <el-button v-icon="'vea-refresh'" @click="handleResetQuery">重置</el-button>
               </el-button-group>
             </el-form-item>
           </el-form>
@@ -46,15 +46,15 @@
 
         <el-table-column label="操作" fixed="right" align="left">
           <template #default="scope">
-            <el-button v-hasPerm="['sys:dept:add']" type="primary" size="small" v-icon="'ga-o-plus'"
+            <el-button v-hasPerm="['sys:dept:add']" type="primary" size="small" v-icon="'vea-o-plus'"
               @click.stop="handleOpenDialog(scope.row.id, undefined)">
               新增
             </el-button>
-            <el-button v-hasPerm="['sys:dept:edit']" type="primary" size="small" v-icon="'ga-o-edit'"
+            <el-button v-hasPerm="['sys:dept:edit']" type="primary" size="small" v-icon="'vea-o-edit'"
               @click.stop="handleOpenDialog(scope.row.parentId, scope.row.id)">
               编辑
             </el-button>
-            <el-button v-hasPerm="['sys:dept:delete']" type="danger" size="small" v-icon="'ga-o-delete'"
+            <el-button v-hasPerm="['sys:dept:delete']" type="danger" size="small" v-icon="'vea-o-delete'"
               @click.stop="handleDelete(scope.row.id)">
               删除
             </el-button>
@@ -95,7 +95,7 @@
 
 <script setup lang="ts">
   defineOptions({
-    name: "SysDept",
+    name: "SystemDept",
     inheritAttrs: false,
   });
 

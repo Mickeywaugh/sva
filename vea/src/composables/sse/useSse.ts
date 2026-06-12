@@ -1,4 +1,4 @@
-import { ref, computed, readonly, watch } from "vue";
+import { ref, computed, readonly } from "vue";
 import { useUserStoreHook } from "@/stores/user";
 
 export interface UseSseOptions {
@@ -33,7 +33,7 @@ function createSseConnection(options: UseSseOptions = {}) {
     topics: [...new Set([...["system.notification", "system.onlineCount", "dict.change"], ...(userStore.userInfo.sseTopics ?? []), ...(options.topics ?? [])])],
     debug: options.debug ?? false,
     reconnectInterval: options.reconnectInterval ?? 3000,
-    maxReconnectAttempts: options.maxReconnectAttempts ?? 0, // 0 表示无限重连
+    maxReconnectAttempts: options.maxReconnectAttempts ?? 5, // 0 表示无限重连
   };
 
   const connectionState = ref<SseConnectionState>(SseConnectionState.DISCONNECTED);
@@ -42,7 +42,7 @@ function createSseConnection(options: UseSseOptions = {}) {
   let eventSource: EventSource | null = null;
   let isManualDisconnect = false;
   let reconnectTimer: ReturnType<typeof setTimeout> | null = null;
-  let reconnectAttempts = 0;
+  let reconnectAttempts = 5;
 
   const eventHandlers = new Map<string, Set<EventHandler>>();
 

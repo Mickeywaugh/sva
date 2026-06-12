@@ -1,8 +1,9 @@
+.husky
 .vscode/*
 .git/
 api/api/config/jwt/public.pem
 api/api/config/jwt/private.pem
-api/.env*
+api/.env
 api/var/
 api/vendor/
 
@@ -22,9 +23,8 @@ vea/*.sln
 vea/*.local
 vea/package-lock.json
 vea/pnpm-lock.yaml
+vea/pnpm-workspace.yaml
 vea/stats.html
-vea/.env.*
 vea/public/
 .idea/
 vea/src/.editorconfig
-vea/vite.config.ts

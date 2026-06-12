@@ -34,14 +34,14 @@ class SysAuthController extends BaseController
             // 验证码验证
             if (!$captchaKey) return $this->error("验证码Key为空");
             if (!$captchaCode) return $this->error("验证码为空");
-            $redisCaptcha = RedisService::getConnection()->get("captcha:" . $captchaKey);
+            $redisCaptcha = RedisService::getInstance()->get("captcha:" . $captchaKey);
             if ($redisCaptcha == null) {
                 return $this->error("验证码已过期" . $captchaKey);
             } else {
                 if (strtolower($redisCaptcha)  != strtolower($captchaCode)) {
                     return $this->error("验证码错误");
                 } else {
-                    RedisService::getConnection()->del("captcha:" . $captchaKey);
+                    RedisService::getInstance()->del("captcha:" . $captchaKey);
                 }
             }
         }
@@ -84,7 +84,7 @@ class SysAuthController extends BaseController
         $captchaKey = md5(uniqid() . microtime());
         if ($captchaPhrase) {
             // 保存验证码至redis
-            $redis = RedisService::getConnection();
+            $redis = RedisService::getInstance();
             $redis->setex("captcha:" . $captchaKey, 60 * 5, $captchaPhrase);
             return $this->success(
                 ["captchaBase64" => $base64, "captchaKey" => $captchaKey],

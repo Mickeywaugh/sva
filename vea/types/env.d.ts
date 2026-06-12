@@ -11,6 +11,7 @@ interface ImportMetaEnv {
   readonly VITE_APP_TITLE?: string;
   readonly VITE_APP_TENANT_ENABLED?: string;
   readonly VITE_MOCK_DEV_SERVER: boolean;
+  readonly USE_CAPTCHA?: string;
 }
 
 interface ImportMeta {

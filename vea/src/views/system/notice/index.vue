@@ -4,8 +4,8 @@
       <div class="toolbar">
         <div class="left-toolbar">
           <el-button-group>
-            <el-button v-hasPerm="['sys:notice:add']" type="success" v-icon="'ga-o-plus'" @click="handleOpenDialog()">新增</el-button>
-            <el-button v-hasPerm="['sys:notice:delete']" type="danger" :disabled="selectIds.length === 0" v-icon="'ga-o-delete'"
+            <el-button v-hasPerm="['sys:notice:add']" type="success" v-icon="'vea-o-plus'" @click="handleOpenDialog()">新增</el-button>
+            <el-button v-hasPerm="['sys:notice:delete']" type="danger" :disabled="selectIds.length === 0" v-icon="'vea-o-delete'"
               @click="handleDelete()">删除</el-button>
           </el-button-group>
         </div>
@@ -23,8 +23,8 @@
             </el-form-item>
             <el-form-item>
               <el-button-group>
-                <el-button type="primary" v-icon="'ga-search'" @click="handleQuery()">{{ t('common.search') }}</el-button>
-                <el-button v-icon="'ga-refresh'" @click="handleResetQuery()">重置</el-button>
+                <el-button type="primary" v-icon="'vea-search'" @click="handleQuery()">{{ t('common.search') }}</el-button>
+                <el-button v-icon="'vea-refresh'" @click="handleResetQuery()">重置</el-button>
               </el-button-group>
             </el-form-item>
           </el-form>
@@ -179,7 +179,7 @@
 
 <script setup lang="ts">
   defineOptions({
-    name: "SysNotice",
+    name: "SystemNotice",
     inheritAttrs: false,
   });
 

@@ -3,7 +3,7 @@
     <el-card shadow="never" class="table-card">
       <div class="toolbar">
         <div class="left-toolbar">
-          <el-button v-hasPerm="['sys:menu:add']" type="success" v-icon="'ga-o-plus'" @click="handleOpenDialog(0)">
+          <el-button v-hasPerm="['sys:menu:add']" type="success" v-icon="'vea-o-plus'" @click="handleOpenDialog(0)">
             {{ $t("common.create") }}
           </el-button>
         </div>
@@ -14,8 +14,8 @@
             </el-form-item>
             <el-form-item>
               <el-button-group>
-                <el-button type="primary" v-icon="'ga-search'" @click="handleQuery">{{ t('common.search') }}</el-button>
-                <el-button v-icon="'ga-refresh'" @click="handleResetQuery">{{ t('common.reset') }}</el-button>
+                <el-button type="primary" v-icon="'vea-search'" @click="handleQuery">{{ t('common.search') }}</el-button>
+                <el-button v-icon="'vea-refresh'" @click="handleResetQuery">{{ t('common.reset') }}</el-button>
               </el-button-group>
             </el-form-item>
           </el-form>
@@ -28,7 +28,7 @@
       }" @row-click="handleRowClick">
         <el-table-column :label="t('sys.menu.name')" min-width="150" prop="title">
           <template v-slot="{ row }">
-            <ga-icon :icon-class="row.icon">{{ t(row.title) }}</ga-icon>
+            <vea-icon :icon-class="row.icon">{{ t(row.title) }}</vea-icon>
           </template>
         </el-table-column>
         <el-table-column :label="t('sys.menu.type')" align="center" width="100">
@@ -42,16 +42,16 @@
         <el-table-column :label="t('sys.menu.routeName')" align="left" prop="routeName" />
         <el-table-column :label="t('sys.menu.path')" align="left" prop="routePath" />
         <el-table-column :label="t('sys.menu.component')" align="left" width="250" prop="component" />
-        <el-table-column :label="t('sys.menu.isPublic')" align="center" prop="isPublic">
+        <el-table-column :label="t('sys.menu.noAuth')" align="center" prop="noAuth">
           <template v-slot="{ row }">
-            <el-switch v-model="row.isPublic" :active-value="1" :inactive-value="0" inline-prompt :active-text="t('common.yes')"
-              :inactive-text="t('common.no')" :before-change="() => confirmChange(row.id, { isPublic: Number(!row.isPublic) })" />
+            <el-switch v-model="row.noAuth" :active-value="1" :inactive-value="0" inline-prompt :active-text="t('common.yes')"
+              :inactive-text="t('common.no')" @change="handleFieldChange(row.id, { noAuth: row.noAuth })" />
           </template>
         </el-table-column>
         <el-table-column :label="t('common.visible')" align="center" width="80">
           <template v-slot="{ row }">
             <el-switch v-model="row.visible" :active-value="1" :inactive-value="0" inline-prompt :active-text="t('common.show')"
-              :inactive-text="t('common.hidden')" :before-change="() => confirmChange(row.id, { visible: Number(!row.visible) })" />
+              :inactive-text="t('common.hidden')" @change="handleFieldChange(row.id, { visible: row.visible })" />
           </template>
         </el-table-column>
         <el-table-column :label="t('common.sort')" align="center" width="80" prop="sort" />
@@ -60,13 +60,13 @@
             <el-button-group>
               <el-button v-if="[MenuTypeEnum.CATALOG, MenuTypeEnum.MENU].includes(row.type)" v-hasPerm="['sys:menu:add']" type="primary"
                 size="small" @click.stop="handleOpenDialog(row.id)">
-                <ga-icon icon-class="ga-o-plus" />{{ $t("common.create") }}
+                <vea-icon icon-class="vea-o-plus" />{{ $t("common.create") }}
               </el-button>
               <el-button v-hasPerm="['sys:menu:edit']" type="primary" size="small" @click.stop="handleOpenDialog(undefined, row.id)">
-                <ga-icon icon-class="ga-o-edit" />{{ $t("common.edit") }}
+                <vea-icon icon-class="vea-o-edit" />{{ $t("common.edit") }}
               </el-button>
-              <el-button v-hasPerm="['sys:menu:delete']" type="warning" size="small" @click.stop="handleDelete(row.id)"><ga-icon
-                  icon-class="ga-o-delete" />
+              <el-button v-hasPerm="['sys:menu:delete']" type="warning" size="small" @click.stop="handleDelete(row.id)"><vea-icon
+                  icon-class="vea-o-delete" />
                 {{ $t("common.delete") }}
               </el-button>
             </el-button-group>
@@ -102,24 +102,7 @@
           <el-input v-model="formData.routePath" :placeholder="t('common.please.input', { s: t('sys.menu.extLinkUrl') })" />
         </el-form-item>
 
-        <el-form-item v-if="formData.type == MenuTypeEnum.MENU" prop="routeName">
-          <template #label>
-            <div class="flex-y-center">
-              {{ t("sys.menu.routeName") }}
-              <el-tooltip placement="bottom" effect="light">
-                <template #content>
-                  如果需要开启缓存，需保证页面 defineOptions 中的 name 与此处一致，建议使用驼峰。
-                </template>
-                <el-icon class="ml-1 cursor-pointer">
-                  <QuestionFilled />
-                </el-icon>
-              </el-tooltip>
-            </div>
-          </template>
-          <el-input v-model="formData.routeName" placeholder="User" />
-        </el-form-item>
-
-        <el-form-item v-if="formData.type == MenuTypeEnum.CATALOG || formData.type == MenuTypeEnum.MENU" prop="routePath">
+        <el-form-item v-if="[MenuTypeEnum.CATALOG, MenuTypeEnum.MENU].includes(formData.type)" prop="routePath">
           <template #label>
             <div class="flex-y-center">
               {{ t("sys.menu.routePath") }}
@@ -137,6 +120,23 @@
           <el-input v-if="formData.type == MenuTypeEnum.CATALOG" v-model="formData.routePath" placeholder="system" />
           <el-input v-else v-model="formData.routePath" placeholder="user" />
         </el-form-item>
+        <el-form-item v-if="[MenuTypeEnum.CATALOG, MenuTypeEnum.MENU].includes(formData.type)" prop="routeName">
+          <template #label>
+            <div class="flex-y-center">
+              {{ t("sys.menu.routeName") }}
+              <el-tooltip placement="bottom" effect="light">
+                <template #content>
+                  路由名称是根据路由路径自动生成的，用于路由标识。以/分割后首字大写连接。Eg： system/user => SystemUser<br>
+                  如果需要开启缓存，建议组件路径对应的页面中 defineOptions 的 name 与此处一致。
+                </template>
+                <el-icon class="ml-1 cursor-pointer">
+                  <QuestionFilled />
+                </el-icon>
+              </el-tooltip>
+            </div>
+          </template>
+          {{ formData.routeName }}
+        </el-form-item>
         <el-form-item v-if="[MenuTypeEnum.MENU].includes(formData.type)" prop="component">
           <template #label>
             <div class="flex-y-center">
@@ -145,7 +145,7 @@
                 <template #content>
                   组件页面完整路径，相对于 src/views/，如 system/user/index，缺省后缀 .vue
                 </template>
-                <ga-icon icon-class="ga-o-question ml-1 cursor-pointer"></ga-icon>
+                <vea-icon icon-class="vea-o-question ml-1 cursor-pointer"></vea-icon>
               </el-tooltip>
             </div>
           </template>
@@ -164,7 +164,7 @@
                 <template #content>
                   组件页面使用 `useRoute().query.参数名` 获取路由参数值。
                 </template>
-                <ga-icon icon-class="ga-o-question ml-1 cursor-pointer"></ga-icon>
+                <vea-icon icon-class="vea-o-question ml-1 cursor-pointer"></vea-icon>
               </el-tooltip>
             </div>
           </template>
@@ -197,8 +197,8 @@
           <el-switch v-model="formData.visible" :active-value="1" :inactive-value="0" inline-prompt :active-text="t('common.show')"
             :inactive-text="t('common.hidden')" />
         </el-form-item>
-        <el-form-item v-if="formData.type == MenuTypeEnum.MENU" prop="isPublic" :label="t('sys.menu.isPublic')">
-          <el-switch v-model="formData.isPublic" :active-value="1" :inactive-value="0" inline-prompt :active-text="t('common.yes')"
+        <el-form-item v-if="formData.type == MenuTypeEnum.MENU" prop="noAuth" :label="t('sys.menu.noAuth')">
+          <el-switch v-model="formData.noAuth" :active-value="1" :inactive-value="0" inline-prompt :active-text="t('common.yes')"
             :inactive-text="t('common.no')" />
         </el-form-item>
         <el-form-item v-if="formData.type === MenuTypeEnum.CATALOG" :label="t('sys.menu.alwaysShowRoot')">
@@ -213,7 +213,7 @@
                 </template>
 
                 <div>
-                  <GaIcon icon-class="ga-o-question-fill"></GaIcon>
+                  <VeaIcon icon-class="vea-o-question-fill"></VeaIcon>
                 </div>
               </el-tooltip>
             </div>
@@ -264,7 +264,7 @@
 
 <script setup lang="ts">
   defineOptions({
-    name: "SysMenu",
+    name: "SystemMenu",
     inheritAttrs: false,
   });
 
@@ -289,7 +289,7 @@
   const menuOptions = ref<OptionItem[]>([]);
   // 初始菜单表单数据
   const initialMenuFormData = ref<MenuForm>({
-    id: undefined,
+    id: 0,
     t: '',
     parentId: 0,
     visible: 1,
@@ -300,7 +300,7 @@
     alwaysShow: 0,
     keepAlive: true,
     params: [],
-    isPublic: 0,
+    noAuth: 0,
   });
   // 菜单表单数据
   const formData = ref({ ...initialMenuFormData.value });
@@ -309,7 +309,6 @@
     parentId: [{ required: true, message: "请选择父级菜单", trigger: "blur" }],
     name: [{ required: true, message: "请输入菜单名称", trigger: "blur" }],
     type: [{ required: true, message: "请选择菜单类型", trigger: "blur" }],
-    routeName: [{ required: true, message: "请输入路由名称", trigger: "blur" }],
     routePath: [{ required: true, message: "请输入路由路径", trigger: "blur" }],
     component: [{ required: true, message: "请输入组件路径", trigger: "blur" }],
     visible: [{ required: true, message: "请选择显示状态", trigger: "change" }],
@@ -350,7 +349,7 @@
   function handleOpenDialog(parentId?: number, menuId?: number) {
     MenuAPI.getOptions(true)
       .then((data) => {
-        menuOptions.value = [{ value: "0", label: "顶级菜单", children: data }];
+        menuOptions.value = [{ value: 0, label: "顶级菜单", children: data }];
       })
       .then(() => {
         dialog.visible = true;
@@ -467,32 +466,22 @@
   }
 
 
-  /**
-   * switch 切换前确认，返回 true 允许切换，返回 false 阻止切换
-   */
-  const confirmChange = (id: number, data: any): Promise<boolean> => {
-    return ElMessageBox.confirm(`确定更改吗?`, "提示", {
-      confirmButtonText: "确定",
-      cancelButtonText: "取消",
-      type: "warning",
-    }).then(async () => {
+  const handleFieldChange = (id: number, data: any) => {
+    try {
       loading.value = true;
-      return MenuAPI.update(id, data)
+      MenuAPI.update(id, data)
         .then(() => {
           ElMessage.success(t("common.succeed.update"));
-          return true;
+          // handleQuery();
         })
-        .catch((error) => {
-          ElMessage.error(error.message || t("common.failed.update"));
-          return false; // API 失败时阻止切换
-        })
-        .finally(() => {
-          loading.value = false;
+        .catch(() => {
+          ElMessage.error(t("common.failed.update"));
         });
-    }).catch(() => {
-      // 用户取消确认，阻止切换
-      return false;
-    });
+    } catch (error) {
+      console.error(error);
+    } finally {
+      loading.value = false;
+    }
   }
 
   onMounted(() => {

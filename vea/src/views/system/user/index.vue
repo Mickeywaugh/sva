@@ -6,17 +6,17 @@
       <div class="toolbar">
         <div class="left-toolbar">
           <el-button-group>
-            <el-button v-hasPerm="['sys:user:add']" type="success" v-icon="'ga-o-plus'" @click="handleOpenDialog()">
+            <el-button v-hasPerm="['sys:user:add']" type="success" v-icon="'vea-o-plus'" @click="handleOpenDialog()">
               {{ t('common.add') }}
             </el-button>
-            <el-button v-hasPerm="'sys:user:delete'" type="danger" v-icon="'ga-o-delete'" :disabled="selectIds.length === 0"
+            <el-button v-hasPerm="'sys:user:delete'" type="danger" v-icon="'vea-o-delete'" :disabled="selectIds.length === 0"
               @click="handleDelete()">
               {{ t('common.delete') }}
             </el-button>
-            <el-button v-hasPerm="'sys:user:import'" v-icon="'ga-cloud-upload'" @click="handleOpenImportDialog">
+            <el-button v-hasPerm="'sys:user:import'" v-icon="'vea-cloud-upload'" @click="handleOpenImportDialog">
               {{ t('common.import') }}
             </el-button>
-            <el-button v-hasPerm="'sys:user:export'" v-icon="'ga-cloud-download'" @click="handleExport">
+            <el-button v-hasPerm="'sys:user:export'" v-icon="'vea-cloud-download'" @click="handleExport">
               {{ t('common.export') }}
             </el-button>
           </el-button-group>
@@ -43,8 +43,8 @@
             </el-form-item>
             <el-form-item>
               <el-button-group>
-                <el-button type="primary" v-icon="'ga-search'" @click="handleQuery">{{ t('common.search') }}</el-button>
-                <el-button v-icon="'ga-refresh'" @click="handleResetQuery">{{ t('common.reset') }}</el-button>
+                <el-button type="primary" v-icon="'vea-search'" @click="handleQuery">{{ t('common.search') }}</el-button>
+                <el-button v-icon="'vea-refresh'" @click="handleResetQuery">{{ t('common.reset') }}</el-button>
               </el-button-group>
             </el-form-item>
           </el-form>
@@ -73,14 +73,14 @@
         <el-table-column :label="t('common.createTime')" align="center" prop="createTime" width="180" />
         <el-table-column :label="t('common.operation')" fixed="right">
           <template #default="{ row }">
-            <el-button v-hasPerm="'sys:user:reset_pwd'" type="primary" v-icon="'ga-o-refresh'" size="small"
+            <el-button v-hasPerm="'sys:user:reset_pwd'" type="primary" v-icon="'vea-o-refresh'" size="small"
               @click="handleResetPassword(row as SysUserItem)">
               {{ t('login.resetPassword') }}
             </el-button>
-            <el-button v-hasPerm="'sys:user:edit'" type="primary" v-icon="'ga-o-edit'" size="small" @click="handleOpenDialog(row.id)">
+            <el-button v-hasPerm="'sys:user:edit'" type="primary" v-icon="'vea-o-edit'" size="small" @click="handleOpenDialog(row.id)">
               {{ t('common.edit') }}
             </el-button>
-            <el-button v-hasPerm="'sys:user:delete'" type="danger" v-icon="'ga-o-delete'" size="small" @click="handleDelete(row.id)">
+            <el-button v-hasPerm="'sys:user:delete'" type="danger" v-icon="'vea-o-delete'" size="small" @click="handleDelete(row.id)">
               {{ t('common.delete') }}
             </el-button>
           </template>
@@ -158,7 +158,7 @@
   import { downloadBolb } from "@/utils/function";
 
   defineOptions({
-    name: "SysUser",
+    name: "SystemUser",
     inheritAttrs: false,
   });
 
@@ -192,11 +192,7 @@
     email: "",
     roleIds: [],
     gender: 1,
-    avatar: "",
-    employeeId: "",
-    factory: undefined,
-    machine: undefined,
-    oaLoginName: ""
+    avatar: ""
   });
 
   const rules = reactive({

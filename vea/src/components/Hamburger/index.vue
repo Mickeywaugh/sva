@@ -1,6 +1,6 @@
 <template>
   <div class="hamburger-wrapper" @click="toggleClick">
-    <div :class="[{ hamburger: true, 'is-active': isActive }, hamburgerClass]"><ga-icon :icon-class="'ga-doubleleft'"></ga-icon></div>
+    <div :class="[{ hamburger: true, 'is-active': isActive }, hamburgerClass]"><vea-icon :icon-class="'vea-doubleleft'"></vea-icon></div>
   </div>
 </template>
 

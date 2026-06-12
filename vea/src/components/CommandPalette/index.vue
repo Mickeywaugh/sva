@@ -3,7 +3,7 @@
     <div class="command-palette-trigger" role="button" tabindex="0" aria-label="打开搜索面板" @click="open" @keydown.enter.prevent="open"
       @keydown.space.prevent="open">
       <div class="command-palette-trigger__left">
-        <div v-icon="'ga-search'"></div>
+        <div v-icon="'vea-search'"></div>
         <span class="command-palette-trigger__text">搜索菜单</span>
       </div>
       <kbd class="command-palette-trigger__kbd">Ctrl K</kbd>
@@ -14,11 +14,11 @@
         <el-input ref="inputRef" v-model="keyword" class="command-palette-input" placeholder="搜索菜单" @input="onSearch"
           @keydown="handleInputKeydown">
           <template #prefix>
-            <div v-icon="'ga-search'" />
+            <div v-icon="'vea-search'" />
           </template>
           <template #suffix>
             <div class="command-palette-input__suffix">
-              <div v-icon="'ga-o-close'" role="button" tabindex="0" aria-label="关闭" @click="close" />
+              <div v-icon="'vea-o-close'" role="button" tabindex="0" aria-label="关闭" @click="close" />
             </div>
           </template>
         </el-input>
@@ -38,22 +38,22 @@
         <div class="command-palette-hints">
           <div class="command-palette-hint">
             <div class="command-palette-hint__key">
-              <div v-icon="'ga-arrowup'" />
+              <div v-icon="'vea-arrowup'" />
             </div>
             <div class="command-palette-hint__key">
-              <div v-icon="'ga-arrowdown'" />
+              <div v-icon="'vea-arrowdown'" />
             </div>
             <span class="command-palette-hint__text">切换</span>
           </div>
           <div class="command-palette-hint">
             <div class="command-palette-hint__key">
-              <div v-icon="'ga-EnterKey'" />
+              <div v-icon="'vea-EnterKey'" />
             </div>
             <span class="command-palette-hint__text">选择</span>
           </div>
           <div class="command-palette-hint">
             <div class="command-palette-hint__key">
-              <div v-icon="'ga-EscKey'" />
+              <div v-icon="'vea-EscKey'" />
             </div>
             <span class="command-palette-hint__text">关闭</span>
           </div>

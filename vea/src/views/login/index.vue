@@ -39,7 +39,7 @@
               <el-form-item prop="username">
                 <el-input v-model.trim="loginFormData.username" :placeholder="t('login.username')">
                   <template #prefix>
-                    <ga-icon icon-class="ga-o-user"></ga-icon>
+                    <vea-icon icon-class="vea-o-user"></vea-icon>
                   </template>
                 </el-input>
               </el-form-item>
@@ -47,13 +47,40 @@
               <el-tooltip :visible="isCapsLock" :content="t('login.capsLock')" placement="right">
                 <el-form-item prop="password">
                   <el-input v-model.trim="loginFormData.password" :placeholder="t('login.password')" type="password" show-password
-                    @keyup="checkCapsLock" @keyup.enter="handleLoginSubmit">
+                    @keyup="checkCapsLock" @keydown.enter="handleLoginSubmit">
                     <template #prefix>
-                      <ga-icon icon-class="ga-locked"></ga-icon>
+                      <vea-icon icon-class="vea-locked"></vea-icon>
                     </template>
                   </el-input>
                 </el-form-item>
               </el-tooltip>
+              <el-form-item v-if="captchaEnabled" prop="captchaCode">
+                <div flex items-center gap-10px>
+                  <el-input v-model.trim="loginFormData.captchaCode" :placeholder="t('login.captchaCode')" clearable class="flex-1"
+                    @keyup.enter="handleLoginSubmit">
+                    <template #prefix>
+                      <div v-icon="'vea-captcha'" />
+                    </template>
+                  </el-input>
+                  <div cursor-pointer h-44px w-140px flex-center @click="getCaptcha">
+                    <el-icon v-if="codeLoading" class="is-loading" size="20">
+                      <Loading />
+                    </el-icon>
+                    <img v-else-if="captchaBase64" border-rd-4px w-full h-full block object-cover
+                      shadow="[0_0_0_1px_var(--el-border-color)_inset]" :src="captchaBase64" alt="captchaCode" title="点击刷新验证码"
+                      @error="getCaptcha" />
+                    <el-text v-else type="info" size="small">点击获取验证码</el-text>
+                  </div>
+                </div>
+              </el-form-item>
+              <div class="flex-x-between w-full">
+                <el-checkbox v-model="loginFormData.rememberMe">
+                  {{ t("login.rememberMe") }}
+                </el-checkbox>
+                <el-link type="primary" underline="never" @click="showForm('resetPwd')">
+                  {{ t("login.forgetPassword") }}
+                </el-link>
+              </div>
               <el-form-item>
                 <el-button :loading="loading" type="primary" class="w-full" @click="handleLoginSubmit">
                   {{ t("login.login") }}
@@ -68,7 +95,7 @@
 
         <footer class="login-card__footer">
           <el-text size="small">
-            www.mickeywu.cc 2026~
+           example.com 2026~
           </el-text>
         </footer>
       </section>
@@ -95,6 +122,7 @@
   const component = ref<LayoutMap>("login");
 
   const tenantEnabled = appConfig.tenantEnabled;
+  const captchaEnabled = appConfig.captchaEnabled;
 
   const formComponents = {
     register: defineAsyncComponent(() => import("./components/Register.vue")),
@@ -111,7 +139,7 @@
   const loginFormData = ref<LoginRequest>({
     username: "",
     password: "",
-    rememberMe: true,
+    rememberMe: rememberMe,
   });
 
   const loginRules = computed(() => ({
@@ -122,11 +150,13 @@
     ]
   }));
 
-  function getCaptcha() {
+  const getCaptcha = async () => {
+    console.log(codeLoading.value, captchaEnabled);
+    if (codeLoading.value || !captchaEnabled) return;
     codeLoading.value = true;
     AuthAPI.getCaptcha()
       .then((data) => {
-        loginFormData.value.captchaId = data.captchaId;
+        loginFormData.value.captchaKey = data.captchaKey;
         captchaBase64.value = data.captchaBase64;
       })
       .finally(() => (codeLoading.value = false));
@@ -147,6 +177,7 @@
           await router.push(decodeURIComponent(redirectPath));
         },
         () => {
+          getCaptcha();
         }
       );
     } finally {
@@ -163,7 +194,7 @@
   function showForm(type: "register" | "resetPwd") {
     component.value = type;
   }
-
+  onMounted(() => getCaptcha());
 </script>
 
 <style lang="scss" scoped>

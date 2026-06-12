@@ -301,10 +301,6 @@ export interface UserForm {
    * 用户名
    */
   username?: string;
-  employeeId?: string;
-  factory?: number;
-  machine?: number;
-  oaLoginName: string;
 }
 
 /** 个人中心用户信息 */

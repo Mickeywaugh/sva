@@ -3,81 +3,37 @@
 namespace App\Service;
 
 use Predis\Client;
-use Predis\Connection\ConnectionException;
 
 class RedisService
 {
-  private static $pool = [];
-  private static $maxConnections = 10; // 最大连接数
-  private static $timeout = 5;         // 超时时间（秒）
+  private static ?Client $instance = null;
 
-  // 从环境变量中读取redis配置信息，每个项目.env中配置的DBINDEX不能相同
-  public static function getCofing(): array
+  // 从环境变量 REDIS_URL 中解析 Redis 配置信息
+  // REDIS_URL 格式: tcp://[password@]host:port[/db-index]
+  public static function getConfig(?array $config = null): array
   {
-    $config =  [
-      "scheme" => "tcp",
-      "host" => $_ENV['REDIS_HOST'],
-      "port" => $_ENV['REDIS_PORT'],
-      "password" => $_ENV['REDIS_PASSWORD'],
-      "database" => $_ENV['REDIS_DBINDEX']
+    $url = $_ENV['REDIS_URL'] ?? 'tcp://127.0.0.1:6379/0';
+    $parsed = (array) parse_url($url);
+    $envConfig = [
+      "scheme" => $parsed['scheme'] ?? 'tcp',
+      "host" => $parsed['host'] ?? '127.0.0.1',
+      "port" => $parsed['port'] ?? 6379,
+      "password" => $parsed['pass'] ?? null,
+      "database" => isset($parsed['path']) ? (int) ltrim($parsed['path'], '/') : 0,
     ];
-    return $config;
+    return $config ? $envConfig + $config : $envConfig;
   }
 
-
-  /**
-   * 获取 Redis 连接
-   */
-  public static function getConnection(): Client
+  public static function getInstance(?array $config = null)
   {
-    // 检查是否有空闲连接
-    foreach (self::$pool as $key => $connection) {
-      if ($connection['inUse'] === false) {
-        self::$pool[$key]['inUse'] = true;
-        return $connection['client'];
-      }
+    if (!self::$instance) {
+      self::$instance = new Client(self::getConfig($config));
     }
-
-    // 如果没有空闲连接且未达到最大连接数，则创建新连接
-    if (count(self::$pool) < self::$maxConnections) {
-      $client = new Client(self::getCofing());
-      try {
-        $client->connect();
-        self::$pool[] = [
-          'client' => $client,
-          'inUse' => true,
-        ];
-        return $client;
-      } catch (ConnectionException $e) {
-        throw new \RuntimeException("Failed to connect to Redis: " . $e->getMessage());
-      }
-    }
-
-    // 如果连接池已满，等待或抛出异常
-    throw new \RuntimeException("Redis connection pool is full.");
+    return self::$instance;
   }
 
-  /**
-   * 归还 Redis 连接到池中
-   */
-  public static function releaseConnection(Client $client): void
+  public static function createClient(?array $config = null)
   {
-    foreach (self::$pool as &$connection) {
-      if ($connection['client'] === $client) {
-        $connection['inUse'] = false;
-        break;
-      }
-    }
-  }
-
-  /**
-   * 关闭所有连接
-   */
-  public static function closeAll(): void
-  {
-    foreach (self::$pool as $connection) {
-      $connection['client']->disconnect();
-    }
-    self::$pool = [];
+    return new Client(self::getConfig($config));
   }
 }

@@ -11,7 +11,7 @@ export interface LoginRequest {
   /** 密码 */
   password: string;
   /** 验证码缓存key */
-  captchaId?: string;
+  captchaKey?: string;
   /** 验证码 */
   captchaCode?: string;
   /** 记住我 */
@@ -39,7 +39,7 @@ export interface LoginResponse {
  */
 export interface CaptchaInfo {
   /** 验证码缓存key */
-  captchaId: string;
+  captchaKey: string;
   /** 验证码图片Base64 */
   captchaBase64: string;
 }

@@ -95,6 +95,7 @@
     "resetConfigDescription": "Restore all settings to system default values"
   },
   "sys": {
+    "node": "System",
     "admin": "System Settings",
     "home": "Home",
     "document": "Project Documentation",
@@ -445,30 +446,6 @@
       "generate": "Confirm to Generate {s}?",
       "operation": "Confirm to Execute This Operation?",
       "operations": "Confirm to execute operation to {s} items?"
-    },
-    "stages": {
-      "Null": "Null",
-      "Undefined": "Undefined",
-      "Initialized": "Initialized",
-      "Running": "Running",
-      "Depricated": "Deprecated",
-      "Producing": "Producing",
-      "Preparing": "Preparing",
-      "Sealed": "Sealed",
-      "Pause": "Paused",
-      "Finished": "Finished",
-      "Archived": "Archived",
-      "Locked": "Locked",
-      "Unlock": "Unlock",
-      "Canceled": "Canceled",
-      "Rejected": "Rejected",
-      "Normal": "Normal",
-      "Abnormal": "Abnormal",
-      "Packing": "Packing",
-      "Shipped": "Shipped",
-      "Draft": "Draft",
-      "Released": "Released",
-      "Deleted": "Deleted"
     }
   }
 }

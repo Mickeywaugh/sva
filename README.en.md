@@ -1,36 +1,69 @@
-# MAS
+# SymfonyVueAdmin
 
 #### Description
-MAS for BoingTech
+
+A front-end and back-end separated admin template, powered by Symfony 8 + Vue 3 + Element-Plus, developed and maintained by Mickeywaugh.
 
 #### Software Architecture
-Software architecture description
+
+- **Front-end**: Vue 3 + Vite + TypeScript + Element-Plus, based on [vue3-element-admin](https://github.com/youlaitech/vue3-element-admin) (youlai)
+- **Back-end**: Symfony 8.1 (PHP 8.1+)
+- **Directory structure**:
+
+```
+sva/
+├── vea/   # Front-end code
+└── api/   # Back-end code
+```
 
 #### Installation
 
-1.  xxxx
-2.  xxxx
-3.  xxxx
+1. Clone the repository:
+   ```bash
+   git clone https://github.com/Mickeywaugh/sva.git
+   ```
+2. Install front-end dependencies:
+   ```bash
+   cd sva/vea && pnpm i
+   ```
+3. Install PHP dependencies:
+   ```bash
+   cd sva/api && composer install
+   ```
+4. Generate JWT keys:
+   ```bash
+   cd sva/api && php bin/console lexik:jwt:generate-keypair
+   ```
 
-#### Instructions
+#### Configuration
 
-1.  xxxx
-2.  xxxx
-3.  xxxx
+| File                   | Purpose                                                     |
+| ---------------------- | ----------------------------------------------------------- |
+| `api/.env`             | Symfony production environment (database connection, etc.)  |
+| `api/.env.dev`         | Symfony development environment (database connection, etc.) |
+| `vea/.env.development` | Vue development environment (back-end API base URL)         |
+| `vea/.env.production`  | Vue production environment (back-end API base URL)          |
 
-#### Contribution
+#### Startup
 
-1.  Fork the repository
-2.  Create Feat_xxx branch
-3.  Commit your code
-4.  Create Pull Request
+**Development:**
 
+```bash
+# Start Symfony (HTTP)
+cd sva/api && symfony server:start -d --listen=0.0.0.0:8000 --no-tls=true
 
-#### Gitee Feature
+# Start Vue dev server
+cd sva/vea && pnpm run dev
+```
 
-1.  You can use Readme\_XXX.md to support different languages, such as Readme\_en.md, Readme\_zh.md
-2.  Gitee blog [blog.gitee.com](https://blog.gitee.com)
-3.  Explore open source project [https://gitee.com/explore](https://gitee.com/explore)
-4.  The most valuable open source project [GVP](https://gitee.com/gvp)
-5.  The manual of Gitee [https://gitee.com/help](https://gitee.com/help)
-6.  The most popular members  [https://gitee.com/gitee-stars/](https://gitee.com/gitee-stars/)
+**Production:**
+
+```bash
+# 1. Start Symfony (HTTPS)
+cd sva/api && symfony server:start -d --listen=0.0.0.0:8000
+
+# 2. Build front-end
+cd sva/vea && sh build.sh
+
+# 3. Deploy all files from dist/ to your web server (Nginx / Apache) document root
+```
