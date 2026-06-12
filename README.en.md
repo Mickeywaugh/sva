@@ -2,7 +2,7 @@
 
 #### Description
 
-A front-end and back-end separated admin template built on the SVA framework, powered by Symfony 8 + Vue 3 + Element-Plus, developed and maintained by Mickeywaugh.
+A front-end and back-end separated admin template, powered by Symfony 8 + Vue 3 + Element-Plus, developed and maintained by Mickeywaugh.
 
 #### Software Architecture
 
@@ -37,12 +37,12 @@ sva/
 
 #### Configuration
 
-| File | Purpose |
-|------|---------|
-| `api/.env` | Symfony production environment (database connection, etc.) |
-| `api/.env.dev` | Symfony development environment (database connection, etc.) |
-| `vea/.env.development` | Vue development environment (back-end API base URL) |
-| `vea/.env.production` | Vue production environment (back-end API base URL) |
+| File                   | Purpose                                                     |
+| ---------------------- | ----------------------------------------------------------- |
+| `api/.env`             | Symfony production environment (database connection, etc.)  |
+| `api/.env.dev`         | Symfony development environment (database connection, etc.) |
+| `vea/.env.development` | Vue development environment (back-end API base URL)         |
+| `vea/.env.production`  | Vue production environment (back-end API base URL)          |
 
 #### Startup
 

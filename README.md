@@ -2,7 +2,7 @@
 
 #### 介绍
 
-基于 SVA 框架开发，Symfony 8 + Vue 3 + Element-Plus 前后端分离式后台管理模板，由 Mickeywaugh 开发维护。
+Symfony 8 + Vue 3 + Element-Plus 前后端分离式后台管理模板，由 Mickeywaugh 开发维护。
 
 #### 软件架构
 
@@ -37,12 +37,12 @@ sva/
 
 #### 配置说明
 
-| 配置文件 | 用途 |
-|---------|------|
-| `api/.env` | Symfony 生产环境配置（数据库连接等） |
-| `api/.env.dev` | Symfony 开发环境配置（数据库连接等） |
-| `vea/.env.development` | Vue 开发环境配置（后端接口地址） |
-| `vea/.env.production` | Vue 生产环境配置（后端接口地址） |
+| 配置文件               | 用途                                 |
+| ---------------------- | ------------------------------------ |
+| `api/.env`             | Symfony 生产环境配置（数据库连接等） |
+| `api/.env.dev`         | Symfony 开发环境配置（数据库连接等） |
+| `vea/.env.development` | Vue 开发环境配置（后端接口地址）     |
+| `vea/.env.production`  | Vue 生产环境配置（后端接口地址）     |
 
 #### 启动方式
 
