@@ -14,7 +14,7 @@
       }">
         <el-menu-item :index="resolvePath(onlyOneChild.path)" :class="{ 'submenu-title-noDropdown': !isNest }">
           <template v-if="onlyOneChild.meta">
-            <vea-icon :icon-class="onlyOneChild.meta.icon ? item.meta?.icon : 'bt-o-menu'"></vea-icon>
+            <vea-icon :icon-class="onlyOneChild.meta.icon ? onlyOneChild.meta?.icon : 'vea-o-menu'"></vea-icon>
             <span v-if="onlyOneChild.meta.title" class="ml-1">
               {{ translateRouteTitle(onlyOneChild.meta.title) }}
             </span>
