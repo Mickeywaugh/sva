@@ -3,7 +3,6 @@
 namespace App\Entity\System;
 
 use App\Entity\BaseEntity;
-use App\Entity\Traits\DeleteTime;
 use App\Repository\System\SysDeptRepository;
 use Doctrine\Common\Collections\ArrayCollection;
 use Doctrine\Common\Collections\Collection;
@@ -46,8 +45,6 @@ class SysDept extends BaseEntity
      */
     #[ORM\OneToMany(targetEntity: SysDept::class, mappedBy: 'parent')]
     private ?Collection $children;
-
-    use DeleteTime;
 
     public function getId(): ?int
     {

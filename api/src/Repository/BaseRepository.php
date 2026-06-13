@@ -896,7 +896,7 @@ abstract class BaseRepository extends ServiceEntityRepository
      * @param array $ids
      * @return bool
      */
-    public function delete(array $ids, bool $softDelte = false): bool
+    public function delete(array $ids): bool
     {
         if (!$ids) return false;
         try {

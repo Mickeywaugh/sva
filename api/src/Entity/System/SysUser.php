@@ -6,7 +6,7 @@ use App\Service\BaseService as Util;
 use App\Entity\System\SysRole;
 use App\Entity\System\SysDept;
 use App\Entity\BaseEntity;
-use App\Entity\Traits\DeleteTime;
+use App\Entity\Traits\DisableTime;
 use App\Repository\System\SysUserRepository;
 use Doctrine\DBAL\Types\Types;
 use Doctrine\ORM\Mapping as ORM;
@@ -57,7 +57,7 @@ class SysUser extends BaseEntity implements UserInterface, PasswordAuthenticated
     #[ORM\JoinColumn(name: 'dept_id', referencedColumnName: 'id', nullable: true)]
     private ?SysDept $dept;
 
-    use DeleteTime;
+    use DisableTime;
 
     /**
      * 多对多关联角色
@@ -330,7 +330,9 @@ class SysUser extends BaseEntity implements UserInterface, PasswordAuthenticated
             'dept' => $this->getDeptId(),
             'roleIds' => $this->getRoleIds(),
             'rolesNames' => $this->getRolesName(),
-            'deptName' => $this->getDeptName()
+            'deptName' => $this->getDeptName(),
+            'disable' => $this->getDisable(),
+            'createTime' => $this->getCreateTime()
         ];
 
         return $this->mergeArray($retArray, $splices);

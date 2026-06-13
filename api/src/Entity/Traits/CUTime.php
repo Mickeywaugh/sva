@@ -42,7 +42,7 @@ trait CUTime
 
     /**
      * @param bool $object 返回对象还是字符串
-     * @return null|string|DateTimeInterface
+     * @return null|string|\DateTimeInterface
      */
     public function getCreateTime(bool $object = false): null|string|\DateTimeInterface
     {
@@ -62,7 +62,7 @@ trait CUTime
 
     /**
      * @param bool $object 返回对象还是字符串
-     * @return null|string|DateTimeInterface
+     * @return null|string|\DateTimeInterface
      */
     public function getUpdateTime(bool $object = false): null| string|\DateTimeInterface
     {

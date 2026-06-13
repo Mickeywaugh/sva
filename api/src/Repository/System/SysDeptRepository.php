@@ -32,7 +32,7 @@ class SysDeptRepository extends BaseRepository
     public function getList(int $pid = 0): array
     {
         $sysdeptTree = [];
-        $sysdeptList = $this->findBy(["parentId" => $pid, "deleteTime" => null]);
+        $sysdeptList = $this->findBy(["parentId" => $pid]);
         foreach ($sysdeptList as $sysdept) {
             $child = $this->getList($sysdept->getId());
             $data = $sysdept->toArray();
@@ -47,7 +47,7 @@ class SysDeptRepository extends BaseRepository
     public function getTree(int $pid = 0): array
     {
         $sysdeptTree = [];
-        $sysdeptList = $this->findBy(["parentId" => $pid, "deleteTime" => null]);
+        $sysdeptList = $this->findBy(["parentId" => $pid]);
 
         foreach ($sysdeptList as $sysdept) {
             $child = $this->getTree($sysdept->getId());
@@ -64,7 +64,7 @@ class SysDeptRepository extends BaseRepository
     }
 
     // 删除实体
-    public function delete(array $ids, bool $softDelete = true): bool
+    public function delete(array $ids): bool
     {
         if (!$ids) return false;
         try {
@@ -73,17 +73,12 @@ class SysDeptRepository extends BaseRepository
                 $entity = $this->find($id);
                 if ($entity) {
                     // is there user in sysdepts
-                    $userList = $em->getRepository(SysUser::class)->findBy(["sysdept_id" => $id]);
+                    $userList = $em->getRepository(SysUser::class)->findBy(["deptId" => $id]);
                     if (count($userList) > 0) {
                         throw new Exception("该部门下存在子部门，无法删除");
                         return false;
                     }
-                    if ($softDelete) {
-                        $entity->setDeleteTime(new \DateTimeImmutable());
-                        $em->persist($entity);
-                    } else {
-                        $em->remove($entity);
-                    }
+                    $em->remove($entity);
                 };
             }
             $em->flush();

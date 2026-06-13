@@ -6,7 +6,6 @@ use App\Controller\BaseController;
 use App\Entity\System\SysMenu;
 use App\Repository\System\SysMenuRepository;
 use App\Service\AuthService;
-use App\Service\Logger;
 use Symfony\Component\HttpFoundation\JsonResponse;
 use Symfony\Component\HttpFoundation\Request;
 use Symfony\Component\Routing\Attribute\Route;
@@ -25,13 +24,14 @@ class MenuController extends BaseController
     public function create(Request $request): JsonResponse
     {
         $data = $request->toArray();
-        if (empty($data)) {
-            return $this->error("参数错误");
-        }
         try {
             $menu = SysMenu::create($data);
+            $parent = null;
+            if (isset($data["parentId"]) && $data["parentId"]) {
+                $parent = $this->menuRepo->find($data["parentId"]);
+            }
+            $menu->setParent($parent);
             $menu = $this->menuRepo->flush($menu);
-            Logger::log("MenuController.create", $menu->toArray());
             if ($menu) {
                 return $this->success($menu->toArray());
             } else {
@@ -78,20 +78,20 @@ class MenuController extends BaseController
     {
         $menuTree = [];
         try {
-            $menuTree = $this->menuRepo->getTree(0, false, true);
+            $menuTree = $this->menuRepo->getTree(null, false, 0);
             return $this->success($menuTree);
         } catch (\Exception $e) {
             return $this->critical("Failed:" . $e->getMessage());
         }
     }
 
-    // 获取菜单树,不包括按钮权限
+    // 获取菜单树,包括菜单树和按钮权限
     #[Route('/menuOptions', name: 'options4', methods: ['GET'])]
-    public function optionsWithoutButton(): JsonResponse
+    public function options4(): JsonResponse
     {
         $menuTree = [];
         try {
-            $menuTree = $this->menuRepo->getTree(0, false);
+            $menuTree = $this->menuRepo->getTree(null, false, 4);
             return $this->success($menuTree);
         } catch (\Exception $e) {
             return $this->critical("Failed:" . $e->getMessage());
@@ -130,7 +130,9 @@ class MenuController extends BaseController
         if (empty($data)) {
             return $this->error("参数错误");
         }
-
+        if (isset($data["parentId"]) && $data["parentId"] > 0) {
+            $data["parent"] = $this->menuRepo->find($data["parentId"]);
+        }
         $menu = $this->menuRepo->update($id, $data);
         if ($menu) {
             return $this->success($menu->toArray());
@@ -140,7 +142,7 @@ class MenuController extends BaseController
     }
 
     #[Route('/{id}/status', name: 'setStatus', methods: ['PUT'])]
-    public function setStatus(int $id, Request $request): JsonResponse
+    public function setStatus(Request $request, int $id): JsonResponse
     {
         $data = $request->toArray();
         if (empty($data)) {

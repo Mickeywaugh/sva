@@ -3,7 +3,6 @@
 namespace App\Entity\System;
 
 use App\Entity\BaseEntity;
-use App\Entity\Traits\DeleteTime;
 use App\Repository\System\SysRoleRepository;
 use Doctrine\Common\Collections\ArrayCollection;
 use Doctrine\Common\Collections\Collection;
@@ -34,7 +33,6 @@ class SysRole extends BaseEntity
     #[ORM\Column(type: Types::SMALLINT, nullable: true)]
     private ?int $dataScope = null;
 
-
     /**
      * @var Collection<int,SysMenu>;
      */
@@ -55,7 +53,6 @@ class SysRole extends BaseEntity
     #[ORM\InverseJoinColumn(name: 'user_id', referencedColumnName: 'id')]
     private ?Collection $users;
 
-    use DeleteTime;
     public function getId(): ?int
     {
         return $this->id;
@@ -169,8 +166,7 @@ class SysRole extends BaseEntity
             'code' => $this->code,
             'sort' => $this->sort,
             'status' => $this->status,
-            'dataScope' => $this->getDataScope(),
-            'isDeleted' => $this->getIsDeleted()
+            'dataScope' => $this->getDataScope()
         ];
     }
 }

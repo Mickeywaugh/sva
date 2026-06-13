@@ -73,7 +73,7 @@ class UserController extends BaseController
     #[Route('options', name: 'options', methods: ['GET'])]
     public function options(): JsonResponse
     {
-        $users = $this->userRepo->findBy(['deleteTime' => ["NULL" => null]], ['dept' => 'ASC']);
+        $users = $this->userRepo->findBy(['disableTime' => ["NULL" => true]], ['dept' => 'ASC']);
         $data = array_map(function ($user) {
             return [
                 'label' => $user->getUsername(),
@@ -300,14 +300,7 @@ class UserController extends BaseController
             return $this->error("参数错误");
         }
         $code = rand(1000, 9999);
-        $sms = new EasySms([]);
-        $result = $sms->send($phone, []);
-        if ($result) {
-            $redis = RedisService::getConnection();
-            $redis->setex("sms:" . $phone, 60 * 5, $code);
-            return $this->success(["code" => $code], "发送成功");
-        } else {
-            return $this->error("发送失败");
-        }
+        // $this->smsService->send($phone, $code);
+        return $this->success(["code" => $code]);
     }
 }

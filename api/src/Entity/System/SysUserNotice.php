@@ -3,7 +3,6 @@
 namespace App\Entity\System;
 
 use App\Entity\BaseEntity;
-use App\Entity\Traits\DeleteTime;
 use App\Repository\System\SysUserNoticeRepository;
 use Doctrine\DBAL\Types\Types;
 use Doctrine\ORM\Mapping as ORM;
@@ -28,8 +27,6 @@ class SysUserNotice extends BaseEntity
 
     #[ORM\Column(type: Types::DATETIME_MUTABLE, nullable: true)]
     private ?\DateTimeInterface $readTime = null;
-
-    use DeleteTime;
 
     public function getId(): ?int
     {
@@ -90,8 +87,7 @@ class SysUserNotice extends BaseEntity
             'id' => $this->getId(),
             'userId' => $this->getUserId(),
             'noticeId' => $this->getNoticeId(),
-            'readTime' => $this->getReadTime(),
-            'isDeleted' => $this->getIsDeleted(),
+            'readTime' => $this->getReadTime()
         ];
     }
 }

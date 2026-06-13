@@ -45,7 +45,7 @@ class AuthService extends BaseService
     public function checkLogin(string $username, string $password)
     {
 
-        $user = $this->userRepo->findOneBy(['username' => $username, 'deleted' => 0]); // return a user entity
+        $user = $this->userRepo->findOneBy(['username' => $username]); // return a user entity
 
         if (!$user) {
             $this->errorResponse("用户不存在");

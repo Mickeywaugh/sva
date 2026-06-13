@@ -4,8 +4,6 @@ namespace App\Entity\System;
 
 use App\Service\BaseService as Util;
 use App\Entity\BaseEntity;
-use App\Entity\Traits\DeleteTime;
-use App\Service\DbalService;
 use App\Repository\System\SysConfigRepository;
 use App\Service\DbService;
 use Doctrine\ORM\Mapping as ORM;
@@ -31,7 +29,6 @@ class SysConfig extends BaseEntity
     #[ORM\Column(length: 255, nullable: true)]
     private ?string $remark = null;
 
-    use DeleteTime;
 
     public function getId(): ?int
     {
@@ -101,17 +98,17 @@ class SysConfig extends BaseEntity
     // 获取
     public static function get(string $key): string
     {
-        return DbService::table('sys_config')->wheres(["config_key" => $key, "delete_time" => ["NULL" => NULL]])->getValue("config_value");
+        return DbService::table('sys_config')->wheres(["config_key" => $key, "disable_time" => ["NULL" => true]])->getValue("config_value");
     }
 
     // 更新
-    public static function set(string $key, string $value)
+    public static function set(string $key, string $value): int
     {
         return DbService::table('sys_config')->wheres(["config_key" => $key])->update(["config_value" => $value, "update_time" => (new \DateTime())->format("Y-m-d H:i:s")]);
     }
 
     // 创建
-    public static function create(string $key, string $value = "")
+    public static function create(string $key, string $value = ""): int
     {
         return DbService::table('sys_config')->insert([
             "config_key" => $key,
@@ -121,7 +118,12 @@ class SysConfig extends BaseEntity
     }
 
     // 删除
-    public static function delete(string $key)
+    public static function disable(string $key): int
+    {
+        return DbService::table('sys_config')->wheres(["config_key" => $key])->update(["disable_time" => (new \DateTime())->format("Y-m-d H:i:s")]);
+    }
+
+    public static function remove(string $key): int
     {
         return DbService::table('sys_config')->wheres(["config_key" => $key])->delete();
     }

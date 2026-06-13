@@ -60,9 +60,6 @@ class SysLog extends Base
     #[ORM\Column(length: 63, nullable: true)]
     private ?string $os = null;
 
-    #[ORM\Column(type: Types::SMALLINT)]
-    private ?\DateTimeInterface $deleteTime = null;
-
     #[ORM\Column(length: 63, nullable: true)]
     private ?string $createBy = null;
 
@@ -244,18 +241,6 @@ class SysLog extends Base
     public function setOs(?string $os): static
     {
         $this->os = $os;
-
-        return $this;
-    }
-
-    public function getDeleteTime(): ?DateTimeInterface
-    {
-        return $this->deleteTime;
-    }
-
-    public function setDeleteTime(DateTimeInterface $deleteTime): static
-    {
-        $this->deleteTime = $deleteTime;
 
         return $this;
     }

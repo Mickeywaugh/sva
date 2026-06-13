@@ -3,7 +3,6 @@
 namespace App\Entity\System;
 
 use App\Entity\BaseEntity;
-use App\Entity\Traits\DeleteTime;
 use App\Repository\System\SysNoticeRepository;
 use Doctrine\DBAL\Types\Types;
 use Doctrine\ORM\Mapping as ORM;
@@ -50,8 +49,6 @@ class SysNotice extends BaseEntity
     #[ORM\ManyToOne(targetEntity: SysUser::class)]
     #[ORM\JoinColumn(name: 'publisher_id', referencedColumnName: 'id')]
     private ?SysUser $publisher = null;
-
-    use DeleteTime;
 
     #[ORM\PrePersist]
     public function onPrePersist(): void
@@ -215,7 +212,6 @@ class SysNotice extends BaseEntity
             'publishTime' => $this->getPublishTime(),
             'createBy' => $this->getCreateBy(),
             'publisherName' => $this->getPublisher()?->getUsername(),
-            'isDeleted' => $this->getIsDeleted(),
             'createTime' => $this->getCreateTime(),
             'updateTime' => $this->getUpdateTime(),
         ];

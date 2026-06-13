@@ -31,7 +31,7 @@ class SysRoleRepository extends BaseRepository
     public function getTree()
     {
         $roleTree = [];
-        $roleList = $this->findBy(["status" => 1, "deleteTime" => null]);
+        $roleList = $this->findBy(["status" => 1]);
 
         foreach ($roleList as $role) {
             $data = [
@@ -44,7 +44,7 @@ class SysRoleRepository extends BaseRepository
     }
 
     // 删除ROLE实体
-    public function delete($ids, bool $softDelete = true): bool
+    public function delete($ids): bool
     {
         if (!$ids) return false;
         try {
@@ -55,13 +55,7 @@ class SysRoleRepository extends BaseRepository
                     if (count($entity->getUsers()) > 0) {
                         throw new Exception("该角色下存在用户，不能删除");
                     }
-                    if ($softDelete) {
-                        $entity->setDeleteTime();
-                        $entity->setUpdateTime();
-                        $em->persist($entity);
-                    } else {
-                        $em->remove($entity);
-                    }
+                    $em->remove($entity);
                 };
             }
             $em->flush();
