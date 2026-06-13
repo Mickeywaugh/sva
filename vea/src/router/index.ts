@@ -38,7 +38,7 @@ export const constantRoutes: RouteRecordRaw[] = [
         name: "Dashboard",
         meta: {
           title: "Dashboard",
-          icon: "bt-homepage",
+          icon: "vea-home-fill",
           affix: true,
           keepAlive: true,
           alwaysShow: false,

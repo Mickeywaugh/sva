@@ -26,7 +26,7 @@
 
   const currentRoute = useRoute();
   // 默认补一个首页面包屑
-  const dashboardRoute: BreadcrumbRoute = { path: "/dashboard", meta: { title: "dashboard" } };
+  const dashboardRoute: BreadcrumbRoute = { path: "/dashboard", meta: { title: "dashboard", icon: "vea-home-fill"} };
 
   // 根据当前路由参数生成跳转路径
   const pathCompile = (path: string) => {

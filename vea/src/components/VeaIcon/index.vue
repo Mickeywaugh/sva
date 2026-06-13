@@ -34,7 +34,7 @@
   const VeaIconCmp = ref("");
   watch(
     () => props.iconClass,
-    (newIconClass) => {
+    (newIconClass: string) => {
       if (newIconClass === "") {
         return;
       }

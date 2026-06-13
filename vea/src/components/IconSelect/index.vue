@@ -21,7 +21,7 @@
       <div ref="popoverContentRef">
         <el-input v-model="searchText" placeholder="搜索图标" clearable @input="(val: string) => handleSearch(val)" />
         <el-tabs v-model="activeTab">
-          <el-tab-pane label="BoingTech Icons" name="vea">
+          <el-tab-pane label="VEA 图标" name="vea">
             <el-scrollbar height="300px">
               <ul class="icon-container">
                 <li v-for="icon in filteredIcons" :key="icon" class="icon-item" @click="selectIcon(icon)">
@@ -90,7 +90,7 @@
    */
   function handleSearch(searchText: string) {
     if (searchText) {
-      filteredIcons.value = currIcons.value.filter((iconName) =>
+      filteredIcons.value = currIcons.value.filter((iconName:string) =>
         iconName.toLowerCase().includes(searchText.toLowerCase())
       );
     } else {
@@ -99,7 +99,7 @@
   }
 
   //切换tab，将当前选项卡下的图标库赋值给currIcons
-  watch(activeTab, (newVal) => {
+  watch(activeTab, (newVal:string) => {
     activeTab.value = newVal;
     currIcons.value = [];
     currIcons.value = filteredIcons.value = newVal === "vea" ? VeaIcons : epIcons;
