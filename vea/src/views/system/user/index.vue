@@ -25,7 +25,7 @@
           <el-form ref="queryFormRef" :model="userTableData.params" :inline="true">
             <el-form-item :label="t('sys.dept.node')" prop="dept">
               <el-tree-select v-model="userTableData.params.dept" :placeholder="$t('common.please.select', { s: $t('sys.dept.node') })
-                " :data="deptOptions" filterable check-strictly clearable :render-after-expand="false" />
+                " :data="deptOptions" filterable check-strictly clearable :render-after-expand="false" style="width: 180px;" />
             </el-form-item>
             <el-form-item :label="t('common.keywords')" prop="keywords">
               <el-input v-model="userTableData.params.keywords" placeholder="用户名/昵称/手机号" clearable style="width: 200px"
@@ -291,7 +291,7 @@
 
     if (id) {
       dialog.title = t("common.edit");
-      UserAPI.getFormData(id).then((data) => {
+      UserAPI.getFormData(id).then((data:any) => {
         Object.assign(formData, { ...data });
       });
     } else {

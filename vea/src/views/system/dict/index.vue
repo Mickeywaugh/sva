@@ -24,7 +24,7 @@
             </el-form-item>
             <el-form-item>
               <el-button-group>
-                <el-button type="primary" v-icon="'vea-search'" GaIcon="" @click="handleQuery('dict')">{{ $t('common.search') }}</el-button>
+                <el-button type="primary" v-icon="'vea-search'" vea-icon="" @click="handleQuery('dict')">{{ $t('common.search') }}</el-button>
               </el-button-group>
             </el-form-item>
           </el-form>

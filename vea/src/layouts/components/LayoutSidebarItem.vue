@@ -14,7 +14,7 @@
       }">
         <el-menu-item :index="resolvePath(onlyOneChild.path)" :class="{ 'submenu-title-noDropdown': !isNest }">
           <template v-if="onlyOneChild.meta">
-            <GaIcon :icon-class="onlyOneChild.meta.icon ? item.meta?.icon : 'bt-o-menu'"></GaIcon>
+            <vea-icon :icon-class="onlyOneChild.meta.icon ? item.meta?.icon : 'bt-o-menu'"></vea-icon>
             <span v-if="onlyOneChild.meta.title" class="ml-1">
               {{ translateRouteTitle(onlyOneChild.meta.title) }}
             </span>
@@ -27,7 +27,7 @@
     <el-sub-menu v-else :index="resolvePath(item.path)" :data-path="item.path" teleported>
       <template #title>
         <template v-if="item.meta">
-          <GaIcon :icon-class="item.meta ? item.meta.icon : 'bt-o-menu'"></GaIcon>
+          <vea-icon :icon-class="item.meta ? item.meta.icon : 'bt-o-menu'"></vea-icon>
           <span v-if="item.meta.title" class="ml-1">
             {{ translateRouteTitle(item.meta.title) }}
           </span>
