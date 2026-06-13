@@ -1,6 +1,6 @@
 <template>
   <div class="hamburger-wrapper" @click="toggleClick">
-    <div :class="[{ hamburger: true, 'is-active': isActive }, hamburgerClass]"><vea-icon :icon-class="'vea-doubleleft'"></vea-icon></div>
+    <div v-icon="'vea-doubleleft'" :class="[{ hamburger: true, 'is-active': isActive }, hamburgerClass]"></div>
   </div>
 </template>
 
@@ -45,7 +45,7 @@
     display: flex;
     align-items: center;
     justify-content: center;
-    padding: 0 15px;
+    padding: 0 6px;
     cursor: pointer;
 
     .hamburger {
