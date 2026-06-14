@@ -108,7 +108,6 @@
 
   const loading = ref(false);
   const selectIds = ref<number[]>([]);
-  const queryParams = reactive({});
   const t = useI18n().t;
 
   const tableData = reactive<PageResult<DeptVO>>({
@@ -170,7 +169,7 @@
     const data = await DeptAPI.getOptions();
     deptOptions.value = [
       {
-        value: "0",
+        value: 0,
         label: "顶级部门",
         children: data,
       },
