@@ -1,5 +1,5 @@
 .husky
-.vscode/*
+.vscode/sftp.json
 .git/
 api/api/config/jwt/public.pem
 api/api/config/jwt/private.pem
