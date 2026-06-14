@@ -44,8 +44,8 @@
         <el-table-column label="操作" align="center">
           <template #default="scope">
             <el-button-group>
-              <el-button type="primary" v-icon="'vea-o-edit'" @click="openDialog('dict', scope.row)">{{ $t('common.edit') }}</el-button>
-              <el-button type="primary" v-icon="'vea-detail'" @click="switchNode('item', scope.row)">{{ $t('common.detail') }} </el-button>
+              <el-button type="primary" v-icon="'vea-o-edit'" size="small" @click="openDialog('dict', scope.row)">{{ $t('common.edit') }}</el-button>
+              <el-button type="primary" v-icon="'vea-detail'" size="small" @click="switchNode('item', scope.row)">{{ $t('common.detail') }} </el-button>
             </el-button-group>
           </template>
         </el-table-column>
@@ -116,8 +116,8 @@
         <el-table-column label="操作" align="center">
           <template #default="scope">
             <el-button-group>
-              <el-button type="primary" v-icon="'vea-o-edit'" @click="openDialog('item', scope.row)">{{ $t('common.edit') }}</el-button>
-              <el-button type="primary" v-icon="'vea-o-delete'" @click="handleDelete('item', scope.row)">{{ $t('common.delete') }}</el-button>
+              <el-button type="primary" v-icon="'vea-o-edit'" size="small" @click="openDialog('item', scope.row)">{{ $t('common.edit') }}</el-button>
+              <el-button type="primary" v-icon="'vea-o-delete'" size="small" @click="handleDelete('item', scope.row)">{{ $t('common.delete') }}</el-button>
             </el-button-group>
           </template>
         </el-table-column>
