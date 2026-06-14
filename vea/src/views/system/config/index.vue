@@ -154,7 +154,7 @@
     dialog.visible = true;
     if (id) {
       dialog.title = "修改系统配置";
-      ConfigAPI.getFormData(id).then((data) => {
+      ConfigAPI.getFormData(id).then((data: any) => {
         Object.assign(formData, data);
       });
     } else {

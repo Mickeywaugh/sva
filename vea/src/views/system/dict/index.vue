@@ -277,10 +277,10 @@
   const handleQuery = async (node: DictNode) => {
     loading.value = true;
     await DictAPI.page(node, vueData.tableData[node].params)
-      .then((data) => {
+      .then((data: any) => {
         vueData.tableData[node].list.splice(0);
         Object.assign(vueData.tableData[node], data);
-      }).catch((error) => {
+      }).catch((error: any) => {
         ElMessage.error(error.message);
       })
       .finally(() => {
@@ -336,7 +336,7 @@
           handleQuery(node);
           closeDialog();
         })
-        .catch((error) => {
+        .catch((error: any) => {
           ElMessage.error(error.message);
         }).finally(() => {
           loading.value = false;
@@ -349,7 +349,7 @@
    * switch 切换前确认，返回 true 允许切换，返回 false 阻止切换
    */
   const confirmChange = async (node: DictNode, row: Dict | DictItem, data: Record<string, any>): Promise<boolean> => {
-    if(!row.id) return false;
+    if (!row.id) return false;
     return ElMessageBox.confirm(`确定更改吗?`, "提示", {
       confirmButtonText: "确定",
       cancelButtonText: "取消",
@@ -362,7 +362,7 @@
           ElMessage.success("修改成功");
           return true;
         })
-        .catch((error) => {
+        .catch((error: any) => {
           ElMessage.error(error.message);
           return false; // API 失败时阻止切换
         })
@@ -388,7 +388,7 @@
           ElMessage.success("删除成功");
           handleQuery(node);
         })
-        .catch((error) => {
+        .catch((error: any) => {
           ElMessage.error(error.message);
         })
         .finally(() => {
@@ -412,7 +412,7 @@
         .then(() => {
           ElMessage.success("删除成功");
           handleQuery(vueData.currentNode);
-        }).catch((error) => {
+        }).catch((error: any) => {
           ElMessage.error(error.message);
         }).finally(() => {
           loading.value = false;

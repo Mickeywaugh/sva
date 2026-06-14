@@ -270,14 +270,14 @@
 
   // 打开通知公告弹窗
   function handleOpenDialog(id?: number) {
-    UserAPI.getOptions().then((data) => {
+    UserAPI.getOptions().then((data:any) => {
       userOptions.value = data;
     });
 
     dialog.visible = true;
     if (id) {
       dialog.title = "修改公告";
-      NoticeAPI.getFormData(id).then((data) => {
+      NoticeAPI.getFormData(id).then((data:any) => {
         Object.assign(formData, data);
       });
     } else {

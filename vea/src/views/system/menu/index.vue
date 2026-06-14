@@ -42,16 +42,17 @@
         <el-table-column :label="t('sys.menu.routeName')" align="left" prop="routeName" />
         <el-table-column :label="t('sys.menu.path')" align="left" prop="routePath" />
         <el-table-column :label="t('sys.menu.component')" align="left" width="250" prop="component" />
-        <el-table-column :label="t('sys.menu.noAuth')" align="center" prop="noAuth">
+        <el-table-column :label="t('sys.menu.noAuth')" align="center">
           <template v-slot="{ row }">
-            <el-switch v-model="row.noAuth" :active-value="1" :inactive-value="0" inline-prompt :active-text="t('common.yes')"
-              :inactive-text="t('common.no')" @change="handleFieldChange(row.id, { noAuth: row.noAuth })" />
+            <el-switch v-if="row.type === MenuTypeEnum.MENU" v-model="row.noAuth" :active-value="1" :inactive-value="0" inline-prompt
+              :active-text="t('common.yes')" :inactive-text="t('common.no')"
+              :before-change="() => handleFieldChange(row, { noAuth: Number(!row.noAuth) })" />
           </template>
         </el-table-column>
         <el-table-column :label="t('common.visible')" align="center" width="80">
           <template v-slot="{ row }">
             <el-switch v-model="row.visible" :active-value="1" :inactive-value="0" inline-prompt :active-text="t('common.show')"
-              :inactive-text="t('common.hidden')" @change="handleFieldChange(row.id, { visible: row.visible })" />
+              :inactive-text="t('common.hidden')" :before-change="() => handleFieldChange(row, { visible: Number(!row.visible) })" />
           </template>
         </el-table-column>
         <el-table-column :label="t('common.sort')" align="center" width="80" prop="sort" />
@@ -348,7 +349,7 @@
    */
   function handleOpenDialog(parentId?: number, menuId?: number) {
     MenuAPI.getOptions(true)
-      .then((data) => {
+      .then((data: any) => {
         menuOptions.value = [{ value: 0, label: "顶级菜单", children: data }];
       })
       .then(() => {
@@ -466,22 +467,31 @@
   }
 
 
-  const handleFieldChange = (id: number, data: any) => {
-    try {
+  const handleFieldChange = async (row: MenuItem, data: any): Promise<boolean> => {
+    if (!row.id) return false;
+    return ElMessageBox.confirm("确定更改吗?", "提示", {
+      confirmButtonText: "确定",
+      cancelButtonText: "取消",
+      type: "warning",
+    }).then(async () => {
       loading.value = true;
-      MenuAPI.update(id, data)
-        .then(() => {
+      return MenuAPI.update(row.id ?? 0, data)
+        .then((response: any) => {
+          Object.assign(row, response.data);
           ElMessage.success(t("common.succeed.update"));
-          // handleQuery();
+          return true;
         })
-        .catch(() => {
+        .catch((error: any) => {
           ElMessage.error(t("common.failed.update"));
+          return false; // API 失败时阻止切换
+        })
+        .finally(() => {
+          loading.value = false;
         });
-    } catch (error) {
-      console.error(error);
-    } finally {
-      loading.value = false;
-    }
+    }).catch(() => {
+      // 用户取消确认，阻止切换
+      return false;
+    });
   }
 
   onMounted(() => {

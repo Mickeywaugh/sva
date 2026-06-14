@@ -6,6 +6,7 @@ namespace App\Controller\System;
 use App\Controller\BaseController;
 use App\Repository\System\SysRoleRepository;
 use App\Repository\System\SysMenuRepository;
+use Doctrine\Common\Collections\ArrayCollection;
 use Symfony\Component\HttpFoundation\JsonResponse;
 use Symfony\Component\HttpFoundation\Request;
 use Symfony\Component\Routing\Attribute\Route;
@@ -127,20 +128,22 @@ class RoleController extends BaseController
     }
 
     #[Route('/{id}/menus', name: 'menus', methods: ['PUT'])]
-    public function menus(int $id, Request $request): JsonResponse
+    public function menus(Request $request, int $id): JsonResponse
     {
         $menuIds = $request->toArray();
-        if (empty($menuIds) || empty($id)) {
+        if (empty($id)) {
             return $this->error("参数错误");
         }
         try {
-            $menus = [];
-            foreach ($menuIds as $menuId) {
-                $menu = $this->menuRepo->find($menuId);
-                if (!$menu) {
-                    continue;
-                } else {
-                    $menus[] = $menu;
+            $menus = new ArrayCollection();
+            if (!empty($menuIds)) {
+                foreach ($menuIds as $menuId) {
+                    $menu = $this->menuRepo->find($menuId);
+                    if (!$menu) {
+                        continue;
+                    } else {
+                        $menus->add($menu);
+                    }
                 }
             }
             $role = $this->roleRepo->update($id, ["menus" => $menus]);

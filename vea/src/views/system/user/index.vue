@@ -230,7 +230,7 @@
   function handleQuery() {
     loading.value = true;
     UserAPI.getPage(userTableData.params)
-      .then((data) => {
+      .then((data: any) => {
         Object.assign(userTableData, data);
       })
       .finally(() => {
@@ -291,7 +291,7 @@
 
     if (id) {
       dialog.title = t("common.edit");
-      UserAPI.getFormData(id).then((data:any) => {
+      UserAPI.getFormData(id).then((data: any) => {
         Object.assign(formData, { ...data });
       });
     } else {
@@ -382,12 +382,12 @@
     }).then(async () => {
       loading.value = true;
       return UserAPI.update(row.id ?? 0, data)
-        .then((response) => {
+        .then((response: any) => {
           Object.assign(row, response.data);
           ElMessage.success("操作成功");
           return true;
         })
-        .catch((error) => {
+        .catch((error: any) => {
           ElMessage.error(error.message);
           return false; // API 失败时阻止切换
         })
@@ -417,7 +417,7 @@
   }
 
   onBeforeMount(() => {
-    DeptAPI.getOptions().then((data) => {
+    DeptAPI.getOptions().then((data: any) => {
       deptOptions.value = data;
     });
   });

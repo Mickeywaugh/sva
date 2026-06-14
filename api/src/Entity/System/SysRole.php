@@ -34,7 +34,7 @@ class SysRole extends BaseEntity
     private ?int $dataScope = null;
 
     /**
-     * @var Collection<int,SysMenu>;
+     *  @var Collection<int,SysMenu>
      */
     #[ORM\ManyToMany(targetEntity: SysMenu::class, cascade: ['persist', 'remove'])]
     #[ORM\JoinTable(name: 'sys_role_menu')]
@@ -42,16 +42,21 @@ class SysRole extends BaseEntity
     #[ORM\InverseJoinColumn(name: 'menu_id', referencedColumnName: 'id')]
     private ?Collection $menus;
 
-
+    // 多对多单向关联
     /**
-     * 多对多单向关联
-     * @var Collection<int,SysUser>;
+     *  @var Collection<int,SysUser>
      */
     #[ORM\ManyToMany(targetEntity: SysUser::class, cascade: ['persist'])]
     #[ORM\JoinTable(name: "sys_user_role")]
     #[ORM\JoinColumn(name: 'role_id', referencedColumnName: 'id')]
     #[ORM\InverseJoinColumn(name: 'user_id', referencedColumnName: 'id')]
     private ?Collection $users;
+
+    public function __construct()
+    {
+        $this->menus = new ArrayCollection();
+        $this->users = new ArrayCollection();
+    }
 
     public function getId(): ?int
     {
@@ -117,15 +122,15 @@ class SysRole extends BaseEntity
         return $this;
     }
 
-    public function setMenus(Collection $menus): static
+    public function setMenus(?Collection $menus): static
     {
         $this->menus = $menus;
         return $this;
     }
 
-    public function getMenus(): ?Collection
+    public function getMenus()
     {
-        return $this->menus ?: new ArrayCollection();
+        return $this->menus;
     }
 
     public function getMenuIds(): array
@@ -166,7 +171,8 @@ class SysRole extends BaseEntity
             'code' => $this->code,
             'sort' => $this->sort,
             'status' => $this->status,
-            'dataScope' => $this->getDataScope()
+            'userCount' => count($this->getUsers()),
+            'dataScope' => $this->getDataScope(),
         ];
     }
 }

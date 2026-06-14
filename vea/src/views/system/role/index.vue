@@ -207,7 +207,7 @@
   function handleQuery() {
     loading.value = true;
     RoleAPI.getPage(pageData.params)
-      .then((data) => {
+      .then((data:any) => {
         Object.assign(pageData, data);
       })
       .finally(() => {
@@ -233,7 +233,7 @@
     dialog.visible = true;
     if (roleId) {
       dialog.title = "修改角色";
-      RoleAPI.getFormData(roleId).then((data) => {
+      RoleAPI.getFormData(roleId).then((data:any) => {
         Object.assign(formData, data);
       });
     } else {
@@ -323,9 +323,9 @@
 
       // 回显角色已拥有的菜单
       RoleAPI.getRoleMenuIds(roleId)
-        .then((data) => {
+        .then((data:any) => {
           const checkedMenuIds = data;
-          checkedMenuIds.forEach((menuId) => permTreeRef.value!.setChecked(menuId, true, false));
+          checkedMenuIds.forEach((menuId: number) => permTreeRef.value!.setChecked(menuId, true, false));
         })
         .finally(() => {
           loading.value = false;
@@ -369,7 +369,7 @@
   }
 
   // 权限筛选
-  watch(permKeywords, (val) => {
+  watch(permKeywords, (val: string) => {
     permTreeRef.value!.filter(val);
   });
 

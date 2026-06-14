@@ -177,7 +177,7 @@
     dialog.visible = true;
     if (deptId) {
       dialog.title = "修改部门";
-      DeptAPI.getFormData(deptId).then((data) => {
+      DeptAPI.getFormData(deptId).then((data: any) => {
         Object.assign(formData, data);
       });
     } else {

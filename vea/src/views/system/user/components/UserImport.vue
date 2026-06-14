@@ -65,7 +65,7 @@
     files: [],
   });
 
-  watch(visible, (newValue) => {
+  watch(visible, (newValue: any) => {
     if (newValue) {
       resultData.value = [];
       resultVisible.value = false;
