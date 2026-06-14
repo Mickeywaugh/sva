@@ -7,8 +7,6 @@ use App\Repository\System\SysDeptRepository;
 use App\Repository\System\SysRoleRepository;
 use App\Repository\System\SysUserRepository;
 use App\Service\AuthService;
-use App\Service\RedisService;
-use Overtrue\EasySms\EasySms;
 use Symfony\Component\HttpFoundation\Request;
 use Symfony\Component\HttpFoundation\JsonResponse;
 use Symfony\Component\Routing\Attribute\Route;

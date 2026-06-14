@@ -8,6 +8,7 @@ use App\Entity\System\SysDept;
 use App\Entity\BaseEntity;
 use App\Entity\Traits\DisableTime;
 use App\Repository\System\SysUserRepository;
+use Doctrine\Common\Collections\ArrayCollection;
 use Doctrine\DBAL\Types\Types;
 use Doctrine\ORM\Mapping as ORM;
 use Doctrine\Common\Collections\Collection;;
@@ -208,10 +209,14 @@ class SysUser extends BaseEntity implements UserInterface, PasswordAuthenticated
         return $this;
     }
 
-    public function setUserRoles(Collection $roles): static
+    public function setUserRoles(array $roles): static
     {
-
-        $this->userRoles = $roles;
+        $roleEntities = new ArrayCollection();
+        if (!$roles) return $this;
+        foreach ($roles as $role) {
+            $roleEntities->add($role);
+        }
+        $this->userRoles = $roleEntities;
         return $this;
     }
 
