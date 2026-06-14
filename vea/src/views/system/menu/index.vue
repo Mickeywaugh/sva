@@ -51,8 +51,9 @@
         </el-table-column>
         <el-table-column :label="t('common.visible')" align="center" width="80">
           <template v-slot="{ row }">
-            <el-switch v-model="row.visible" :active-value="1" :inactive-value="0" inline-prompt :active-text="t('common.show')"
-              :inactive-text="t('common.hidden')" :before-change="() => handleFieldChange(row, { visible: Number(!row.visible) })" />
+            <el-switch v-if="[MenuTypeEnum.MENU, MenuTypeEnum.CATALOG].includes(row.type)" v-model="row.visible" :active-value="1"
+              :inactive-value="0" inline-prompt :active-text="t('common.show')" :inactive-text="t('common.hidden')"
+              :before-change="() => handleFieldChange(row, { visible: Number(!row.visible) })" />
           </template>
         </el-table-column>
         <el-table-column :label="t('common.sort')" align="center" width="80" prop="sort" />
