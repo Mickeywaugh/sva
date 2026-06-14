@@ -38,16 +38,18 @@
         <el-table-column label="排序" align="center" prop="sort" />
         <el-table-column fixed="right" label="操作">
           <template #default="scope">
-            <el-button type="primary" size="small" v-icon="'vea-aim'" @click="handleOpenAssignPermDialog(scope.row)">
-              分配权限
-            </el-button>
-            <el-button type="primary" size="small" v-icon="'vea-o-edit'" @click="handleOpenDialog(scope.row.id)">
-              编辑
-            </el-button>
-            <el-button :disabled="scope.row.userCount > 0" type="danger" size="small" v-icon="'vea-o-delete'"
-              @click="handleDelete(scope.row.id)">
-              删除
-            </el-button>
+            <el-button-group>
+              <el-button type="primary" size="small" v-icon="'vea-aim'" @click="handleOpenAssignPermDialog(scope.row)">
+                分配权限
+              </el-button>
+              <el-button type="primary" size="small" v-icon="'vea-o-edit'" @click="handleOpenDialog(scope.row.id)">
+                编辑
+              </el-button>
+              <el-button :disabled="scope.row.userCount > 0" type="danger" size="small" v-icon="'vea-o-delete'"
+                @click="handleDelete(scope.row.id)">
+                删除
+              </el-button>
+            </el-button-group>
           </template>
         </el-table-column>
       </el-table>
@@ -207,7 +209,7 @@
   function handleQuery() {
     loading.value = true;
     RoleAPI.getPage(pageData.params)
-      .then((data:any) => {
+      .then((data: any) => {
         Object.assign(pageData, data);
       })
       .finally(() => {
@@ -233,7 +235,7 @@
     dialog.visible = true;
     if (roleId) {
       dialog.title = "修改角色";
-      RoleAPI.getFormData(roleId).then((data:any) => {
+      RoleAPI.getFormData(roleId).then((data: any) => {
         Object.assign(formData, data);
       });
     } else {
@@ -323,7 +325,7 @@
 
       // 回显角色已拥有的菜单
       RoleAPI.getRoleMenuIds(roleId)
-        .then((data:any) => {
+        .then((data: any) => {
           const checkedMenuIds = data;
           checkedMenuIds.forEach((menuId: number) => permTreeRef.value!.setChecked(menuId, true, false));
         })

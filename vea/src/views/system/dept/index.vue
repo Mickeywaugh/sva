@@ -46,18 +46,20 @@
 
         <el-table-column label="操作" fixed="right" align="left">
           <template #default="scope">
-            <el-button v-hasPerm="['sys:dept:add']" type="primary" size="small" v-icon="'vea-o-plus'"
-              @click.stop="handleOpenDialog(scope.row.id, undefined)">
-              新增
-            </el-button>
-            <el-button v-hasPerm="['sys:dept:edit']" type="primary" size="small" v-icon="'vea-o-edit'"
-              @click.stop="handleOpenDialog(scope.row.parentId, scope.row.id)">
-              编辑
-            </el-button>
-            <el-button v-hasPerm="['sys:dept:delete']" type="danger" size="small" v-icon="'vea-o-delete'"
-              @click.stop="handleDelete(scope.row.id)">
-              删除
-            </el-button>
+            <el-button-group>
+              <el-button v-hasPerm="['sys:dept:add']" type="primary" size="small" v-icon="'vea-o-plus'"
+                @click.stop="handleOpenDialog(scope.row.id, undefined)">
+                新增
+              </el-button>
+              <el-button v-hasPerm="['sys:dept:edit']" type="primary" size="small" v-icon="'vea-o-edit'"
+                @click.stop="handleOpenDialog(scope.row.parentId, scope.row.id)">
+                编辑
+              </el-button>
+              <el-button v-hasPerm="['sys:dept:delete']" type="danger" size="small" v-icon="'vea-o-delete'"
+                @click.stop="handleDelete(scope.row.id)">
+                删除
+              </el-button>
+            </el-button-group>
           </template>
         </el-table-column>
       </el-table>

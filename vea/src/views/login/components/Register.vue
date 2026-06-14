@@ -164,7 +164,7 @@
   function getCaptcha() {
     codeLoading.value = true;
     AuthAPI.getCaptcha()
-      .then((data) => {
+      .then((data: any) => {
         model.captchaKey = data.captchaKey;
         captchaBase64.value = data.captchaBase64;
       })

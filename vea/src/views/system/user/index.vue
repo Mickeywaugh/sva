@@ -73,16 +73,18 @@
         <el-table-column :label="t('common.createTime')" align="center" prop="createTime" width="180" />
         <el-table-column :label="t('common.operation')" fixed="right">
           <template #default="{ row }">
-            <el-button v-hasPerm="'sys:user:reset_pwd'" type="primary" v-icon="'vea-o-refresh'" size="small"
-              @click="handleResetPassword(row as SysUserItem)">
-              {{ t('login.resetPassword') }}
-            </el-button>
-            <el-button v-hasPerm="'sys:user:edit'" type="primary" v-icon="'vea-o-edit'" size="small" @click="handleOpenDialog(row.id)">
-              {{ t('common.edit') }}
-            </el-button>
-            <el-button v-hasPerm="'sys:user:delete'" type="danger" v-icon="'vea-o-delete'" size="small" @click="handleDelete(row.id)">
-              {{ t('common.delete') }}
-            </el-button>
+            <el-button-group>
+              <el-button v-hasPerm="'sys:user:reset_pwd'" type="primary" v-icon="'vea-o-refresh'" size="small"
+                @click="handleResetPassword(row as SysUserItem)">
+                {{ t('login.resetPassword') }}
+              </el-button>
+              <el-button v-hasPerm="'sys:user:edit'" type="primary" v-icon="'vea-o-edit'" size="small" @click="handleOpenDialog(row.id)">
+                {{ t('common.edit') }}
+              </el-button>
+              <el-button v-hasPerm="'sys:user:delete'" type="danger" v-icon="'vea-o-delete'" size="small" @click="handleDelete(row.id)">
+                {{ t('common.delete') }}
+              </el-button>
+            </el-button-group>
           </template>
         </el-table-column>
       </el-table>

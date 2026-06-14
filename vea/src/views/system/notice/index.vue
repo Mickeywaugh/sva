@@ -78,25 +78,27 @@
         </el-table-column>
         <el-table-column align="center" fixed="right" label="操作">
           <template #default="scope">
-            <el-button type="primary" size="small" @click="openDetailDialog(scope.row.id)">
-              查看
-            </el-button>
-            <el-button v-if="scope.row.publishStatus != 1" v-hasPerm="['sys:notice:publish']" type="primary" size="small"
-              @click="handlePublish(scope.row.id)">
-              发布
-            </el-button>
-            <el-button v-if="scope.row.publishStatus == 1" v-hasPerm="['sys:notice:revoke']" type="primary" size="small"
-              @click="handleRevoke(scope.row.id)">
-              撤回
-            </el-button>
-            <el-button v-if="scope.row.publishStatus != 1" v-hasPerm="['sys:notice:edit']" type="primary" size="small"
-              @click="handleOpenDialog(scope.row.id)">
-              编辑
-            </el-button>
-            <el-button v-if="scope.row.publishStatus != 1" v-hasPerm="['sys:notice:delete']" type="danger" size="small"
-              @click="handleDelete(scope.row.id)">
-              删除
-            </el-button>
+            <el-button-group>
+              <el-button type="primary" size="small" @click="openDetailDialog(scope.row.id)">
+                查看
+              </el-button>
+              <el-button v-if="scope.row.publishStatus != 1" v-hasPerm="['sys:notice:publish']" type="primary" size="small"
+                @click="handlePublish(scope.row.id)">
+                发布
+              </el-button>
+              <el-button v-if="scope.row.publishStatus == 1" v-hasPerm="['sys:notice:revoke']" type="primary" size="small"
+                @click="handleRevoke(scope.row.id)">
+                撤回
+              </el-button>
+              <el-button v-if="scope.row.publishStatus != 1" v-hasPerm="['sys:notice:edit']" type="primary" size="small"
+                @click="handleOpenDialog(scope.row.id)">
+                编辑
+              </el-button>
+              <el-button v-if="scope.row.publishStatus != 1" v-hasPerm="['sys:notice:delete']" type="danger" size="small"
+                @click="handleDelete(scope.row.id)">
+                删除
+              </el-button>
+            </el-button-group>
           </template>
         </el-table-column>
       </el-table>
@@ -270,14 +272,14 @@
 
   // 打开通知公告弹窗
   function handleOpenDialog(id?: number) {
-    UserAPI.getOptions().then((data:any) => {
+    UserAPI.getOptions().then((data: any) => {
       userOptions.value = data;
     });
 
     dialog.visible = true;
     if (id) {
       dialog.title = "修改公告";
-      NoticeAPI.getFormData(id).then((data:any) => {
+      NoticeAPI.getFormData(id).then((data: any) => {
         Object.assign(formData, data);
       });
     } else {
