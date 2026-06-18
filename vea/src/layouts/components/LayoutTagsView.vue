@@ -510,7 +510,7 @@
     gap: 2px;
     align-items: center;
     height: 28px;
-    padding: 0 10px;
+    padding: 0 6px;
     font-size: 13px;
     color: var(--el-text-color-regular);
     cursor: pointer;
