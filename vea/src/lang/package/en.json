@@ -223,6 +223,10 @@
     },
     "config": {
       "admin": "Config Management"
+    },
+    "notice": {
+      "node": "Notice",
+      "admin": "Notice Mgmt."
     }
   },
   "common": {

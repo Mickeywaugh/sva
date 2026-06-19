@@ -226,6 +226,10 @@
     },
     "config": {
       "admin": "配置管理"
+    },
+    "notice":{
+      "node": "通知",
+      "admin": "通知管理"
     }
   },
   "common": {

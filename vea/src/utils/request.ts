@@ -16,7 +16,7 @@ const http = axios.create({
   baseURL: import.meta.env.VITE_APP_BASE_API,
   timeout: 50000,
   headers: { "Content-Type": "application/json;charset=utf-8" },
-  paramsSerializer: (params) => qs.stringify(params, { arrayFormat: "repeat" }),
+  paramsSerializer: (params: Record<string, any>) => qs.stringify(params, { arrayFormat: "repeat" }),
 });
 
 // 请求拦截器
@@ -32,8 +32,47 @@ http.interceptors.request.use(
 
     return config;
   },
-  (error) => Promise.reject(error)
+  (error: any) => Promise.reject(error)
 );
+
+/**
+ * 处理 401 token 过期（成功分支复用此逻辑）
+ */
+const handleAccessTokenInvalid = async (
+  config: InternalAxiosRequestConfig,
+  msg?: string
+): Promise<never> => {
+  // 已重试过，直接跳登录
+  if (retriedConfigs.has(config)) {
+    await redirectToLogin("登录已过期，请重新登录", true);
+    return Promise.reject(new Error("Token Invalid"));
+  }
+
+  retriedConfigs.add(config);
+
+  try {
+    const userStore = useUserStoreHook();
+
+    // 全局锁：确保多个并发 401 请求只触发一次 token 刷新
+    if (!refreshPromise) {
+      refreshPromise = userStore.refreshTokenOnce().finally(() => {
+        refreshPromise = null;
+      });
+    }
+    await refreshPromise;
+
+    const token = AuthStorage.getAccessToken();
+    if (token) {
+      config.headers.set("Authorization", `Bearer ${token}`);
+    }
+
+    // 重新发起请求并透传结果
+    return http(config) as unknown as Promise<never>;
+  } catch {
+    await redirectToLogin("登录已过期，请重新登录");
+    return Promise.reject(new Error("Token refresh failed"));
+  }
+};
 
 // 响应拦截器
 http.interceptors.response.use(
@@ -51,11 +90,16 @@ http.interceptors.response.use(
       return data;
     }
 
+    // 成功分支中也可能收到 token 过期（HTTP 200 + code 401）
+    if (code === ApiCodeEnum.ACCESS_TOKEN_INVALID) {
+      return handleAccessTokenInvalid(response.config, msg);
+    }
+
     ElMessage.error(msg || "系统出错");
     return Promise.reject(new Error(msg || "系统出错"));
   },
 
-  async (error) => {
+  async (error: any) => {
     const { config, response } = error;
 
     if (!response) {
@@ -67,35 +111,7 @@ http.interceptors.response.use(
 
     // Token 过期：尝试刷新 token 后自动重试一次
     if (code === ApiCodeEnum.ACCESS_TOKEN_INVALID) {
-      // 已重试过，直接跳登录
-      if (retriedConfigs.has(config)) {
-        await redirectToLogin("登录已过期，请重新登录");
-        return Promise.reject(new Error("Token Invalid"));
-      }
-
-      retriedConfigs.add(config);
-
-      try {
-        const userStore = useUserStoreHook();
-
-        // 全局锁：确保多个并发 401 请求只触发一次 token 刷新
-        if (!refreshPromise) {
-          refreshPromise = userStore.refreshTokenOnce().finally(() => {
-            refreshPromise = null;
-          });
-        }
-        await refreshPromise;
-
-        const token = AuthStorage.getAccessToken();
-        if (token) {
-          config.headers.set("Authorization", `Bearer ${token}`);
-        }
-
-        return http(config);
-      } catch {
-        await redirectToLogin("登录已过期，请重新登录");
-        return Promise.reject(new Error("Token refresh failed"));
-      }
+      return handleAccessTokenInvalid(config, msg);
     }
 
     // Refresh token 失效：无法续期，跳转登录
