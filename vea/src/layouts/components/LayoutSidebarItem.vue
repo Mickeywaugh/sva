@@ -27,7 +27,7 @@
     <el-sub-menu v-else :index="resolvePath(item.path)" :data-path="item.path" teleported>
       <template #title>
         <template v-if="item.meta">
-          <vea-icon :icon-class="item.meta ? item.meta.icon : 'bt-o-menu'"></vea-icon>
+          <vea-icon :icon-class="item.meta ? item.meta.icon : 'vea-o-menu'"></vea-icon>
           <span v-if="item.meta.title" class="ml-1">
             {{ translateRouteTitle(item.meta.title) }}
           </span>

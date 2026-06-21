@@ -15,7 +15,7 @@
             :active-text-color="useMenuColors ? variables['menu-active-text'] : undefined" @select="handleTopMenuSelect">
             <el-menu-item v-for="item in topMenuItems" :key="item.path" :index="item.path">
               <template v-if="item.meta">
-                <vea-icon :icon-class="item.meta ? item.meta.icon : 'bt-o-menu'"></vea-icon>
+                <vea-icon :icon-class="item.meta ? item.meta.icon : 'vea-o-menu'"></vea-icon>
                 <span v-if="item.meta.title" class="ml-1">
                   {{ translateRouteTitle(item.meta.title) }}
                 </span>
