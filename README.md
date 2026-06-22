@@ -40,9 +40,9 @@ sva/
 | 配置文件               | 用途                                 |
 | ---------------------- | ------------------------------------ |
 | `api/.env`             | Symfony 生产环境配置（数据库连接等） |
-| `api/.env.dev`         | Symfony 开发环境配置（数据库连接等） |
-| `vea/.env.development` | Vue 开发环境配置（后端接口地址）     |
-| `vea/.env.production`  | Vue 生产环境配置（后端接口地址）     |
+| `api/.env.example`         | Symfony 环境配置样例（数据库连接等） |
+| `vea/.env.dev` | Vue 开发环境配置（后端接口地址）     |
+| `vea/.env.prod`  | Vue 生产环境配置（后端接口地址）     |
 
 #### 启动方式
 
