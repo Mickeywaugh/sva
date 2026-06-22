@@ -137,7 +137,7 @@
 
   const rememberMe = AuthStorage.getRememberMe();
   const loginFormData = ref<LoginRequest>({
-    username: "admin",
+    username: "guest",
     password: "123456",
     rememberMe: rememberMe,
   });
