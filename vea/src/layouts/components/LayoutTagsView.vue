@@ -19,7 +19,7 @@
             {{ translateRouteTitle(tag.title) }}
           </span>
           <span v-if="!tag.affix" class="tags-item__close" @click.stop="closeSelectedTag(tag)">
-            <vea-icon icon-class="vea-o-close" clolor="rgb(255, 0, 0)"></vea-icon>
+            <vea-icon icon-class="vea-o-close" color="rgb(255, 0, 0)"></vea-icon>
           </span>
         </div>
       </div>
