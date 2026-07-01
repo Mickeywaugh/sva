@@ -15,7 +15,6 @@ class AuthService extends BaseService
     private JWTTokenManagerInterface $jwtManager;
     private BaseRepository $userRepo;
     private TokenStorageInterface $tokenStore;
-    private ?int $lastCount = null;
 
     public function __construct(
         SysUserRepository $_userRepo,
@@ -30,7 +29,7 @@ class AuthService extends BaseService
     public function getCurrentUser(): ?SysUser
     {
         $token = $this->tokenStore->getToken();
-        if (!$token) null;
+        if (!$token) return null;
         $username = $token->getUser()->getUserIdentifier();
         return $this->userRepo->findOneBy(['username' => $username]);
     }
@@ -60,12 +59,7 @@ class AuthService extends BaseService
             // 密码验证通过，生成 JWT payload
             $payload = [
                 'username' => $user->getUsername(),
-                'id' => $user->getId(),
-                // Mercure SSE 订阅权限配置
-                'mercure' => [
-                    // 允许订阅所有主题
-                    'subscribe' => ['*']
-                ],
+                'id' => $user->getId()               
             ];
             return $this->jwtManager->createFromPayload($user, $payload);
         } else {
