@@ -95,7 +95,7 @@
 
         <footer class="login-card__footer">
           <el-text size="small">
-            example.com 2026~
+            www.mickeywu.cc 2026~
           </el-text>
         </footer>
       </section>
