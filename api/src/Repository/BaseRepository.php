@@ -30,6 +30,7 @@ abstract class BaseRepository extends ServiceEntityRepository
     protected ?EntityManagerInterface $em = null;
     protected bool $debug = false;
     protected bool $isLogSql = true;
+    protected bool $returnArray = false;
     // 支持的查询方法
     protected array $expr = [
         '=',
@@ -45,6 +46,7 @@ abstract class BaseRepository extends ServiceEntityRepository
         'LIKE',
         'NOT_LIKE',
         'IN',
+        'EMPTY',
         'NOT_IN',
         'LT_TIME',
         'GT_TIME',
@@ -63,7 +65,7 @@ abstract class BaseRepository extends ServiceEntityRepository
         $this->entityClass = $entityClass ?: static::getEntityClass();
         parent::__construct($registry, $this->entityClass);
         $this->em = $this->getEntityManager();
-        $this->resetQueryBuilder();
+        $this->init();
     }
 
     public function __destruct()
@@ -175,14 +177,15 @@ abstract class BaseRepository extends ServiceEntityRepository
     // =========================================================================
 
     /**
-     * 重置查询构造器
+     * 初始化查询构造器
      * @return static
      */
-    public function resetQueryBuilder(): static
+    public function init(): static
     {
         $this->qb = $this->createQueryBuilder('t')->resetDQLParts(["where", "set", "join"]);
         $this->whereCounter = 0;
         $this->whereCond = "AND";
+        $this->returnArray = false;
         return $this;
     }
 
@@ -246,6 +249,26 @@ abstract class BaseRepository extends ServiceEntityRepository
     {
         $this->qb->from(...$args);
         return $this;
+    }
+
+    /**
+     * 查询指定字段的不重复值
+     * @param string $field 字段名
+     * @param array $where 查询条件
+     * @return array 不重复的值数组
+     */
+    public function distinct(string $field, array $where = []): array
+    {
+        $this->init();
+        $rfield = self::rebuildField($field);
+        $this->parseWhere($where);
+
+        $result = $this->qb
+            ->select("DISTINCT $rfield")
+            ->getQuery()
+            ->getScalarResult();
+
+        return $result;
     }
 
     public function orderBy(?array $orderBy): static
@@ -347,6 +370,10 @@ abstract class BaseRepository extends ServiceEntityRepository
                     $this->setQbWhere("$rfield = :$paramName")->setParameter($paramName, $condition);
                 } else {
                     switch ($op) {
+                        case "EMPTY":
+                            //$rfield 为0或为null
+                            $this->setQbWhere($this->qb->expr()->orX($this->qb->expr()->eq("$rfield", 0), $this->qb->expr()->isNull("$rfield")));
+                            break;
                         case "NULL":
                             $this->setQbWhere($this->qb->expr()->isNull("$rfield"));
                             break;
@@ -438,6 +465,15 @@ abstract class BaseRepository extends ServiceEntityRepository
         return $this;
     }
 
+    /**
+     * 不对查询结果进行实例化，而是直接返回数组,查询效率至少提升5倍
+     */
+    public function retArray(): static
+    {
+        $this->returnArray = true;
+        return $this;
+    }
+
     private function logSql(?QueryBuilder $qb = null): static
     {
         if (!$qb) {
@@ -501,8 +537,11 @@ abstract class BaseRepository extends ServiceEntityRepository
         unset($filter['pageNum'], $filter['pageSize']);
         $data = $this->search($filter, $order, $limit, $offset);
         $list = [];
+        if (!empty($names)) {
+            $this->returnArray = false;
+        }
         foreach ($data["items"] as &$entity) {
-            $list[] = $entity->toArray($names);
+            $list[] = $this->returnArray ? $entity : $entity->toArray($names);
         }
         return [
             'total' => $data['total'],
@@ -548,9 +587,12 @@ abstract class BaseRepository extends ServiceEntityRepository
         } else {
             $data = $this->search($filter, $order);
         }
+        if (!empty($names)) {
+            $this->returnArray = false;
+        }
         $list = [];
         foreach ($data["items"] as &$entity) {
-            $list[] = $entity->toArray($names);
+            $list[] = $this->returnArray ? $entity : $entity->toArray($names);
         }
         return $list;
     }
@@ -573,11 +615,11 @@ abstract class BaseRepository extends ServiceEntityRepository
             throw new Exception("$kv is uncompliance");
         }
         $result = $this->getArrayResult();
-        $retArray = [];
+        $items = [];
         $metaKey = array_slice($kv, 2);
         foreach ($result as $key => $value) {
-            $retArray[$key]['value'] = $value[$kv[0]];
-            $retArray[$key]['label'] = $value[$kv[1]];
+            $items[$key]['value'] = $value[$kv[0]];
+            $items[$key]['label'] = $value[$kv[1]];
             $meta = [];
             if (count($metaKey) > 0) {
                 foreach ($metaKey as $metaKeyItem) {
@@ -588,9 +630,9 @@ abstract class BaseRepository extends ServiceEntityRepository
                     }
                 }
             }
-            $retArray[$key]['meta'] = $meta;
+            $items[$key]['meta'] = $meta;
         }
-        return $retArray;
+        return $items;
     }
 
     // =========================================================================
@@ -707,7 +749,7 @@ abstract class BaseRepository extends ServiceEntityRepository
 
     public function getResult(): mixed
     {
-        return $this->logSql()->qb->getQuery()->getResult();
+        return $this->returnArray ? $this->getArrayResult() : $this->logSql()->qb->getQuery()->getResult();
     }
 
     public function getArrayResult(): array
@@ -734,6 +776,7 @@ abstract class BaseRepository extends ServiceEntityRepository
      */
     public function findEntities(array $where = [], $orderBy = null): mixed
     {
+
         try {
             $this->parseWhere($where)->orderBy($orderBy);
             return $this->getResult();
@@ -896,7 +939,7 @@ abstract class BaseRepository extends ServiceEntityRepository
      * @param array $ids
      * @return bool
      */
-    public function delete(array $ids): bool
+    public function delete(array $ids, bool $softDelte = false): bool
     {
         if (!$ids) return false;
         try {
@@ -945,8 +988,11 @@ abstract class BaseRepository extends ServiceEntityRepository
      * */
     public function flush(mixed $entities): mixed
     {
+        // 检查 EntityManager 是否关闭，关闭则重新获取
         if (!$this->em->isOpen()) {
-            Logger::log("em is closed");
+            Logger::log("em is closed, reopen it.");
+            $this->em = $this->getEntityManager();
+            return null;
         }
         if (!$entities) {
             Logger::error("flush entities is empty");
