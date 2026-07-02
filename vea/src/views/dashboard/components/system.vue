@@ -2,7 +2,7 @@
   <el-card>
     <template #header>
       <div class="flex justify-between">
-        <div><vea-icon icon-class="vea-system" /></div>
+        <div><bt-icon icon-class="bt-system" /></div>
         <div class="card-title w-full">{{ attrs.title }}</div>
         <div style="right: 14px;">
           <el-tag>在线:{{ onLineCount.onlineUserCount }}</el-tag>
@@ -10,7 +10,11 @@
       </div>
     </template>
     <div :style="contanierStyle">
-
+      <LabelCard label="Server">{{ cardData.serverInfo }}</LabelCard>
+      <LabelCard label="PHP">{{ cardData.phpVersion }}</LabelCard>
+      <LabelCard label="Vue3">{{ cardData.Vue3Version }}</LabelCard>
+      <LabelCard label="Redis">{{ cardData.RedisVerion }}</LabelCard>
+      <LabelCard label="Mysql">{{ cardData.MysqlVerion }}</LabelCard>
     </div>
   </el-card>
 
@@ -18,9 +22,10 @@
 
 <script setup lang="ts">
   import { useOnlineCount } from "@/composables";
-
+  import LabelCard from "@/components/LabelCard/index.vue";
+  import DashboardAPI from "@/api/dashboard";
   defineOptions({
-    name: "StaticsMonthlyYield",
+    name: "DashboardSystemCard",
   });
 
   const onLineCount = useOnlineCount();
@@ -32,6 +37,13 @@
   }>();
 
 
+  const cardData = reactive({
+    serverInfo: "127.0.0.1:8080",
+    phpVersion: "8.5",
+    Vue3Version: "3.5.34",
+    RedisVerion: "12.10.0",
+    MysqlVerion: "9.0.0"
+  })
 
   const contanierStyle = ref({
     height: props.maxHeight,
@@ -40,13 +52,16 @@
     minHeight: "300px"
   });
 
-
-  const { t } = useI18n();
-  const loading = ref(false);
-  const FullScreen = ref(false);
+  const handleQuery = async () => {
+    await DashboardAPI.systemInfo().then((data: any) => {
+      Object.assign(cardData, data);
+    }).catch((err: any) => {
+      console.log(err);
+    });
+  }
 
   onMounted(() => {
-
+    handleQuery();
   });
 
 </script>

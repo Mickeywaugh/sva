@@ -305,4 +305,34 @@ class BaseService
     {
         return $_ENV["APP_ENV"] == "dev" ? sprintf("http://localhost%s", $port) : "http://example.com";
     }
+
+     public static function getRedisVersion(): string
+    {
+        try {
+            $redis = \App\Service\RedisService::createClient();
+            $info = $redis->info('server');
+            return $info['redis_version'] ?? $info['Server']['redis_version'] ?? 'Unknown';
+        } catch (\Throwable) {
+            return 'Unknown';
+        }
+    }
+
+    public static function getMysqlVersion(): string
+    {
+        try {
+            // 利用 Doctrine Dbal 原生 SQL 查询获取 MySQL 版本
+            $conn = DbService::getConnection();
+            return $conn->fetchOne('SELECT VERSION()') ?: 'Unknown';
+        } catch (\Throwable) {
+            return 'Unknown';
+        }
+    }
+
+    public static function getOsInfo(): string {
+        try {
+            return php_uname();
+        } catch (\Throwable) {
+            return 'Unknown';
+        }
+    }
 }

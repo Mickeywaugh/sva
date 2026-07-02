@@ -75,7 +75,7 @@ class SysDeptRepository extends BaseRepository
                     // is there user in sysdepts
                     $userList = $em->getRepository(SysUser::class)->findBy(["deptId" => $id]);
                     if (count($userList) > 0) {
-                        throw new Exception("该部门下存在子部门，无法删除");
+                        Logger::log("该部门下存在用户，无法删除");
                         return false;
                     }
                     $em->remove($entity);
