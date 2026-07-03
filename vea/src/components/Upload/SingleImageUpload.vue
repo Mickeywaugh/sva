@@ -70,9 +70,8 @@
     },
   });
 
-  const modelValue = defineModel("modelValue", {
-    type: String,
-    default: () => "",
+  const modelValue = defineModel<string>("modelValue", {
+    default: "",
   });
 
   /**

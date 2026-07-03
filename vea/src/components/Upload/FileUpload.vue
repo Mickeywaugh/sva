@@ -104,8 +104,7 @@
       },
     },
   });
-  const modelValue = defineModel("modelValue", {
-    type: [Array] as PropType<FileInfo[]>,
+  const modelValue = defineModel<FileInfo[]>("modelValue", {
     required: true,
     default: () => [],
   });
