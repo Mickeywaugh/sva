@@ -32,7 +32,7 @@ class UserController extends BaseController
     #[Route('me', name: 'me', methods: ['GET'])]
     public function currentUserData(): JsonResponse
     {
-        $currUser = $this->currUser;
+        $currUser = $this->getCurrUser();
         if ($currUser) {
             try {
                 return $this->success($currUser->getUserInfo());
@@ -212,14 +212,14 @@ class UserController extends BaseController
             return $this->error("参数错误");
         }
         //验证旧密码
-        if (!$this->currUser->verifyPassword($oldPassword)) {
+        if (!$this->getCurrUser()->verifyPassword($oldPassword)) {
             return $this->error("旧密码错误");
         };
         if ($confirmPassword != $newPassword) {
             return $this->error("新密码和确认密码不一致");
         }
 
-        if ($this->userRepo->update($this->currUser->getId(), ["password" => $newPassword])) {
+        if ($this->userRepo->update($this->getCurrUser()->getId(), ["password" => $newPassword])) {
             return $this->success(msg: "重置密码成功");
         } else {
             return $this->error("重置密码失败");
@@ -264,8 +264,8 @@ class UserController extends BaseController
     #[Route('profile', name: 'getProfile', methods: ['GET'], requirements: ['id' => '\d+'])]
     public function getProfile(): JsonResponse
     {
-        if ($this->currUser) {
-            return $this->success($this->currUser->toArray());
+        if ($this->getCurrUser()) {
+            return $this->success($this->getCurrUser()->toArray());
         } else {
             return $this->error("获取失败");
         }
@@ -278,7 +278,7 @@ class UserController extends BaseController
         if (empty($data)) {
             return $this->error("参数错误");
         }
-        $user = $this->currUser;
+        $user = $this->getCurrUser();
         $user = $this->userRepo->update($user->getId(), $data);
         if ($user) {
             return $this->success($user->toArray());

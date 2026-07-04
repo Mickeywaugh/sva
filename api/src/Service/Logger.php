@@ -32,11 +32,12 @@ class Logger
     $backtrace = debug_backtrace(DEBUG_BACKTRACE_IGNORE_ARGS);
     $callerInfo = [];
     foreach ($backtrace as $index => $frame) {
+      if (!isset($frame['file'])) continue;
       $callerInfo[] = sprintf(
         "File %d: %s:%d %s()",
         $index,
         basename($frame['file']),
-        $frame['line'],
+        $frame['line'] ?? 0,
         $frame['function'] ?? 'index'
       );
     }

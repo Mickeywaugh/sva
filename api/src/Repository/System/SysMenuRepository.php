@@ -51,7 +51,6 @@ class SysMenuRepository extends BaseRepository
         $treeMenus = new ArrayCollection();
         $treeMenusArr = [];
         $menuList = $this->findBy(["parent" => $pnode], ["sort" => "ASC"]); //["visible" => 1]
-        if (!$menuList) return $retObj ? $treeMenus : $treeMenusArr;
         foreach ($menuList as $menu) {
             //跳过type =4的btn类型
             if ($menu->getType() == $without) continue;
@@ -82,33 +81,40 @@ class SysMenuRepository extends BaseRepository
         if ($userId) {
             //返回用户菜单树
             $user = $this->userRepo->find($userId);
-            if ($user->getUsername() == "root") {
-                return $this->getTree(null, false, 4);
+            Logger::log("userRoles", $user->getRoles());
+            // 角色为ROOT时返回所有菜单
+            if (in_array('ROOT', $user->getRoles())) {
+                return $this->getUserMenuTree([]);
             }
-            $roles = $user->getRoles();
-            $flatMenus = $user->getFlatMenus();
-            return $this->getUserMenuTree(null, $flatMenus, $roles);
+            return $this->getUserMenuTree($user->getFlatMenus());
         } else {
-            //返回菜单数组，去掉type=4的btn类型
-            return $this->getTree(null, false, 4);
+            return $this->getUserMenuTree(null);
         }
     }
 
     // 获取用户路由树
-    public function getUserMenuTree(?SysMenu $pnode, array $flatMenus, array $roles)
+    public function getUserMenuTree(?array $flatMenus = null, ?SysMenu $pnode = null)
     {
         $userMenuTree = [];
+        // 如果flatMenus为null，则返回空数组
+        if ($flatMenus == null) return $userMenuTree;
         $menus = $this->getTree($pnode, true, 4);
-        if (!$menus) return $userMenuTree;
         foreach ($menus as $menu) {
-            $id = $menu->getId();
-            if (in_array($id, $flatMenus)) {
+            if ($flatMenus) {
+                $id = $menu->getId();
+                if (in_array($id, $flatMenus)) {
+                    $childMenu = $menu->getRoute();
+                    $child = $menu->getChildren();
+                    if ($child) {
+                        $childMenu["children"] = $this->getUserMenuTree($flatMenus, $menu);
+                    }
+                    $userMenuTree[] = $childMenu;
+                }
+            } else {
                 $childMenu = $menu->getRoute();
-                $childMenu["meta"]["roles"] = $roles;
                 $child = $menu->getChildren();
                 if ($child) {
-                    unset($childMenu["redirect"]);
-                    $childMenu["children"] = $this->getUserMenuTree($menu, $flatMenus, $roles);
+                    $childMenu["children"] = $this->getUserMenuTree(null, $menu);
                 }
                 $userMenuTree[] = $childMenu;
             }

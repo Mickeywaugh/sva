@@ -30,6 +30,11 @@ class AuthService extends BaseService
         $this->requestStack = $_requestStack;
     }
 
+/**
+     * 获取当前用户。
+     * Worker 模式下绕过 TokenStorage（可能跨请求残留），
+     * 直接从 Request header 中解析 JWT token 获取 username。
+     */
     public function getCurrentUser(): ?SysUser
     {
         $payload = $this->getPayload();

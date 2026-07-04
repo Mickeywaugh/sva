@@ -73,7 +73,7 @@ class DeptController extends BaseController
     }
 
     #[Route('/{id}/form', name: 'get', methods: ['GET'])]
-    public function get($id): JsonResponse
+    public function get(int $id): JsonResponse
     {
         $dept = $this->deptRepo->find($id);
         if ($dept) {
@@ -84,7 +84,7 @@ class DeptController extends BaseController
     }
 
     #[Route('/{id}/status', name: 'setStatus', methods: ['PUT'])]
-    public function setStatus(Request $request, $id): JsonResponse
+    public function setStatus(Request $request,int $id): JsonResponse
     {
         $data = $request->toArray();
         if (empty($data)) {
@@ -99,7 +99,7 @@ class DeptController extends BaseController
     }
 
     #[Route('/{id}', name: 'update', methods: ['PUT'])]
-    public function update(Request $request, $id): JsonResponse
+    public function update(Request $request,int $id): JsonResponse
     {
         $data = $request->toArray();
         if (empty($data)) {
@@ -115,7 +115,7 @@ class DeptController extends BaseController
     }
 
     #[Route('/{ids}', name: 'delete', methods: ['DELETE'])]
-    public function delete($ids): JsonResponse
+    public function delete(string $ids): JsonResponse
     {
         if (empty($ids)) {
             return $this->error("参数错误");

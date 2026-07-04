@@ -58,7 +58,7 @@ class MenuController extends BaseController
     #[Route('/routes', name: 'routes', methods: ['GET'])]
     public function routes(): JsonResponse
     {
-        $currUser = $this->currUser;
+        $currUser = $this->getCurrUser();
         if ($currUser) {
             try {
                 //将当前用户id传入，获取用户菜单
@@ -112,6 +112,7 @@ class MenuController extends BaseController
     #[Route('/{id}', name: 'delete', methods: ['DELETE'])]
     public function delete(int $id): JsonResponse
     {
+        return $this->success([], "展示站点,菜单不允许删除");
         try {
             if ($this->menuRepo->delete([$id])) {
                 return $this->success();
@@ -126,6 +127,7 @@ class MenuController extends BaseController
     #[Route('/{id}', name: 'update', methods: ['PUT'])]
     public function update(int $id, Request $request): JsonResponse
     {
+        return $this->success([], "展示站点,菜单无法更新");
         $data = $request->toArray();
         if (empty($data)) {
             return $this->error("参数错误");

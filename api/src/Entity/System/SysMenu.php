@@ -278,9 +278,9 @@ class SysMenu extends BaseEntity
         return $this;
     }
 
-    public function getAlwaysShow(): ?int
+    public function getAlwaysShow(): ?bool
     {
-        return $this->alwaysShow;
+        return $this->alwaysShow ? true : false;
     }
 
     public function setAlwaysShow(?int $alwaysShow): static
@@ -342,10 +342,10 @@ class SysMenu extends BaseEntity
                 "keepAlive" => $this->getKeepAlive() ? true : false,
                 "blank" => $this->getBlank(),
                 "noAuth" => $this->getNoAuth(),
+                "alwaysShow" => $this->getAlwaysShow()
             ],
         ];
         if ($this->getRedirect())  $retRoute["redirect"] = $this->getRedirect();
-        if ($this->getAlwaysShow()) $retRoute["meta"]["alwaysShow"] = true;
         return $retRoute;
     }
 

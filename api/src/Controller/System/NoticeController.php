@@ -37,8 +37,8 @@ class NoticeController extends BaseController
   public function myPage(Request $request): JsonResponse
   {
     $params = $request->toArray();
-    if ($this->currUser) {
-      $params['userId'] = $this->currUser->getId();
+    if ($this->getCurrUser()) {
+      $params['userId'] = $this->getCurrUser()->getId();
     }
     $data = $this->userNoticeRepo->page($params);
     return $this->success($data);
@@ -51,8 +51,8 @@ class NoticeController extends BaseController
     if (empty($data)) {
       return $this->error("参数错误");
     }
-    $data["createBy"] = $this->currUser->getId();
-    $data["publisher"] = $this->currUser;
+    $data["createBy"] = $this->getCurrUser()->getId();
+    $data["publisher"] = $this->getCurrUser();
     $role = $this->noticeRepo->create($data);
     if ($role) {
       return $this->success($role->toArray());
@@ -117,11 +117,11 @@ class NoticeController extends BaseController
   #[Route('/read-all', name: 'read', methods: ['PUT'])]
   public function read(): JsonResponse
   {
-    if (!$this->currUser) {
+    if (!$this->getCurrUser()) {
       return $this->error("用户不存在");
     }
 
-    $this->userNoticeRepo->readAll($this->currUser->getId());
+    $this->userNoticeRepo->readAll($this->getCurrUser()->getId());
 
     return $this->success();
   }
