@@ -45,7 +45,13 @@ class SysMenuRepository extends BaseRepository
         return $menuTree;
     }
 
-    // 获取菜单树状结构,返回结构为实体树
+    /**
+     * 获取菜单树状结构
+     * @param SysMenu|null $pnode 父节点
+     * @param bool $retObj 是否返回对象
+     * @param int $without 跳过的菜单类型
+     * @return array|ArrayCollection
+     */
     public function getTree(?SysMenu $pnode = null, bool $retObj = true, int $without = 0): array|ArrayCollection
     {
         $treeMenus = new ArrayCollection();
@@ -81,14 +87,14 @@ class SysMenuRepository extends BaseRepository
         if ($userId) {
             //返回用户菜单树
             $user = $this->userRepo->find($userId);
-            Logger::log("userRoles", $user->getRoles());
-            // 角色为ROOT时返回所有菜单
+            $roles = $user->getRoles();            // 角色为ROOT时返回所有菜单
+            if (!$roles) return [];
             if (in_array('ROOT', $user->getRoles())) {
-                return $this->getUserMenuTree([]);
+                return $this->getUserMenuTree();
             }
             return $this->getUserMenuTree($user->getFlatMenus());
         } else {
-            return $this->getUserMenuTree(null);
+            return $this->getUserMenuTree();
         }
     }
 
@@ -97,7 +103,6 @@ class SysMenuRepository extends BaseRepository
     {
         $userMenuTree = [];
         // 如果flatMenus为null，则返回空数组
-        if ($flatMenus == null) return $userMenuTree;
         $menus = $this->getTree($pnode, true, 4);
         foreach ($menus as $menu) {
             if ($flatMenus) {
@@ -114,7 +119,7 @@ class SysMenuRepository extends BaseRepository
                 $childMenu = $menu->getRoute();
                 $child = $menu->getChildren();
                 if ($child) {
-                    $childMenu["children"] = $this->getUserMenuTree(null, $menu);
+                    $childMenu["children"] = $this->getUserMenuTree($flatMenus, $menu);
                 }
                 $userMenuTree[] = $childMenu;
             }

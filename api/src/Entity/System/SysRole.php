@@ -36,7 +36,7 @@ class SysRole extends BaseEntity
     /**
      *  @var Collection<int,SysMenu>
      */
-    #[ORM\ManyToMany(targetEntity: SysMenu::class, cascade: ['persist', 'remove'])]
+    #[ORM\ManyToMany(targetEntity: SysMenu::class, cascade: ['persist'])]
     #[ORM\JoinTable(name: 'sys_role_menu')]
     #[ORM\JoinColumn(name: 'role_id', referencedColumnName: 'id')]
     #[ORM\InverseJoinColumn(name: 'menu_id', referencedColumnName: 'id')]

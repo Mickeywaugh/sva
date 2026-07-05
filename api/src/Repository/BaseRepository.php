@@ -951,7 +951,7 @@ abstract class BaseRepository extends ServiceEntityRepository
                 };
             }
             $this->em->flush();
-            $this->em->commit();
+            // $this->em->commit(); //展示站点不提交事务
             return true;
         } catch (\Exception $e) {
             $this->em->rollback();

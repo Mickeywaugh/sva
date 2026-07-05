@@ -112,7 +112,6 @@ class MenuController extends BaseController
     #[Route('/{id}', name: 'delete', methods: ['DELETE'])]
     public function delete(int $id): JsonResponse
     {
-        return $this->success([], "展示站点,菜单不允许删除");
         try {
             if ($this->menuRepo->delete([$id])) {
                 return $this->success();
