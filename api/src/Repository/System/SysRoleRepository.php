@@ -49,6 +49,7 @@ class SysRoleRepository extends BaseRepository
         if (!$ids) return false;
         try {
             $em = $this->getEm();
+            $em->beginTransaction();
             foreach ($ids as $id) {
                 $entity = $this->find($id);
                 if ($entity) {
@@ -59,6 +60,7 @@ class SysRoleRepository extends BaseRepository
                 };
             }
             $em->flush();
+            $em->commit();
             return true;
         } catch (\Exception $e) {
             Logger::log($e->getMessage());
