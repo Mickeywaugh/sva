@@ -31,7 +31,7 @@ class RoleController extends BaseController
             $params['name'] = ["LIKE" => $keywords];
         }
         unset($params['keywords']);
-        $data = $this->roleRepo->page($params);
+        $data = $this->roleRepo->init()->page($params);
         return $this->success($data);
     }
 

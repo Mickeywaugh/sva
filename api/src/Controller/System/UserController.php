@@ -63,7 +63,7 @@ class UserController extends BaseController
             unset($params['roleId']);
             $data = $this->userRepo->join('t.userRoles', 'r')->page($params, ["time"]);
         } else {
-            $data = $this->userRepo->page($params, ["time"]);
+            $data = $this->userRepo->init()->page($params, ["time"]);
         }
         return $this->success($data);
     }
@@ -100,7 +100,7 @@ class UserController extends BaseController
         if (!isset($data['roleIds']) && !$data['roleIds']) {
             return $this->error("参数错误,缺少角色ID");
         } else {
-            $data['userRoles'] = $this->roleRepo->findEntities(["id" => ["IN" => $data['roleIds']]]);
+            $data['userRoles'] = $this->roleRepo->init()->findEntities(["id" => ["IN" => $data['roleIds']]]);
             unset($data['roleIds']);
         }
 
@@ -136,7 +136,7 @@ class UserController extends BaseController
         }
         unset($data['createTime']);
         if (isset($data['roleIds']) && $data['roleIds']) {
-            $data['userRoles'] = $this->roleRepo->findEntities(["id" => ["IN" => $data['roleIds']]]);
+            $data['userRoles'] = $this->roleRepo->init()->findEntities(["id" => ["IN" => $data['roleIds']]]);
             unset($data['roleIds']);
         }
 

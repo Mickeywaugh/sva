@@ -1,11 +1,16 @@
 .husky
 .vscode/sftp.json
 .git/
+
+
 api/api/config/jwt/public.pem
 api/api/config/jwt/private.pem
 api/.env
 api/var/
 api/vendor/
+api/composer.lock
+api/symfony.lock
+api/compose.override.yaml
 
 vea/node_modules
 vea/.DS_Store
