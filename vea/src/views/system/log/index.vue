@@ -22,15 +22,17 @@
         </div>
       </div>
       <el-table v-loading="loading" :data="pageData.list" highlight-current-row border>
-        <el-table-column label="操作时间" prop="createTime" width="180" />
-        <el-table-column label="操作人" prop="operator" width="120" />
-        <el-table-column label="日志模块" prop="module" width="100" />
-        <el-table-column label="日志内容" prop="content" min-width="200" />
-        <el-table-column label="IP 地址" prop="ip" width="150" />
-        <el-table-column label="地区" prop="region" width="150" />
-        <el-table-column label="浏览器" prop="browser" width="150" />
-        <el-table-column label="终端系统" prop="os" width="200" show-overflow-tooltip />
-        <el-table-column label="执行时间(ms)" prop="executionTime" width="150" />
+        <el-table-column label="操作时间" prop="createTime" />
+        <el-table-column label="操作人" prop="operator" />
+        <el-table-column label="请求路由" prop="requestUri" />
+        <el-table-column label="请求方法" prop="requestMethod" />
+        <el-table-column label="请求参数" prop="requestParams" />
+        <el-table-column label="响应码" prop="responseCode" />
+        <el-table-column label="IP 地址" prop="ip" />
+        <el-table-column label="地区" prop="region" />
+        <el-table-column label="浏览器" prop="browser" />
+        <el-table-column label="终端系统" prop="os" show-overflow-tooltip />
+        <el-table-column label="执行时间(ms)" prop="executionTime" />
       </el-table>
 
       <pagination v-if="pageData.total > 0" v-model:total="pageData.total" v-model:page="pageData.params.pageNum"

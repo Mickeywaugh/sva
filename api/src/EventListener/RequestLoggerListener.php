@@ -12,7 +12,7 @@ class RequestLoggerListener
 {
   private SysLogRepository $loggerRepo;
   private Agent $agent;
-  private float $startTime;
+  private float $startTime = 0;
   private bool $save = false;
   private ?SysLog $sysLog = null;
 
@@ -25,6 +25,8 @@ class RequestLoggerListener
 
   public function onKernelRequest(RequestEvent $reqEvent): void
   {
+    $this->startTime = microtime(true);
+
     if (!$this->save) {
       return;
     }
@@ -40,8 +42,6 @@ class RequestLoggerListener
     if (str_contains($request->getPathInfo(), '/auth/login') || str_contains($request->getPathInfo(), 'system/logs/page')) {
       return;
     }
-
-    $this->startTime = microtime(true);
 
     $logData = [
       'requestMethod'  => $request->getMethod(),

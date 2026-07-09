@@ -27,7 +27,7 @@ class SysLog extends Base
     private ?string $requestParams = null;
 
     #[ORM\Column(type: Types::INTEGER, nullable: true)]
-    private ?string $responsCode = null;
+    private ?string $responseCode = null;
 
     #[ORM\Column(length: 63, nullable: true)]
     private ?string $ip = null;
@@ -103,14 +103,14 @@ class SysLog extends Base
         return $this;
     }
 
-    public function getResponseCode(): int
+    public function getResponseCode(): ?int
     {
-        return $this->responsCode;
+        return $this->responseCode;
     }
 
-    public function setResponseCode(int $responsCode): static
+    public function setResponseCode(?int $responseCode): static
     {
-        $this->responsCode = $responsCode;
+        $this->responseCode = $responseCode;
         return $this;
     }
 
@@ -227,6 +227,7 @@ class SysLog extends Base
             'id' => $this->getId(),
             'requestMethod' => $this->getRequestMethod(),
             'requestUri' => $this->getRequestUri(),
+            'requestParams' => $this->getRequestParams(),
             'responseCode' => $this->getResponseCode(),
             'ip' => $this->getIp(),
             'region' => $this->getProvince() . "/" . $this->getCity(),
