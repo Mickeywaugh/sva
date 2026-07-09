@@ -25,7 +25,7 @@ class ConfigController extends BaseController
       $params['configName'] = ['LIKE' => $params['keywords']];
     }
     unset($params['keywords']);
-    $data = $this->configRepo->page($params);
+    $data = $this->configRepo->init()->page($params);
     return $this->success($data);
   }
 
@@ -45,8 +45,8 @@ class ConfigController extends BaseController
     }
   }
 
-  #[Route('/{id}', name: 'delete', methods: ['DELETE'])]
-  public function delete($id): JsonResponse
+  #[Route('/{id}', name: 'delete', methods: ['DELETE'], requirements: ['id' => '\d+'])]
+  public function delete(int $id): JsonResponse
   {
     if (empty($id)) {
       return $this->error("参数错误");
@@ -59,8 +59,8 @@ class ConfigController extends BaseController
     }
   }
   // 获取配置数据
-  #[Route('/{id}/form', name: 'get', methods: ['GET'])]
-  public function get($id): JsonResponse
+  #[Route('/{id}/form', name: 'get', methods: ['GET'], requirements: ['id' => '\d+'])]
+  public function get(int $id): JsonResponse
   {
     if (!$id) {
       return $this->error("参数错误");
@@ -75,7 +75,7 @@ class ConfigController extends BaseController
 
   //更新配置数据
   #[Route('/{id}', name: 'update', methods: ['PUT'], requirements: ['id' => '\d+'])]
-  public function update(Request $request, $id): JsonResponse
+  public function update(Request $request, int $id): JsonResponse
   {
     $data = $request->toArray();
     if (empty($data) || !$id) {

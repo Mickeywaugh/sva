@@ -23,7 +23,6 @@ class StatisticsController extends BaseController
     $startDate = $request->query->get('startDate');
     $endDate = $request->query->get('endDate');
     return $this->success(["dates" => [$startDate, $endDate], "pvList" => [], "ipList" => []]);
-    return $this->success($data);
   }
 
   #[Route('visits/overview', name: 'overview', methods: ['GET'])]

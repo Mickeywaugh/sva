@@ -27,7 +27,7 @@ class DeptController extends BaseController
         }
         unset($params['keywords']);
         try {
-            $deptList = $this->deptRepo->page($params);
+            $deptList = $this->deptRepo->init()->page($params);
             return $this->success($deptList);
         } catch (\Exception $e) {
             return $this->error("部门数据获取失败:" . $e->getMessage());

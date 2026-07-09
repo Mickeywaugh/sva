@@ -30,7 +30,7 @@ class DictController extends BaseController
         $params = $request->query->all();
         $dictList = [];
         try {
-            $dictList = $this->dictRepo->list($params, ["DictData"]);
+            $dictList = $this->dictRepo->init()->list($params, ["DictData"]);
             return $this->success($dictList);
         } catch (\Exception $e) {
             return $this->critical("字典数据获取失败:" . $e->getMessage());
@@ -56,7 +56,7 @@ class DictController extends BaseController
                 $params['name|dictCode'] = ["LIKE" => $params['keyword']];
             }
             unset($params['keyword']);
-            $page = $repo->page($params);
+            $page = $repo->init()->page($params);
             return $this->success($page);
         } catch (\Exception $e) {
             return $this->critical("字典数据获取失败:" . $e->getMessage());
@@ -99,7 +99,7 @@ class DictController extends BaseController
             }
             $entity = $repo->create($params);
         } else {
-            $entity = $repo->debug(true)->update($id, $params);
+            $entity = $repo->update($id, $params);
         }
         if (!$entity) {
             return $this->error("保存失败");

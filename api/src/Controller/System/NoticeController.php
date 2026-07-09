@@ -29,7 +29,7 @@ class NoticeController extends BaseController
     if (isset($params['title'])  && !empty($params['title'])) {
       $params['title'] = ["LIKE" => $params['title']];
     }
-    $data = $this->noticeRepo->page($params);
+    $data = $this->noticeRepo->init()->page($params);
     return $this->success($data);
   }
 
@@ -40,7 +40,7 @@ class NoticeController extends BaseController
     if ($this->getCurrUser()) {
       $params['userId'] = $this->getCurrUser()->getId();
     }
-    $data = $this->userNoticeRepo->page($params);
+    $data = $this->userNoticeRepo->init()->page($params);
     return $this->success($data);
   }
 
