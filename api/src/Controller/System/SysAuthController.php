@@ -6,7 +6,7 @@ use Symfony\Component\HttpFoundation\JsonResponse;
 use Symfony\Component\HttpFoundation\Request;
 use Symfony\Component\Routing\Attribute\Route;
 
-use Mickeywaugh\Captcha\CaptchaBuilder;
+use Gregwar\Captcha\CaptchaBuilder;
 use App\Controller\BaseController;
 use App\Service\AuthService;
 use App\Service\RedisService;
@@ -72,11 +72,11 @@ class SysAuthController extends BaseController
         }
     }
 
-    #[Route('/captcha', name: 'captcha', methods: ['POST', 'GET'])]
+    #[Route('/captcha', name: 'captcha', methods: ['GET'])]
     public function captcha(): JsonResponse
     {
-        $builder = new CaptchaBuilder;
-        $builder->setBackgroundColor(0, 0, 0, 127);
+        $builder = new captchaBuilder();
+        $builder->setBackgroundColor(0, 0, 0)->setBackgroundAlpha(127);
         $builder->build();
         $base64 = $builder->inline();
         $captchaPhrase = $builder->getPhrase(); //验证码
