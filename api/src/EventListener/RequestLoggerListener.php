@@ -34,7 +34,7 @@ class RequestLoggerListener
     if ($request->getMethod() === 'OPTIONS') {
       return;
     }
-    if ($request->getPathInfo() === '/api/v1/auth/login') {
+    if ($request->getPathInfo() === '/api/v1/system/auth/login') {
       return;
     }
     $this->startTime = microtime(true) * 1000;
