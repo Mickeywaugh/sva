@@ -5,7 +5,6 @@ namespace App\Entity\System;
 use App\Entity\Base;
 use App\Repository\System\SysLogRepository;
 use DateTimeImmutable;
-use DateTimeInterface;
 use Doctrine\DBAL\Types\Types;
 use Doctrine\ORM\Mapping as ORM;
 
@@ -18,8 +17,8 @@ class SysLog extends Base
     #[ORM\Column]
     private ?int $id = null;
 
-    #[ORM\Column(length: 50)]
-    private ?string $module = null;
+    #[ORM\Column(length: 255, nullable: true)]
+    private ?string $requestUri = null;
 
     #[ORM\Column(length: 63)]
     private ?string $requestMethod = null;
@@ -27,17 +26,8 @@ class SysLog extends Base
     #[ORM\Column(type: Types::TEXT, nullable: true)]
     private ?string $requestParams = null;
 
-    #[ORM\Column(type: Types::TEXT, nullable: true)]
-    private ?string $responseContent = null;
-
-    #[ORM\Column(type: Types::TEXT, nullable: true)]
-    private ?string $content = null;
-
-    #[ORM\Column(length: 255, nullable: true)]
-    private ?string $requestUri = null;
-
-    #[ORM\Column(length: 32, nullable: true)]
-    private ?string $method = null;
+    #[ORM\Column(type: Types::INTEGER, nullable: true)]
+    private ?string $responsCode = null;
 
     #[ORM\Column(length: 63, nullable: true)]
     private ?string $ip = null;
@@ -77,18 +67,6 @@ class SysLog extends Base
         return $this->id;
     }
 
-    public function getModule(): ?string
-    {
-        return $this->module;
-    }
-
-    public function setModule(string $module): static
-    {
-        $this->module = $module;
-
-        return $this;
-    }
-
     public function getRequestMethod(): ?string
     {
         return $this->requestMethod;
@@ -113,30 +91,6 @@ class SysLog extends Base
         return $this;
     }
 
-    public function getResponseContent(): ?string
-    {
-        return $this->responseContent;
-    }
-
-    public function setResponseContent(?string $responseContent): static
-    {
-        $this->responseContent = $responseContent;
-
-        return $this;
-    }
-
-    public function getContent(): ?string
-    {
-        return $this->content;
-    }
-
-    public function setContent(?string $content): static
-    {
-        $this->content = $content;
-
-        return $this;
-    }
-
     public function getRequestUri(): ?string
     {
         return $this->requestUri;
@@ -149,15 +103,14 @@ class SysLog extends Base
         return $this;
     }
 
-    public function getMethod(): ?string
+    public function getResponseCode(): int
     {
-        return $this->method;
+        return $this->responsCode;
     }
 
-    public function setMethod(?string $method): static
+    public function setResponseCode(int $responsCode): static
     {
-        $this->method = $method;
-
+        $this->responsCode = $responsCode;
         return $this;
     }
 
@@ -272,10 +225,9 @@ class SysLog extends Base
     {
         $retArray = [
             'id' => $this->getId(),
-            'module' => $this->getModule(),
-            'content' => $this->getContent(),
+            'requestMethod' => $this->getRequestMethod(),
             'requestUri' => $this->getRequestUri(),
-            'method' => $this->getMethod(),
+            'responseCode' => $this->getResponseCode(),
             'ip' => $this->getIp(),
             'region' => $this->getProvince() . "/" . $this->getCity(),
             "browser" => $this->getBrowser() . "/" . $this->getBrowserVersion(),
