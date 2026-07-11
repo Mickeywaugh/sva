@@ -15,7 +15,7 @@
         "lexik/jwt-authentication-bundle": "^3.2",
         "gregwar/captcha": "^2.1.0",
         "monolog/monolog": "^3.10",
-        "jenssegers/agent": "^2.1.0",
+        "jenssegers/agent": "^2.6.4",
         "predis/predis": "^3.5.1",
         "symfony/console": "8.1.*",
         "symfony/dotenv": "8.1.*",

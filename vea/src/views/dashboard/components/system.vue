@@ -2,7 +2,7 @@
   <el-card>
     <template #header>
       <div class="flex justify-between">
-        <div><bt-icon icon-class="bt-system" /></div>
+        <div><vea-icon icon-class="vea-system" /></div>
         <div class="card-title w-full">{{ attrs.title }}</div>
         <div style="right: 14px;">
           <el-tag>在线:{{ onLineCount.onlineUserCount }}</el-tag>

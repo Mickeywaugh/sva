@@ -62,7 +62,7 @@
                       <div v-icon="'vea-captcha'" />
                     </template>
                   </el-input>
-                  <div cursor-pointer h-44px w-140px flex-center @click="getCaptcha">
+                  <div cursor-pointer h-40px w-140px flex-center @click="getCaptcha">
                     <el-icon v-if="codeLoading" class="is-loading" size="20">
                       <Loading />
                     </el-icon>
@@ -151,8 +151,8 @@
   }));
 
   const getCaptcha = async () => {
-    console.log(codeLoading.value, captchaEnabled);
-    if (codeLoading.value || !captchaEnabled) return;
+    console.log(captchaEnabled);
+    if (codeLoading.value) return;
     codeLoading.value = true;
     AuthAPI.getCaptcha()
       .then((data: any) => {
