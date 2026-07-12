@@ -185,7 +185,7 @@
 
   import { Camera } from "@element-plus/icons-vue";
 
-  const userProfile = ref<UserProfileVO>({});
+  const userProfile = ref<UserProfileVO>({ id: 0 });
 
   const enum DialogType {
     ACCOUNT = "account",
@@ -204,7 +204,7 @@
   const mobileBindingFormRef = ref();
   const emailBindingFormRef = ref();
 
-  const userProfileForm = reactive<UserProfileForm>({});
+  const userProfileForm = reactive<UserProfileForm>({ id: 0 });
   const passwordChangeForm = reactive<PasswordChangeForm>({});
   const mobileUpdateForm = reactive<MobileUpdateForm>({});
   const emailUpdateForm = reactive<EmailUpdateForm>({});
@@ -438,167 +438,167 @@
 </script>
 
 <style lang="scss" scoped>
-  .profile-container {
-    min-height: calc(100vh - 84px);
-    padding: 20px;
-    background: var(--el-fill-color-blank);
-  }
+.profile-container {
+  min-height: calc(100vh - 84px);
+  padding: 20px;
+  background: var(--el-fill-color-blank);
+}
 
-  .user-card {
-    .user-info {
-      padding: 20px 0;
-      text-align: center;
+.user-card {
+  .user-info {
+    padding: 20px 0;
+    text-align: center;
 
-      .avatar-wrapper {
-        position: relative;
-        display: inline-block;
-        margin-bottom: 16px;
+    .avatar-wrapper {
+      position: relative;
+      display: inline-block;
+      margin-bottom: 16px;
 
-        .avatar-edit-btn {
-          position: absolute;
-          right: 0;
-          bottom: 0;
-          background: rgba(0, 0, 0, 0.5);
-          border: none;
-          transition: all 0.3s ease;
+      .avatar-edit-btn {
+        position: absolute;
+        right: 0;
+        bottom: 0;
+        background: rgba(0, 0, 0, 0.5);
+        border: none;
+        transition: all 0.3s ease;
 
-          &:hover {
-            background: rgba(0, 0, 0, 0.7);
-          }
-        }
-      }
-
-      .user-name {
-        margin-bottom: 8px;
-
-        .nickname {
-          font-size: 18px;
-          font-weight: 600;
-          color: var(--el-text-color-primary);
-        }
-
-        .edit-icon {
-          margin-left: 8px;
-          color: var(--el-text-color-secondary);
-          cursor: pointer;
-          transition: all 0.3s ease;
-
-          &:hover {
-            color: var(--el-color-primary);
-          }
-        }
-      }
-
-      .user-role {
-        font-size: 14px;
-        color: var(--el-text-color-secondary);
-      }
-    }
-
-    .user-stats {
-      display: flex;
-      justify-content: space-around;
-      padding: 16px 0;
-
-      .stat-item {
-        text-align: center;
-
-        .stat-value {
-          font-size: 20px;
-          font-weight: 600;
-          color: var(--el-text-color-primary);
-        }
-
-        .stat-label {
-          margin-top: 4px;
-          font-size: 12px;
-          color: var(--el-text-color-secondary);
+        &:hover {
+          background: rgba(0, 0, 0, 0.7);
         }
       }
     }
-  }
 
-  .info-card,
-  .security-card {
-    margin-bottom: 20px;
+    .user-name {
+      margin-bottom: 8px;
 
-    .card-header {
-      font-size: 16px;
-      font-weight: 600;
-      color: var(--el-text-color-primary);
-    }
-  }
-
-  .security-item {
-    display: flex;
-    align-items: center;
-    justify-content: space-between;
-    padding: 16px 0;
-
-    .security-info {
-      .security-title {
-        margin-bottom: 4px;
-        font-size: 16px;
-        font-weight: 500;
+      .nickname {
+        font-size: 18px;
+        font-weight: 600;
         color: var(--el-text-color-primary);
       }
 
-      .security-desc {
-        font-size: 14px;
+      .edit-icon {
+        margin-left: 8px;
+        color: var(--el-text-color-secondary);
+        cursor: pointer;
+        transition: all 0.3s ease;
+
+        &:hover {
+          color: var(--el-color-primary);
+        }
+      }
+    }
+
+    .user-role {
+      font-size: 14px;
+      color: var(--el-text-color-secondary);
+    }
+  }
+
+  .user-stats {
+    display: flex;
+    justify-content: space-around;
+    padding: 16px 0;
+
+    .stat-item {
+      text-align: center;
+
+      .stat-value {
+        font-size: 20px;
+        font-weight: 600;
+        color: var(--el-text-color-primary);
+      }
+
+      .stat-label {
+        margin-top: 4px;
+        font-size: 12px;
         color: var(--el-text-color-secondary);
       }
     }
   }
+}
 
-  .el-descriptions {
-    .el-descriptions__label {
+.info-card,
+.security-card {
+  margin-bottom: 20px;
+
+  .card-header {
+    font-size: 16px;
+    font-weight: 600;
+    color: var(--el-text-color-primary);
+  }
+}
+
+.security-item {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  padding: 16px 0;
+
+  .security-info {
+    .security-title {
+      margin-bottom: 4px;
+      font-size: 16px;
       font-weight: 500;
-      color: var(--el-text-color-regular);
-    }
-
-    .el-descriptions__content {
       color: var(--el-text-color-primary);
     }
 
-    .gender-icon {
-      margin-left: 8px;
-      font-size: 16px;
-
-      &.male {
-        color: #409eff;
-      }
-
-      &.female {
-        color: #f56c6c;
-      }
+    .security-desc {
+      font-size: 14px;
+      color: var(--el-text-color-secondary);
     }
   }
+}
 
-  .el-dialog {
-    .el-dialog__header {
-      padding: 20px;
-      margin: 0;
-      border-bottom: 1px solid var(--el-border-color-light);
-    }
-
-    .el-dialog__body {
-      padding: 30px 20px;
-    }
-
-    .el-dialog__footer {
-      padding: 20px;
-      border-top: 1px solid var(--el-border-color-light);
-    }
+.el-descriptions {
+  .el-descriptions__label {
+    font-weight: 500;
+    color: var(--el-text-color-regular);
   }
 
-  // 响应式适配
-  @media (max-width: 768px) {
-    .profile-container {
-      padding: 10px;
+  .el-descriptions__content {
+    color: var(--el-text-color-primary);
+  }
+
+  .gender-icon {
+    margin-left: 8px;
+    font-size: 16px;
+
+    &.male {
+      color: #409eff;
     }
 
-    .el-col {
-      width: 100%;
+    &.female {
+      color: #f56c6c;
     }
   }
+}
+
+.el-dialog {
+  .el-dialog__header {
+    padding: 20px;
+    margin: 0;
+    border-bottom: 1px solid var(--el-border-color-light);
+  }
+
+  .el-dialog__body {
+    padding: 30px 20px;
+  }
+
+  .el-dialog__footer {
+    padding: 20px;
+    border-top: 1px solid var(--el-border-color-light);
+  }
+}
+
+// 响应式适配
+@media (max-width: 768px) {
+  .profile-container {
+    padding: 10px;
+  }
+
+  .el-col {
+    width: 100%;
+  }
+}
 </style>

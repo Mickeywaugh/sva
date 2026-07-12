@@ -78,7 +78,6 @@ class DeptController extends BaseController
         }
         if ($id == 0) {
             unset($data["id"]);
-            Logger::log("create dept: " . json_encode($data));
             $dept = $this->deptRepo->create($data);
         } else {
             $dept = $this->deptRepo->update($id, $data);
