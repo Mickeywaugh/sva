@@ -20,29 +20,7 @@ class MenuController extends BaseController
         $this->menuRepo = $_MenuRepository;
     }
 
-    #[Route('', name: 'create', methods: ['POST'])]
-    public function create(Request $request): JsonResponse
-    {
-        $data = $request->toArray();
-        try {
-            $menu = SysMenu::create($data);
-            $parent = null;
-            if (isset($data["parentId"]) && $data["parentId"]) {
-                $parent = $this->menuRepo->find($data["parentId"]);
-            }
-            $menu->setParent($parent);
-            $menu = $this->menuRepo->flush($menu);
-            if ($menu) {
-                return $this->success($menu->toArray());
-            } else {
-                return $this->error("Failed");
-            }
-        } catch (\Exception $e) {
-            return $this->critical("Failed:" . $e->getMessage());
-        }
-    }
-
-    #[Route('', name: 'list', methods: ['GET'])]
+    #[Route('/list', name: 'list', methods: ['GET'])]
     public function list(): JsonResponse
     {
         $menuList = [];
@@ -98,7 +76,7 @@ class MenuController extends BaseController
         }
     }
 
-    #[Route('/{id}/form', name: 'get', methods: ['GET'])]
+    #[Route('/{id}', name: 'get', methods: ['GET'], requirements: ['id' => '\d+'])]
     public function get(int $id): JsonResponse
     {
         $menu = $this->menuRepo->findOneBy(['id' => $id]);
@@ -123,10 +101,10 @@ class MenuController extends BaseController
         }
     }
 
-    #[Route('/{id}', name: 'update', methods: ['PUT'])]
-    public function update(int $id, Request $request): JsonResponse
+    #[Route('/{id}', name: 'set', methods: ['POST'], requirements: ['id' => '\d+'])]
+    public function set(int $id, Request $request): JsonResponse
     {
-        return $this->success([], "展示站点,菜单无法更新");
+        // return $this->success([], "展示站点,菜单无法更新");
         $data = $request->toArray();
         if (empty($data)) {
             return $this->error("参数错误");
@@ -134,24 +112,14 @@ class MenuController extends BaseController
         if (isset($data["parentId"]) && $data["parentId"] > 0) {
             $data["parent"] = $this->menuRepo->find($data["parentId"]);
         }
-        $menu = $this->menuRepo->update($id, $data);
+        if ($id == 0) {
+            unset($data["id"]);
+            $menu = $this->menuRepo->create($data);
+        } else {
+            $menu = $this->menuRepo->update($id, $data);
+        }
         if ($menu) {
             return $this->success($menu->toArray());
-        } else {
-            return $this->error("Failed");
-        }
-    }
-
-    #[Route('/{id}/status', name: 'setStatus', methods: ['PUT'])]
-    public function setStatus(Request $request, int $id): JsonResponse
-    {
-        $data = $request->toArray();
-        if (empty($data)) {
-            return $this->error("参数错误");
-        }
-        $dept = $this->menuRepo->update($id, $data);
-        if ($dept) {
-            return $this->success($dept->toArray());
         } else {
             return $this->error("Failed");
         }

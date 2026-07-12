@@ -36,7 +36,6 @@ class ConfigController extends BaseController
     if (empty($data)) {
       return $this->error("参数错误");
     }
-    $data["createBy"] = $this->getUser()->getUserIdentifier();
     $config = $this->configRepo->create($data);
     if ($config) {
       return $this->success($config->toArray());
@@ -45,21 +44,9 @@ class ConfigController extends BaseController
     }
   }
 
-  #[Route('/{id}', name: 'delete', methods: ['DELETE'], requirements: ['id' => '\d+'])]
-  public function delete(int $id): JsonResponse
-  {
-    if (empty($id)) {
-      return $this->error("参数错误");
-    }
-    $config = $this->configRepo->delete([$id]);
-    if ($config) {
-      return $this->success([$id]);
-    } else {
-      return $this->error("删除失败");
-    }
-  }
+
   // 获取配置数据
-  #[Route('/{id}/form', name: 'get', methods: ['GET'], requirements: ['id' => '\d+'])]
+  #[Route('/{id}', name: 'get', methods: ['GET'], requirements: ['id' => '\d+'])]
   public function get(int $id): JsonResponse
   {
     if (!$id) {
@@ -73,19 +60,37 @@ class ConfigController extends BaseController
     }
   }
 
-  //更新配置数据
-  #[Route('/{id}', name: 'update', methods: ['PUT'], requirements: ['id' => '\d+'])]
-  public function update(Request $request, int $id): JsonResponse
+  //新增或修改配置数据
+  #[Route('/{id}', name: 'set', methods: ['POST'], requirements: ['id' => '\d+'])]
+  public function set(int $id, Request $request): JsonResponse
   {
     $data = $request->toArray();
-    if (empty($data) || !$id) {
-      return $this->error("参数错误");
+    if ($id == 0) {
+      unset($data["id"]);
+      $data["createBy"] = $this->getCurrUser()->getUsername();
+      $config = $this->configRepo->create($data);
+    } else {
+      $data["updateBy"] = $this->getCurrUser()->getUsername();
+      $config = $this->configRepo->update($id, $data);
     }
-    $config = $this->configRepo->update($id, $data);
     if ($config) {
       return $this->success($config->toArray());
     } else {
       return $this->error("更新失败");
+    }
+  }
+
+  #[Route('/{id}', name: 'delete', methods: ['DELETE'], requirements: ['id' => '\d+'])]
+  public function delete(int $id): JsonResponse
+  {
+    if (empty($id)) {
+      return $this->error("参数错误");
+    }
+    $result = $this->configRepo->delete([$id]);
+    if ($result) {
+      return $this->success([$id]);
+    } else {
+      return $this->error("删除失败");
     }
   }
 

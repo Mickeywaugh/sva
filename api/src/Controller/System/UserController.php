@@ -90,32 +90,6 @@ class UserController extends BaseController
         return $this->success($data);
     }
 
-    #[Route('create', name: 'create', methods: ['POST'])]
-    public function create(Request $request): JsonResponse
-    {
-        $data = $request->toArray();
-        if (empty($data)) {
-            return $this->error("参数错误");
-        }
-        if (!isset($data['roleIds']) && !$data['roleIds']) {
-            return $this->error("参数错误,缺少角色ID");
-        } else {
-            $data['userRoles'] = $this->roleRepo->init()->findEntities(["id" => ["IN" => $data['roleIds']]]);
-            unset($data['roleIds']);
-        }
-
-        if (isset($data['dept']) && $data['dept']) {
-            $data['dept'] = $this->deptRepo->find($data['dept']);
-        }
-
-        $user = $this->userRepo->create($data);
-        if ($user) {
-            return $this->success($user->toArray());
-        } else {
-            return $this->error("创建用户失败");
-        }
-    }
-
     #[Route('{id}/form', name: 'user.get', methods: ['GET'], requirements: ['id' => '\d+'])]
     public function get(int $id): JsonResponse
     {
@@ -127,14 +101,14 @@ class UserController extends BaseController
         }
     }
 
-    #[Route('{id}', name: 'update', methods: ['PUT'], requirements: ['id' => '\d+'])]
-    public function update(int $id, Request $request): JsonResponse
+    #[Route('{id}', name: 'set', methods: ['POST'], requirements: ['id' => '\d+'])]
+    public function set(int $id, Request $request): JsonResponse
     {
         $data = $request->toArray();
         if (empty($data)) {
             return $this->error("参数错误");
         }
-        unset($data['createTime']);
+
         if (isset($data['roleIds']) && $data['roleIds']) {
             $data['userRoles'] = $this->roleRepo->init()->findEntities(["id" => ["IN" => $data['roleIds']]]);
             unset($data['roleIds']);
@@ -143,26 +117,16 @@ class UserController extends BaseController
         if (isset($data['dept']) && $data['dept']) {
             $data['dept'] = $this->deptRepo->find($data['dept']);
         }
-        $user = $this->userRepo->updateUser($id, $data);
+        if ($id == 0) {
+            unset($data["id"]);
+            $user = $this->userRepo->create($data);
+        } else {
+            $user = $this->userRepo->updateUser($id, $data);
+        }
         if ($user) {
             return $this->success($user->toArray());
         } else {
-            return $this->error("更新失败");
-        }
-    }
-
-    #[Route('{id}/status', name: 'setStatus', methods: ['PUT'], requirements: ['id' => '\d+'])]
-    public function setStatus(int $id, Request $request): JsonResponse
-    {
-        $data = $request->toArray();
-        if (empty($data)) {
-            return $this->error("参数错误");
-        }
-        $dept = $this->userRepo->update($id, $data);
-        if ($dept) {
-            return $this->success($dept->toArray());
-        } else {
-            return $this->error("更新失败");
+            return $this->error("操作失败");
         }
     }
 

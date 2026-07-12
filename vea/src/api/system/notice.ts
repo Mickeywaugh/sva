@@ -18,37 +18,23 @@ const NoticeAPI = {
    * @param id NoticeID
    * @returns Notice表单数据
    */
-  getFormData(id: number) {
+  get(id: number) {
     return request<any, NoticeForm>({
-      url: `${NOTICE_BASE_URL}/${id}/form`,
+      url: `${NOTICE_BASE_URL}/${id}`,
       method: "get",
     });
   },
-
   /**
    * 添加通知公告
-   *
-   * @param data Notice表单数据
-   * @returns
-   */
-  add(data: NoticeForm) {
-    return request({
-      url: `${NOTICE_BASE_URL}`,
-      method: "post",
-      data,
-    });
-  },
-
-  /**
    * 更新通知公告
    *
    * @param id NoticeID
    * @param data Notice表单数据
    */
-  update(id: number, data: NoticeForm) {
+  set(id: number, data: NoticeForm) {
     return request({
       url: `${NOTICE_BASE_URL}/${id}`,
-      method: "put",
+      method: "post",
       data,
     });
   },
@@ -97,7 +83,7 @@ const NoticeAPI = {
    */
   getDetail(id: number) {
     return request<any, NoticeDetail>({
-      url: `${NOTICE_BASE_URL}/${id}/detail`,
+      url: `${NOTICE_BASE_URL}/detail/${id}`,
       method: "get",
     });
   },
@@ -128,7 +114,7 @@ export default NoticeAPI;
 /** 通知表单对象 */
 export interface NoticeForm {
   /** 通知ID */
-  id?: number;
+  id: number;
   /** 通知标题 */
   title?: string;
   /** 通知内容 */

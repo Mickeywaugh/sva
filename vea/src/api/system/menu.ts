@@ -23,9 +23,9 @@ const MenuAPI = {
    * @param queryParams 查询参数
    * @returns 菜单树形列表
    */
-  getList(queryParams: MenuQuery) {
+  getTree(queryParams: MenuQuery) {
     return request<any, MenuItem[]>({
-      url: `${MENU_BASE_URL}`,
+      url: `${MENU_BASE_URL}/list`,
       method: "get",
       params: queryParams,
     });
@@ -58,38 +58,25 @@ const MenuAPI = {
    *
    * @param id 菜单ID
    */
-  getFormData(id: number) {
+  get(id: number) {
     return request<any, MenuForm>({
-      url: `${MENU_BASE_URL}/${id}/form`,
+      url: `${MENU_BASE_URL}/${id}`,
       method: "get",
     });
   },
 
-  /**
+  /** 
    * 添加菜单
-   *
-   * @param data 菜单表单数据
-   * @returns 请求结果
-   */
-  add(data: MenuForm) {
-    return request({
-      url: `${MENU_BASE_URL}`,
-      method: "post",
-      data,
-    });
-  },
-
-  /**
    * 修改菜单
    *
    * @param id 菜单ID
    * @param data 菜单表单数据
    * @returns 请求结果
    */
-  update(id: number, data: MenuForm) {
+  set(id: number, data: MenuForm) {
     return request({
       url: `${MENU_BASE_URL}/${id}`,
-      method: "put",
+      method: "post",
       data,
     });
   },
@@ -100,7 +87,7 @@ const MenuAPI = {
    * @param id 菜单ID
    * @returns 请求结果
    */
-  deleteById(id: number) {
+  delete(id: number) {
     return request({
       url: `${MENU_BASE_URL}/${id}`,
       method: "delete",
@@ -161,7 +148,7 @@ export interface MenuItem {
 /** 菜单表单对象 */
 export interface MenuForm {
   /** 菜单ID */
-  id?: number;
+  id: number;
   /** 父菜单ID */
   parentId?: number;
   /** 菜单名称 */

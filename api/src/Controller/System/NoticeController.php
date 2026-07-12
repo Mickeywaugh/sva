@@ -44,55 +44,30 @@ class NoticeController extends BaseController
     return $this->success($data);
   }
 
-  #[Route('', name: 'create', methods: ['POST'])]
-  public function create(Request $request): JsonResponse
+  #[Route('/{id}', name: 'set', methods: ['POST'], requirements: ['id' => '\d+'])]
+  public function set(int $id, Request $request): JsonResponse
   {
     $data = $request->toArray();
     if (empty($data)) {
       return $this->error("参数错误");
     }
-    $data["createBy"] = $this->getCurrUser()->getId();
-    $data["publisher"] = $this->getCurrUser();
-    $role = $this->noticeRepo->create($data);
-    if ($role) {
-      return $this->success($role->toArray());
+    if ($id == 0) {
+      unset($data["id"]);
+      $data["createBy"] = $this->getCurrUser()->getUsername();
+      $notice = $this->noticeRepo->create($data);
+    } else {
+      $notice = $this->noticeRepo->update($id, $data);
+      $data["publisher"] = $this->getCurrUser();
+    }
+    if ($notice) {
+      return $this->success($notice->toArray());
     } else {
       return $this->error();
     }
   }
 
-  #[Route('/{id}', name: 'update', methods: ['PUT'])]
-  public function update(Request $request, int $id): JsonResponse
-  {
-    $data = $request->toArray();
-    if (empty($data)) {
-      return $this->error("参数错误");
-    }
-    $role = $this->noticeRepo->update($id, $data);
-    if ($role) {
-      return $this->success($role->toArray());
-    } else {
-      return $this->error();
-    }
-  }
-
-  #[Route('/{id}/status', name: 'setStatus', methods: ['PUT'])]
-  public function setStatus(int $id, Request $request): JsonResponse
-  {
-    $data = $request->toArray();
-    if (empty($data)) {
-      return $this->error("参数错误");
-    }
-    $dept = $this->noticeRepo->update($id, $data);
-    if ($dept) {
-      return $this->success($dept->toArray());
-    } else {
-      return $this->error("更新失败");
-    }
-  }
-
-  #[Route('/{id}/form', name: 'getFormData', methods: ['GET'])]
-  public function getFormData(int $id): JsonResponse
+  #[Route('/{id}', name: 'get', methods: ['GET'], requirements: ['id' => '\d+'])]
+  public function get(int $id): JsonResponse
   {
     $data = $this->noticeRepo->find($id);
     if ($data) {
@@ -103,7 +78,7 @@ class NoticeController extends BaseController
   }
 
 
-  #[Route('/{id}/detail', name: 'getFormData', methods: ['GET'])]
+  #[Route('/detail/{id}', name: 'getFormData', methods: ['GET'])]
   public function getDetail(int $id): JsonResponse
   {
     $data = $this->noticeRepo->find($id);

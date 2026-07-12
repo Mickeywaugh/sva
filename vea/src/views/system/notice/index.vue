@@ -109,30 +109,30 @@
 
     <!-- 通知公告表单弹窗 -->
     <el-dialog v-model="dialog.visible" :title="dialog.title" top="3vh" width="80%" @close="handleCloseDialog">
-      <el-form ref="dataFormRef" :model="formData" :rules="rules" label-width="100px">
+      <el-form ref="dataFormRef" :model="dialog.formData" :rules="rules" label-width="100px">
         <el-form-item label="通知标题" prop="title">
-          <el-input v-model="formData.title" placeholder="通知标题" clearable />
+          <el-input v-model="dialog.formData.title" placeholder="通知标题" clearable />
         </el-form-item>
 
         <el-form-item label="通知类型" prop="type">
-          <Dict v-model="formData.type" code="notice_type" />
+          <Dict v-model="dialog.formData.type" code="notice_type" />
         </el-form-item>
         <el-form-item label="通知等级" prop="level">
-          <Dict v-model="formData.level" code="notice_level" />
+          <Dict v-model="dialog.formData.level" code="notice_level" />
         </el-form-item>
         <el-form-item label="目标类型" prop="targetType">
-          <el-radio-group v-model="formData.targetType">
+          <el-radio-group v-model="dialog.formData.targetType">
             <el-radio :value="1">全体</el-radio>
             <el-radio :value="2">指定</el-radio>
           </el-radio-group>
         </el-form-item>
-        <el-form-item v-if="formData.targetType == 2" label="指定用户" prop="targetUserIds">
-          <el-select v-model="formData.targetUserIds" multiple search placeholder="请选择指定用户">
+        <el-form-item v-if="dialog.formData.targetType == 2" label="指定用户" prop="targetUserIds">
+          <el-select v-model="dialog.formData.targetUserIds" multiple search placeholder="请选择指定用户">
             <el-option v-for="item in userOptions" :key="item.value" :label="item.label" :value="item.value" />
           </el-select>
         </el-form-item>
         <el-form-item label="通知内容" prop="content">
-          <WangEditor v-model="formData.content" height="500px" />
+          <WangEditor v-model="dialog.formData.content" height="500px" />
         </el-form-item>
       </el-form>
       <template #footer>
@@ -213,12 +213,11 @@
   const dialog = reactive({
     title: "",
     visible: false,
-  });
-
-  // 通知公告表单数据
-  const formData = reactive<NoticeForm>({
-    level: "L", // 默认优先级为低
-    targetType: 1, // 默认目标类型为全体
+    formData: {
+      id: 0,
+      level: "L", // 默认优先级为低
+      targetType: 1, // 默认目标类型为全体
+    } as NoticeForm
   });
 
   // 通知公告表单校验规则
@@ -247,7 +246,7 @@
   const currentNotice = ref<NoticeDetail>({});
 
   // 查询通知公告
-  function handleQuery() {
+  const handleQuery = () => {
     loading.value = true;
     NoticeAPI.getPage(pageData.params)
       .then((data: PageResult<NoticeItem>) => {
@@ -256,22 +255,22 @@
       .finally(() => {
         loading.value = false;
       });
-  }
+  };
 
   // 重置查询
-  function handleResetQuery() {
+  const handleResetQuery = () => {
     queryFormRef.value!.resetFields();
     pageData.params.pageNum = 1;
     handleQuery();
-  }
+  };
 
   // 行复选框选中项变化
-  function handleSelectionChange(selection: any) {
+  const handleSelectionChange = (selection: any) => {
     selectIds.value = selection.map((item: any) => item.id);
-  }
+  };
 
   // 打开通知公告弹窗
-  function handleOpenDialog(id?: number) {
+  const handleOpenDialog = (id?: number) => {
     UserAPI.getOptions().then((data: any) => {
       userOptions.value = data;
     });
@@ -279,74 +278,63 @@
     dialog.visible = true;
     if (id) {
       dialog.title = "修改公告";
-      NoticeAPI.getFormData(id).then((data: any) => {
-        Object.assign(formData, data);
+      NoticeAPI.get(id).then((data: any) => {
+        Object.assign(dialog.formData, data);
       });
     } else {
-      Object.assign(formData, { level: 0, targetType: 0 });
+      Object.assign(dialog.formData, { level: 0, targetType: 0 });
       dialog.title = "新增公告";
     }
-  }
+  };
 
   // 发布通知公告
-  function handlePublish(id: number) {
+  const handlePublish = (id: number) => {
     NoticeAPI.publish(id).then(() => {
       ElMessage.success("发布成功");
       handleQuery();
     });
-  }
+  };
 
   // 撤回通知公告
-  function handleRevoke(id: number) {
+  const handleRevoke = (id: number) => {
     NoticeAPI.revoke(id).then(() => {
       ElMessage.success("撤回成功");
       handleQuery();
     });
-  }
+  };
 
   // 通知公告表单提交
-  function handleSubmit() {
+  const handleSubmit = () => {
     dataFormRef.value.validate((valid: any) => {
       if (valid) {
         loading.value = true;
-        const id = formData.id;
-        if (id) {
-          NoticeAPI.update(id, formData)
-            .then(() => {
-              ElMessage.success("修改成功");
-              handleCloseDialog();
-              handleResetQuery();
-            })
-            .finally(() => (loading.value = false));
-        } else {
-          NoticeAPI.add(formData)
-            .then(() => {
-              ElMessage.success("新增成功");
-              handleCloseDialog();
-              handleResetQuery();
-            })
-            .finally(() => (loading.value = false));
-        }
+        NoticeAPI.set(dialog.formData.id, dialog.formData)
+          .then(() => {
+            ElMessage.success("修改成功");
+            handleCloseDialog();
+            handleResetQuery();
+          })
+          .finally(() => (loading.value = false));
       }
     });
-  }
+  };
 
   // 重置表单
-  function resetForm() {
+  const resetForm = () => {
     dataFormRef.value.resetFields();
     dataFormRef.value.clearValidate();
-    formData.id = undefined;
-    formData.targetType = 1;
-  }
+    dialog.formData.id = 0;
+    dialog.formData.targetType = 1;
+  };
 
   // 关闭通知公告弹窗
-  function handleCloseDialog() {
+  const handleCloseDialog = () => {
     dialog.visible = false;
     resetForm();
-  }
+  };
 
   // 删除通知公告
-  function handleDelete(id?: number) {
+  const handleDelete = (id?: number) => {
     const deleteIds = [id || selectIds.value].join(",");
     if (!deleteIds) {
       ElMessage.warning("请勾选删除项");
@@ -371,7 +359,7 @@
         ElMessage.info("已取消删除");
       }
     );
-  }
+  };
 
   const closeDetailDialog = () => {
     detailDialog.visible = false;

@@ -52,32 +52,25 @@ const RoleAPI = {
    * @param id 角色ID
    * @returns 角色表单数据
    */
-  getFormData(id: number) {
+  get(id: number) {
     return request<any, RoleForm>({
-      url: `${ROLE_BASE_URL}/${id}/form`,
+      url: `${ROLE_BASE_URL}/${id}`,
       method: "get",
     });
   },
 
-  /** 添加角色 */
-  add(data: RoleForm) {
-    return request({
-      url: `${ROLE_BASE_URL}`,
-      method: "post",
-      data: data,
-    });
-  },
 
   /**
    * 更新角色
+   * 添加角色
    *
    * @param id 角色ID
    * @param data 角色表单数据
    */
-  update(id: number, data: RoleForm) {
+  set(id: number, data: RoleForm) {
     return request({
       url: `${ROLE_BASE_URL}/${id}`,
-      method: "put",
+      method: "post",
       data: data,
     });
   },
@@ -93,34 +86,14 @@ const RoleAPI = {
       method: "delete",
     });
   },
-  /**
-   * 更改状态
-   */
-  setStatus(id: number, data: any) {
-    return request({
-      url: `${ROLE_BASE_URL}/${id}/status`,
-      method: "put",
-      data: data,
-    });
-  },
 };
 
 export default RoleAPI;
 
 /** 角色分页对象 */
-export interface RoleItem {
+export interface RoleItem extends RoleForm {
   /** 角色编码 */
-  code?: string;
-  /** 角色ID */
-  id?: number;
-  /** 角色名称 */
-  name?: string;
-  /** 排序 */
-  sort?: number;
-  /** 角色状态 */
-  status?: number;
   userCount?: number;
-  dataScope?: number; // 数据权限
   /** 创建时间 */
   createTime?: Date;
   /** 修改时间 */
@@ -130,7 +103,7 @@ export interface RoleItem {
 /** 角色表单对象 */
 export interface RoleForm {
   /** 角色ID */
-  id?: number;
+  id: number;
   /** 角色编码 */
   code?: string;
   /** 数据权限 */

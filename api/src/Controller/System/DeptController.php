@@ -4,6 +4,7 @@ namespace App\Controller\System;
 
 use App\Controller\BaseController;
 use App\Repository\System\SysDeptRepository;
+use App\Service\Logger;
 use Symfony\Component\HttpFoundation\JsonResponse;
 use Symfony\Component\HttpFoundation\Request;
 use Symfony\Component\Routing\Attribute\Route;
@@ -46,8 +47,20 @@ class DeptController extends BaseController
         }
     }
 
-    #[Route('', name: 'create', methods: ['POST'])]
-    public function create(Request $request): JsonResponse
+    #[Route('/{id}', name: 'get', methods: ['GET'], requirements: ['id' => '\d+'])]
+    public function get(int $id): JsonResponse
+    {
+        $dept = $this->deptRepo->find($id);
+        if ($dept) {
+            return $this->success($dept->toArray());
+        } else {
+            return $this->error("获取部门数据失败");
+        }
+    }
+
+
+    #[Route('/{id}', name: 'set', methods: ['POST'], requirements: ['id' => '\d+'])]
+    public function set(int $id, Request $request): JsonResponse
     {
         $data = $request->toArray();
         if (empty($data)) {
@@ -63,54 +76,17 @@ class DeptController extends BaseController
             }
             $data["parent"] = $parentDept;
         }
-
-        $dept = $this->deptRepo->create($data);
+        if ($id == 0) {
+            unset($data["id"]);
+            Logger::log("create dept: " . json_encode($data));
+            $dept = $this->deptRepo->create($data);
+        } else {
+            $dept = $this->deptRepo->update($id, $data);
+        }
         if ($dept) {
             return $this->success($dept->toArray());
         } else {
-            return $this->error("部门创建失败");
-        }
-    }
-
-    #[Route('/{id}/form', name: 'get', methods: ['GET'])]
-    public function get(int $id): JsonResponse
-    {
-        $dept = $this->deptRepo->find($id);
-        if ($dept) {
-            return $this->success($dept->toArray());
-        } else {
-            return $this->error("获取部门数据失败");
-        }
-    }
-
-    #[Route('/{id}/status', name: 'setStatus', methods: ['PUT'])]
-    public function setStatus(Request $request,int $id): JsonResponse
-    {
-        $data = $request->toArray();
-        if (empty($data)) {
-            return $this->error("参数错误");
-        }
-        $dept = $this->deptRepo->update($id, $data);
-        if ($dept) {
-            return $this->success($dept->toArray());
-        } else {
-            return $this->error("更新失败");
-        }
-    }
-
-    #[Route('/{id}', name: 'update', methods: ['PUT'])]
-    public function update(Request $request,int $id): JsonResponse
-    {
-        $data = $request->toArray();
-        if (empty($data)) {
-            return $this->error("参数错误1");
-        }
-
-        $dept = $this->deptRepo->update($id, $data);
-        if ($dept) {
-            return $this->success($dept->toArray());
-        } else {
-            return $this->error("更新失败");
+            return $this->error("操作失败");
         }
     }
 

@@ -67,7 +67,7 @@
         <el-table-column :label="t('common.status')" align="center" prop="status" width="90">
           <template #default="{ row }">
             <el-switch v-model="row.status" :active-value="1" :inactive-value="0" inline-prompt :active-text="$t('common.enable')"
-              :inactive-text="$t('common.disable')" :before-change="() => handleFieldChange(row, { status: Number(!row.status) })" />
+              :inactive-text="$t('common.disable')" :before-change="() => handleFieldChange(row as SysUserItem, { status: Number(!row.status) })" />
           </template>
         </el-table-column>
         <el-table-column :label="t('common.createTime')" align="center" prop="createTime" width="180" />
@@ -95,44 +95,44 @@
 
     <!-- 用户表单 -->
     <el-drawer v-model="dialog.visible" :title="dialog.title" append-to-body @close="handleCloseDialog">
-      <el-form ref="userFormRef" :model="formData" :rules="rules" label-width="90px">
+      <el-form ref="userFormRef" :model="dialog.formData" :rules="rules" label-width="90px">
         <el-form-item :label="$t('sys.user.name')" prop="username">
-          <el-input v-model="formData.username" :readonly="!!formData.id"
+          <el-input v-model="dialog.formData.username" :readonly="!!dialog.formData.id"
             :placeholder="$t('common.please.input', { s: $t('sys.user.name') })" />
         </el-form-item>
 
         <el-form-item :label="$t('sys.user.nickName')" prop="nickname">
-          <el-input v-model="formData.nickname" :placeholder="$t('common.please.input', { s: $t('sys.user.nickName') })
+          <el-input v-model="dialog.formData.nickname" :placeholder="$t('common.please.input', { s: $t('sys.user.nickName') })
             " />
         </el-form-item>
 
         <el-form-item :label="$t('sys.user.gender')" prop="gender">
-          <Dict v-model="formData.gender" type="radio" code="gender" />
+          <Dict v-model="dialog.formData.gender" type="radio" code="gender" />
         </el-form-item>
 
         <el-form-item :label="$t('sys.role.node')" prop="roleIds">
-          <el-select v-model="formData.roleIds" multiple :placeholder="$t('common.please.select')">
+          <el-select v-model="dialog.formData.roleIds" multiple :placeholder="$t('common.please.select')">
             <el-option v-for="item in roleOptions" :key="item.value" :label="item.label" :value="item.value" />
           </el-select>
         </el-form-item>
 
         <el-form-item :label="$t('sys.dept.node')" prop="dept">
-          <el-tree-select v-model="formData.dept" :placeholder="$t('common.please.select', { s: $t('sys.dept.node') })
+          <el-tree-select v-model="dialog.formData.dept" :placeholder="$t('common.please.select', { s: $t('sys.dept.node') })
             " :data="deptOptions" filterable check-strictly :render-after-expand="false" />
         </el-form-item>
 
         <el-form-item :label="$t('sys.user.mobile')" prop="mobile">
-          <el-input v-model="formData.mobile" :placeholder="$t('common.please.input', { s: $t('sys.user.mobile') })
+          <el-input v-model="dialog.formData.mobile" :placeholder="$t('common.please.input', { s: $t('sys.user.mobile') })
             " maxlength="11" />
         </el-form-item>
 
         <el-form-item :label="$t('sys.user.email')" prop="email">
-          <el-input v-model="formData.email" :placeholder="$t('common.please.input', { s: $t('sys.user.email') })
+          <el-input v-model="dialog.formData.email" :placeholder="$t('common.please.input', { s: $t('sys.user.email') })
             " maxlength="50" />
         </el-form-item>
 
         <el-form-item :label="$t('common.status')" prop="status">
-          <el-switch v-model="formData.status" :active-value="1" :inactive-value="0" inline-prompt :active-text="$t('common.enable')"
+          <el-switch v-model="dialog.formData.status" :active-value="1" :inactive-value="0" inline-prompt :active-text="$t('common.enable')"
             :inactive-text="$t('common.disable')" />
         </el-form-item>
       </el-form>
@@ -151,7 +151,7 @@
 </template>
 
 <script setup lang="ts">
-  import UserAPI, { UserForm, SysUserItem } from "@/api/system/user";
+  import UserAPI, { SysUserForm, SysUserItem } from "@/api/system/user";
 
   import DeptAPI from "@/api/system/dept.js";
   import RoleAPI from "@/api/system/role.js";
@@ -183,18 +183,18 @@
   const dialog = reactive({
     visible: false,
     title: "新增用户",
-  });
-
-  const formData = reactive<UserForm>({
-    status: 1,
-    username: "",
-    nickname: "",
-    dept: undefined,
-    mobile: "",
-    email: "",
-    roleIds: [],
-    gender: 1,
-    avatar: ""
+    formData: {
+      id: 0,
+      status: 1,
+      username: "",
+      nickname: "",
+      dept: undefined,
+      mobile: "",
+      email: "",
+      roleIds: [],
+      gender: 1,
+      avatar: ""
+    } as SysUserForm
   });
 
   const rules = reactive({
@@ -293,8 +293,8 @@
 
     if (id) {
       dialog.title = t("common.edit");
-      UserAPI.getFormData(id).then((data: any) => {
-        Object.assign(formData, { ...data });
+      UserAPI.get(id).then((data: any) => {
+        Object.assign(dialog.formData, { ...data });
       });
     } else {
       dialog.title = t('common.add');
@@ -307,37 +307,24 @@
     userFormRef.value.resetFields();
     userFormRef.value.clearValidate();
 
-    formData.id = undefined;
-    formData.status = 1;
+    dialog.formData.id = 0;
+    dialog.formData.status = 1;
   }
 
   // 提交用户表单（防抖）
   const handleSubmit = () => {
     userFormRef.value.validate((valid: boolean) => {
       if (valid) {
-        const userId = formData.id;
         loading.value = true;
-        if (userId) {
-          UserAPI.update(userId, formData)
-            .then(() => {
-              ElMessage.success(t("common.succeed.update", { s: "" }));
-            })
-            .finally(() => {
-              loading.value = false;
-              handleCloseDialog();
-              handleQuery();
-            });
-        } else {
-          UserAPI.add(formData)
-            .then(() => {
-              ElMessage.success(t("common.succeed.create", { s: "" }));
-            })
-            .finally(() => {
-              loading.value = false;
-              handleCloseDialog();
-              handleQuery();
-            });
-        }
+        UserAPI.set(dialog.formData.id, dialog.formData)
+          .then(() => {
+            ElMessage.success(t("common.succeed.update", { s: "" }));
+          })
+          .finally(() => {
+            loading.value = false;
+            handleCloseDialog();
+            handleQuery();
+          });
       }
     });
   };
@@ -375,7 +362,7 @@
     );
   }
 
-  const handleFieldChange = async (row: UserForm, data: any): Promise<boolean> => {
+  const handleFieldChange = async (row: SysUserItem, data: any): Promise<boolean> => {
     if (!row.id) return false;
     return ElMessageBox.confirm("确定更改吗?", "提示", {
       confirmButtonText: "确定",
@@ -383,7 +370,7 @@
       type: "warning",
     }).then(async () => {
       loading.value = true;
-      return UserAPI.update(row.id ?? 0, data)
+      return UserAPI.set(row.id, data)
         .then((response: any) => {
           Object.assign(row, response.data);
           ElMessage.success("操作成功");

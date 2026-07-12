@@ -8,9 +8,9 @@
           </el-button>
         </div>
         <div class="right-toolbar">
-          <el-form ref="queryFormRef" :model="queryParams" :inline="true">
+          <el-form ref="queryFormRef" :model="menuTableData.params" :inline="true">
             <el-form-item :label="t('common.keywords')" prop="keywords">
-              <el-input v-model="queryParams.keywords" placeholder="Menu Name" clearable @keyup.enter="handleQuery" />
+              <el-input v-model="menuTableData.params.keywords" placeholder="Menu Name" clearable @keyup.enter="handleQuery" />
             </el-form-item>
             <el-form-item>
               <el-button-group>
@@ -22,7 +22,7 @@
         </div>
       </div>
 
-      <el-table v-loading="loading" :data="menuTableData" highlight-current-row row-key="id" fit :tree-props="{
+      <el-table v-loading="loading" :data="menuTableData.tree" highlight-current-row row-key="id" fit :tree-props="{
         children: 'children',
         hasChildren: 'hasChildren',
       }" @row-click="handleRowClick">
@@ -78,21 +78,21 @@
     </el-card>
 
     <el-drawer v-model="dialog.visible" :title="dialog.title" size="50%" @close="handleCloseDialog">
-      <el-form ref="menuFormRef" :model="formData" :rules="rules" label-width="100px">
+      <el-form ref="menuFormRef" :model="dialog.formData" :rules="rules" label-width="100px">
         <el-form-item label="父级菜单" prop="parentId">
-          <el-tree-select v-model="formData.parentId" placeholder="选择上级菜单" :data="menuOptions" filterable check-strictly
+          <el-tree-select v-model="dialog.formData.parentId" placeholder="选择上级菜单" :data="menuOptions" filterable check-strictly
             :render-after-expand="false" />
         </el-form-item>
 
         <el-form-item :label="t('sys.menu.name')" prop="name">
-          <el-input v-model="formData.name" :placeholder="t('common.please.input', { s: t('sys.menu.name') })" />
+          <el-input v-model="dialog.formData.name" :placeholder="t('common.please.input', { s: t('sys.menu.name') })" />
         </el-form-item>
         <el-form-item :label="t('sys.menu.tindex')" prop="name">
-          <el-input v-model="formData.t" :placeholder="t('common.please.input', { s: t('sys.menu.tindex') })
+          <el-input v-model="dialog.formData.t" :placeholder="t('common.please.input', { s: t('sys.menu.tindex') })
             " />
         </el-form-item>
         <el-form-item :label="t('sys.menu.type')" prop="type">
-          <el-radio-group v-model="formData.type" @change="handleMenuTypeChange">
+          <el-radio-group v-model="dialog.formData.type" @change="handleMenuTypeChange">
             <el-radio-button :value="1">{{ $t("sys.menu.catalog") }}</el-radio-button>
             <el-radio-button :value="2">{{ $t("sys.menu.node") }}</el-radio-button>
             <el-radio-button :value="4">{{ $t("sys.menu.button") }}</el-radio-button>
@@ -100,11 +100,11 @@
           </el-radio-group>
         </el-form-item>
 
-        <el-form-item v-if="formData.type == MenuTypeEnum.EXTLINK" :label="t('sys.menu.extLinkUrl')" prop="routePath">
-          <el-input v-model="formData.routePath" :placeholder="t('common.please.input', { s: t('sys.menu.extLinkUrl') })" />
+        <el-form-item v-if="dialog.formData.type == MenuTypeEnum.EXTLINK" :label="t('sys.menu.extLinkUrl')" prop="routePath">
+          <el-input v-model="dialog.formData.routePath" :placeholder="t('common.please.input', { s: t('sys.menu.extLinkUrl') })" />
         </el-form-item>
 
-        <el-form-item v-if="[MenuTypeEnum.CATALOG, MenuTypeEnum.MENU].includes(formData.type)" prop="routePath">
+        <el-form-item v-if="[MenuTypeEnum.CATALOG, MenuTypeEnum.MENU].includes(dialog.formData.type)" prop="routePath">
           <template #label>
             <div class="flex-y-center">
               {{ t("sys.menu.routePath") }}
@@ -119,10 +119,10 @@
               </el-tooltip>
             </div>
           </template>
-          <el-input v-if="formData.type == MenuTypeEnum.CATALOG" v-model="formData.routePath" placeholder="system" />
-          <el-input v-else v-model="formData.routePath" placeholder="user" />
+          <el-input v-if="dialog.formData.type == MenuTypeEnum.CATALOG" v-model="dialog.formData.routePath" placeholder="system" />
+          <el-input v-else v-model="dialog.formData.routePath" placeholder="user" />
         </el-form-item>
-        <el-form-item v-if="[MenuTypeEnum.CATALOG, MenuTypeEnum.MENU].includes(formData.type)" prop="routeName">
+        <el-form-item v-if="[MenuTypeEnum.CATALOG, MenuTypeEnum.MENU].includes(dialog.formData.type)" prop="routeName">
           <template #label>
             <div class="flex-y-center">
               {{ t("sys.menu.routeName") }}
@@ -137,9 +137,9 @@
               </el-tooltip>
             </div>
           </template>
-          {{ formData.routeName }}
+          {{ dialog.formData.routeName }}
         </el-form-item>
-        <el-form-item v-if="[MenuTypeEnum.MENU].includes(formData.type)" prop="component">
+        <el-form-item v-if="[MenuTypeEnum.MENU].includes(dialog.formData.type)" prop="component">
           <template #label>
             <div class="flex-y-center">
               {{ t("sys.menu.pagePath") }}
@@ -152,13 +152,13 @@
             </div>
           </template>
 
-          <el-input v-model="formData.component" placeholder="system/user/index" style="width: 95%">
-            <template v-if="formData.type == MenuTypeEnum.MENU" #prepend>src/views/</template>
-            <template v-if="formData.type == MenuTypeEnum.MENU" #append>.vue</template>
+          <el-input v-model="dialog.formData.component" placeholder="system/user/index" style="width: 95%">
+            <template v-if="dialog.formData.type == MenuTypeEnum.MENU" #prepend>src/views/</template>
+            <template v-if="dialog.formData.type == MenuTypeEnum.MENU" #append>.vue</template>
           </el-input>
         </el-form-item>
 
-        <el-form-item v-if="formData.type == MenuTypeEnum.MENU">
+        <el-form-item v-if="dialog.formData.type == MenuTypeEnum.MENU">
           <template #label>
             <div class="flex-y-center">
               {{ t("sys.menu.routeParams") }}
@@ -171,39 +171,39 @@
             </div>
           </template>
 
-          <div v-if="!formData.params || formData.params.length === 0">
-            <el-button type="success" plain @click="formData.params = [{ key: '', value: '' }]">
+          <div v-if="!dialog.formData.params || dialog.formData.params.length === 0">
+            <el-button type="success" plain @click="dialog.formData.params = [{ key: '', value: '' }]">
               {{ t("common.add") }}
             </el-button>
           </div>
 
           <div v-else>
-            <div v-for="(item, index) in formData.params" :key="index">
+            <div v-for="(item, index) in dialog.formData.params" :key="index">
               <el-input v-model="item.key" placeholder="Name" style="width: 100px" />
               <span class="mx-1">=</span>
               <el-input v-model="item.value" placeholder="Value" style="width: 100px" />
-              <el-icon v-if="formData.params.indexOf(item) === formData.params.length - 1"
+              <el-icon v-if="dialog.formData.params.indexOf(item) === dialog.formData.params.length - 1"
                 class="ml-2 cursor-pointer color-[var(--el-color-success)]" style="vertical-align: -0.15em"
-                @click="formData.params.push({ key: '', value: '' })">
+                @click="dialog.formData.params.push({ key: '', value: '' })">
                 <CirclePlusFilled />
               </el-icon>
               <el-icon class="ml-2 cursor-pointer color-[var(--el-color-danger)]" style="vertical-align: -0.15em"
-                @click="formData.params.splice(formData.params.indexOf(item), 1)">
+                @click="dialog.formData.params.splice(dialog.formData.params.indexOf(item), 1)">
                 <DeleteFilled />
               </el-icon>
             </div>
           </div>
         </el-form-item>
 
-        <el-form-item v-if="formData.type !== MenuTypeEnum.BUTTON" prop="visible" :label="t('common.visible')">
-          <el-switch v-model="formData.visible" :active-value="1" :inactive-value="0" inline-prompt :active-text="t('common.show')"
+        <el-form-item v-if="dialog.formData.type !== MenuTypeEnum.BUTTON" prop="visible" :label="t('common.visible')">
+          <el-switch v-model="dialog.formData.visible" :active-value="1" :inactive-value="0" inline-prompt :active-text="t('common.show')"
             :inactive-text="t('common.hidden')" />
         </el-form-item>
-        <el-form-item v-if="formData.type == MenuTypeEnum.MENU" prop="noAuth" :label="t('sys.menu.noAuth')">
-          <el-switch v-model="formData.noAuth" :active-value="1" :inactive-value="0" inline-prompt :active-text="t('common.yes')"
+        <el-form-item v-if="dialog.formData.type == MenuTypeEnum.MENU" prop="noAuth" :label="t('sys.menu.noAuth')">
+          <el-switch v-model="dialog.formData.noAuth" :active-value="1" :inactive-value="0" inline-prompt :active-text="t('common.yes')"
             :inactive-text="t('common.no')" />
         </el-form-item>
-        <el-form-item v-if="formData.type === MenuTypeEnum.CATALOG" :label="t('sys.menu.alwaysShowRoot')">
+        <el-form-item v-if="dialog.formData.type === MenuTypeEnum.CATALOG" :label="t('sys.menu.alwaysShowRoot')">
           <template #label>
             <div>
               {{ $t("sys.menu.alwaysShow") }}
@@ -221,36 +221,36 @@
             </div>
           </template>
 
-          <el-switch v-model="formData.alwaysShow" :active-value="1" :inactive-value="0" inline-prompt :active-text="t('common.yes')"
+          <el-switch v-model="dialog.formData.alwaysShow" :active-value="1" :inactive-value="0" inline-prompt :active-text="t('common.yes')"
             :inactive-text="t('common.no')" />
         </el-form-item>
 
-        <el-form-item v-if="formData.type === MenuTypeEnum.MENU" :label="t('sys.menu.cacheOrNo')">
-          <el-switch v-model="formData.keepAlive" :active-value="true" :inactive-value="false" inline-prompt :active-text="t('common.yes')"
-            :inactive-text="t('common.no')" />
+        <el-form-item v-if="dialog.formData.type === MenuTypeEnum.MENU" :label="t('sys.menu.cacheOrNo')">
+          <el-switch v-model="dialog.formData.keepAlive" :active-value="true" :inactive-value="false" inline-prompt
+            :active-text="t('common.yes')" :inactive-text="t('common.no')" />
         </el-form-item>
 
-        <el-form-item v-if="formData.type === MenuTypeEnum.MENU" :label="t('sys.menu.newWindow')">
-          <el-switch v-model="formData.blank" :active-value="1" :inactive-value="0" inline-prompt :active-text="t('common.yes')"
+        <el-form-item v-if="dialog.formData.type === MenuTypeEnum.MENU" :label="t('sys.menu.newWindow')">
+          <el-switch v-model="dialog.formData.blank" :active-value="1" :inactive-value="0" inline-prompt :active-text="t('common.yes')"
             :inactive-text="t('common.no')" />
         </el-form-item>
 
         <el-form-item :label="t('common.sort')" prop="sort">
-          <el-input-number v-model="formData.sort" style="width: 100px" controls-position="right" :min="0" />
+          <el-input-number v-model="dialog.formData.sort" style="width: 100px" controls-position="right" :min="0" />
         </el-form-item>
 
         <!-- 权限标识 -->
-        <el-form-item v-if="formData.type == MenuTypeEnum.BUTTON" :label="t('sys.menu.perm')" prop="perm">
-          <el-input v-model="formData.perm" placeholder="sys:user:add" />
+        <el-form-item v-if="dialog.formData.type == MenuTypeEnum.BUTTON" :label="t('sys.menu.perm')" prop="perm">
+          <el-input v-model="dialog.formData.perm" placeholder="sys:user:add" />
         </el-form-item>
 
-        <el-form-item v-if="formData.type !== MenuTypeEnum.BUTTON" :label="t('sys.menu.icon')" prop="icon">
+        <el-form-item v-if="dialog.formData.type !== MenuTypeEnum.BUTTON" :label="t('sys.menu.icon')" prop="icon">
           <!-- 图标选择器 -->
-          <icon-select v-model="formData.icon" />
+          <icon-select v-model="dialog.formData.icon" />
         </el-form-item>
 
-        <el-form-item v-if="formData.type == MenuTypeEnum.CATALOG" :label="t('sys.menu.redirect')">
-          <el-input v-model="formData.redirect" :placeholder="t('common.please.input', { s: t('sys.menu.redirect') })" />
+        <el-form-item v-if="dialog.formData.type == MenuTypeEnum.CATALOG" :label="t('sys.menu.redirect')">
+          <el-input v-model="dialog.formData.redirect" :placeholder="t('common.please.input', { s: t('sys.menu.redirect') })" />
         </el-form-item>
       </el-form>
 
@@ -272,23 +272,14 @@
 
   import MenuAPI, { MenuQuery, MenuForm, MenuItem } from "@/api/system/menu";
   import { MenuTypeEnum } from "@/enums/business";
+  import { Menu } from "vxe-table";
 
   const queryFormRef = ref();
   const menuFormRef = ref();
 
   const t = useI18n().t;
   const loading = ref(false);
-  const dialog = reactive({
-    title: t('common.add'),
-    visible: false,
-  });
 
-  // 查询参数
-  const queryParams = reactive<MenuQuery>({});
-  // 菜单表格数据
-  const menuTableData = ref<MenuItem[]>([]);
-  // 顶级菜单下拉选项
-  const menuOptions = ref<OptionItem[]>([]);
   // 初始菜单表单数据
   const initialMenuFormData = ref<MenuForm>({
     id: 0,
@@ -304,8 +295,24 @@
     params: [],
     noAuth: 0,
   });
-  // 菜单表单数据
-  const formData = ref({ ...initialMenuFormData.value });
+
+  // 菜单表单
+  const dialog = reactive({
+    title: t('common.add'),
+    visible: false,
+    formData: { ...initialMenuFormData.value },
+  });
+
+  // 菜单表格数据查询参数
+  const menuTableData = reactive({
+    tree: [] as MenuItem[],
+    params: {
+      keywords: undefined
+    }
+  });
+  // 顶级菜单下拉选项
+  const menuOptions = ref<OptionItem[]>([]);
+
   // 表单验证规则
   const rules = reactive({
     parentId: [{ required: true, message: "请选择父级菜单", trigger: "blur" }],
@@ -322,9 +329,9 @@
   // 查询菜单
   function handleQuery() {
     loading.value = true;
-    MenuAPI.getList(queryParams)
+    MenuAPI.getTree(menuTableData.params)
       .then((data: any) => {
-        menuTableData.value = data;
+        Object.assign(menuTableData.tree, data);
       })
       .finally(() => {
         loading.value = false;
@@ -357,13 +364,13 @@
         dialog.visible = true;
         if (menuId) {
           dialog.title = t('common.edit');
-          MenuAPI.getFormData(menuId).then((data: any) => {
+          MenuAPI.get(menuId).then((data: any) => {
             initialMenuFormData.value = { ...data };
-            formData.value = data;
+            dialog.formData = data;
           });
         } else {
           dialog.title = t('common.add');
-          formData.value.parentId = parentId;
+          dialog.formData.parentId = parentId;
         }
       });
   }
@@ -371,15 +378,15 @@
   // 菜单类型切换
   function handleMenuTypeChange() {
     // 如果菜单类型改变
-    if (formData.value.type !== initialMenuFormData.value.type) {
-      if (formData.value.type === MenuTypeEnum.MENU) {
+    if (dialog.formData.type !== initialMenuFormData.value.type) {
+      if (dialog.formData.type === MenuTypeEnum.MENU) {
         // 目录切换到菜单时，清空组件路径
         if (initialMenuFormData.value.type === MenuTypeEnum.CATALOG) {
-          formData.value.component = "";
+          dialog.formData.component = "";
         } else {
           // 其他情况，保留原有的组件路径
-          formData.value.routePath = initialMenuFormData.value.routePath;
-          formData.value.component = initialMenuFormData.value.component;
+          dialog.formData.routePath = initialMenuFormData.value.routePath;
+          dialog.formData.component = initialMenuFormData.value.component;
         }
       }
     }
@@ -391,25 +398,20 @@
   function handleSubmit() {
     menuFormRef.value.validate((isValid: boolean) => {
       if (isValid) {
-        const menuId = formData.value.id;
+        const menuId = dialog.formData.id;
         if (menuId) {
           //修改时父级菜单不能为当前菜单
-          if (formData.value.parentId == menuId) {
+          if (dialog.formData.parentId == menuId) {
             ElMessage.error("父级菜单不能为当前菜单");
             return;
           }
-          MenuAPI.update(menuId, formData.value).then(() => {
-            ElMessage.success("Succeed");
-            handleCloseDialog();
-            handleQuery();
-          });
-        } else {
-          MenuAPI.add(formData.value).then(() => {
-            ElMessage.success("Succeed");
-            handleCloseDialog();
-            handleQuery();
-          });
+
         }
+        MenuAPI.set(dialog.formData.id, dialog.formData).then(() => {
+          ElMessage.success("Succeed");
+          handleCloseDialog();
+          handleQuery();
+        });
       }
     });
   }
@@ -428,10 +430,12 @@
     }).then(
       () => {
         loading.value = true;
-        MenuAPI.deleteById(menuId)
+        MenuAPI.delete(menuId)
           .then(() => {
             ElMessage.success("Delete Succeed");
             handleQuery();
+          }).catch((error) => {
+            ElMessage.error(error.message);
           })
           .finally(() => {
             loading.value = false;
@@ -446,19 +450,7 @@
   function resetForm() {
     menuFormRef.value.resetFields();
     menuFormRef.value.clearValidate();
-    formData.value = {
-      id: undefined,
-      parentId: 0,
-      visible: 1,
-      t: "",
-      routeName: "",
-      routePath: "",
-      sort: 1,
-      type: MenuTypeEnum.MENU, // 默认菜单
-      alwaysShow: 0,
-      keepAlive: true,
-      params: [],
-    };
+    dialog.formData = initialMenuFormData.value;
   }
 
   // 关闭弹窗
@@ -476,7 +468,7 @@
       type: "warning",
     }).then(async () => {
       loading.value = true;
-      return MenuAPI.update(row.id ?? 0, data)
+      return MenuAPI.set(row.id ?? 0, data)
         .then((response: any) => {
           Object.assign(row, response.data);
           ElMessage.success(t("common.succeed.update"));

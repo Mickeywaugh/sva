@@ -17,19 +17,10 @@ const ConfigAPI = {
    * @param id ConfigID
    * @returns Config表单数据
    */
-  getFormData(id: number) {
+  get(id: number) {
     return request<any, ConfigForm>({
-      url: `${CONFIG_BASE_URL}/${id}/form`,
+      url: `${CONFIG_BASE_URL}/${id}`,
       method: "get",
-    });
-  },
-
-  /** 添加系统配置*/
-  add(data: ConfigForm) {
-    return request({
-      url: `${CONFIG_BASE_URL}`,
-      method: "post",
-      data,
     });
   },
 
@@ -39,10 +30,10 @@ const ConfigAPI = {
    * @param id ConfigID
    * @param data Config表单数据
    */
-  update(id: number, data: ConfigForm) {
+  set(id: number, data: ConfigForm) {
     return request({
       url: `${CONFIG_BASE_URL}/${id}`,
-      method: "put",
+      method: "post",
       data,
     });
   },
@@ -50,9 +41,9 @@ const ConfigAPI = {
   /**
    * 删除系统配置
    *
-   * @param ids 系统配置ID
+   * @param id 系统配置ID
    */
-  deleteById(id: number) {
+  delete(id: number) {
     return request({
       url: `${CONFIG_BASE_URL}/${id}`,
       method: "delete",
@@ -72,7 +63,7 @@ export default ConfigAPI;
 /** 系统配置表单对象 */
 export interface ConfigForm {
   /** 主键 */
-  id?: number;
+  id: number;
   /** 配置名称 */
   configName?: string;
   /** 配置键 */

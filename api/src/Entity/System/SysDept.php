@@ -25,7 +25,7 @@ class SysDept extends BaseEntity
     private ?string $name = null;
 
     #[ORM\Column(type: Types::BIGINT, options: ['default' => 0])]
-    private int $parentId = 0;
+    private ?int $parentId = null;
 
     #[ORM\Column(nullable: true)]
     private ?int $sort = null;

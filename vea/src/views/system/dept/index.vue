@@ -7,8 +7,6 @@
           <el-button-group>
             <el-button v-hasPerm="['sys:dept:add']" type="success" v-icon="'vea-o-plus'"
               @click="handleOpenDialog()">{{ t('common.create') }}</el-button>
-            <el-button v-hasPerm="['sys:dept:delete']" type="danger" :disabled="selectIds.length === 0" v-icon="'vea-o-delete'"
-              @click="handleDelete()">{{ t('common.delete') }}</el-button>
           </el-button-group>
         </div>
         <div class="right-toolbar">
@@ -35,28 +33,26 @@
         :tree-props="{ children: 'children', hasChildren: 'hasChildren' }" @selection-change="handleSelectionChange">
         <el-table-column type="selection" width="55" align="center" />
         <el-table-column prop="name" label="部门名称" min-width="200" />
+        <el-table-column prop="code" label="部门编码" min-width="200" />
         <el-table-column prop="status" label="状态" width="100">
           <template #default="scope">
             <el-tag v-if="scope.row.status == 1" type="success">正常</el-tag>
             <el-tag v-else type="info">禁用</el-tag>
           </template>
         </el-table-column>
-
         <el-table-column prop="sort" label="排序" width="100" />
-
         <el-table-column label="操作" fixed="right" align="left">
-          <template #default="scope">
+          <template v-slot="{ row }">
             <el-button-group>
               <el-button v-hasPerm="['sys:dept:add']" type="primary" size="small" v-icon="'vea-o-plus'"
-                @click.stop="handleOpenDialog(scope.row.id, undefined)">
+                @click.stop="handleOpenDialog(true, (row as DeptItem))">
                 新增
               </el-button>
               <el-button v-hasPerm="['sys:dept:edit']" type="primary" size="small" v-icon="'vea-o-edit'"
-                @click.stop="handleOpenDialog(scope.row.parentId, scope.row.id)">
+                @click.stop="handleOpenDialog(false, (row as DeptItem))">
                 编辑
               </el-button>
-              <el-button v-hasPerm="['sys:dept:delete']" type="danger" size="small" v-icon="'vea-o-delete'"
-                @click.stop="handleDelete(scope.row.id)">
+              <el-button v-hasPerm="['sys:dept:delete']" type="danger" size="small" v-icon="'vea-o-delete'" @click.stop="handleDelete(row.id)">
                 删除
               </el-button>
             </el-button-group>
@@ -68,19 +64,22 @@
     </el-card>
 
     <el-dialog v-model="dialog.visible" :title="dialog.title" width="600px" @closed="handleCloseDialog">
-      <el-form ref="deptFormRef" :model="formData" :rules="rules" label-width="80px">
+      <el-form ref="deptFormRef" :model="dialog.formData" :rules="rules" label-width="80px">
         <el-form-item label="上级部门" prop="parentId">
-          <el-tree-select v-model="formData.parentId" placeholder="选择上级部门" :data="deptOptions" filterable check-strictly
+          <el-tree-select v-model="dialog.formData.parentId" placeholder="选择上级部门" :data="deptOptions" filterable check-strictly
             :render-after-expand="false" />
         </el-form-item>
         <el-form-item label="部门名称" prop="name">
-          <el-input v-model="formData.name" placeholder="请输入部门名称" />
+          <el-input v-model="dialog.formData.name" placeholder="请输入部门名称" />
+        </el-form-item>
+        <el-form-item label="部门编码" prop="code">
+          <el-input v-model="dialog.formData.code" placeholder="请输入部门编码" />
         </el-form-item>
         <el-form-item label="显示排序" prop="sort">
-          <el-input-number v-model="formData.sort" controls-position="right" style="width: 100px" :min="0" />
+          <el-input-number v-model="dialog.formData.sort" controls-position="right" style="width: 100px" :min="0" />
         </el-form-item>
         <el-form-item label="部门状态">
-          <el-switch v-model="formData.status" inline-prompt :active-text="t('common.enable')" :inactive-text="t('common.disable')"
+          <el-switch v-model="dialog.formData.status" inline-prompt :active-text="t('common.enable')" :inactive-text="t('common.disable')"
             :active-value="1" :inactive-value="0" />
         </el-form-item>
       </el-form>
@@ -101,7 +100,7 @@
     inheritAttrs: false,
   });
 
-  import DeptAPI, { DeptVO, DeptForm, DeptQuery } from "@/api/system/dept";
+  import DeptAPI, { DeptItem, DeptForm } from "@/api/system/dept";
 
   const queryFormRef = ref(ElForm);
   const deptFormRef = ref(ElForm);
@@ -110,26 +109,29 @@
   const selectIds = ref<number[]>([]);
   const t = useI18n().t;
 
-  const tableData = reactive<PageResult<DeptVO>>({
-    list: [],
+  const tableData = reactive<PageResult<DeptItem>>({
+    list: [] as DeptItem[],
     total: 0,
     params: {
       pageNum: 1,
       pageSize: 25,
+      keywords: "",
+      status: 1,
     },
   });
 
   const dialog = reactive({
     title: "",
     visible: false,
+    formData: reactive<DeptForm>({
+      id: 0,
+      status: 1,
+      parentId: 0,
+      sort: 1,
+    }),
   });
 
   const deptOptions = ref<OptionItem[]>();
-  const formData = reactive<DeptForm>({
-    status: 1,
-    parentId: 0,
-    sort: 1,
-  });
 
   const rules = reactive({
     parentId: [{ required: true, message: "上级部门不能为空", trigger: "change" }],
@@ -138,7 +140,7 @@
   });
 
   // 查询部门
-  function handleQuery() {
+  const handleQuery = () => {
     loading.value = true;
     DeptAPI.page(tableData.params).then((data: any) => {
       tableData.list = data.list ?? [];
@@ -148,15 +150,15 @@
     });
   }
   // 重置查询
-  function handleResetQuery() {
+  const handleResetQuery = () => {
     queryFormRef.value.resetFields();
     handleQuery();
-  }
+  };
 
   // 处理选中项变化
-  function handleSelectionChange(selection: any) {
+  const handleSelectionChange = (selection: any) => {
     selectIds.value = selection.map((item: any) => item.id);
-  }
+  };
 
   /**
    * 打开部门弹窗
@@ -164,7 +166,7 @@
    * @param parentId 父部门ID
    * @param deptId 部门ID
    */
-  async function handleOpenDialog(parentId?: number, deptId?: number) {
+  const handleOpenDialog = async (create: boolean = false, deptData?: DeptItem) => {
     // 加载部门下拉数据
     const data = await DeptAPI.getOptions();
     deptOptions.value = [
@@ -176,49 +178,35 @@
     ];
 
     dialog.visible = true;
-    if (deptId) {
-      dialog.title = "修改部门";
-      DeptAPI.getFormData(deptId).then((data: any) => {
-        Object.assign(formData, data);
-      });
-    } else {
+    if (create) {
       dialog.title = "新增部门";
-      formData.parentId = parentId || 0;
+      dialog.formData.parentId = deptData?.id || 0;
+    } else {
+      dialog.title = "修改部门";
+      Object.assign(dialog.formData, deptData);
     }
   }
 
   // 提交部门表单
-  function handleSubmit() {
+  const handleSubmit = () => {
     deptFormRef.value.validate((valid: any) => {
       if (valid) {
         loading.value = true;
-        const deptId = formData.id;
-        if (deptId) {
-          DeptAPI.update(deptId, formData)
-            .then(() => {
-              ElMessage.success("修改成功");
-              handleCloseDialog();
-              handleQuery();
-            })
-            .finally(() => (loading.value = false));
-        } else {
-          DeptAPI.add(formData)
-            .then(() => {
-              ElMessage.success("新增成功");
-              handleCloseDialog();
-              handleQuery();
-            })
-            .finally(() => (loading.value = false));
-        }
+        DeptAPI.set(dialog.formData.id, dialog.formData)
+          .then(() => {
+            ElMessage.success("操作成功");
+            handleCloseDialog();
+            handleQuery();
+          })
+          .finally(() => (loading.value = false));
       }
     });
   }
 
   // 删除部门
-  function handleDelete(deptId?: number) {
-    const deptIds = [deptId || selectIds.value].join(",");
+  const handleDelete = (deptId?: number) => {
 
-    if (!deptIds) {
+    if (!deptId) {
       ElMessage.warning("请勾选删除项");
       return;
     }
@@ -230,7 +218,7 @@
     }).then(
       () => {
         loading.value = true;
-        DeptAPI.deleteByIds(deptIds)
+        DeptAPI.delete(deptId)
           .then(() => {
             ElMessage.success("删除成功");
             handleResetQuery();
@@ -244,18 +232,17 @@
   }
 
   // 重置表单
-  function resetForm() {
+  const resetForm = () => {
     deptFormRef.value.resetFields();
     deptFormRef.value.clearValidate();
-
-    formData.id = undefined;
-    formData.parentId = 0;
-    formData.status = 1;
-    formData.sort = 1;
+    dialog.formData.id = 0;
+    dialog.formData.parentId = 0;
+    dialog.formData.status = 1;
+    dialog.formData.sort = 1;
   }
 
   // 关闭弹窗
-  function handleCloseDialog() {
+  const handleCloseDialog = () => {
     dialog.visible = false;
     resetForm();
   }

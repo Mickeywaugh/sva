@@ -42,7 +42,7 @@ class RoleController extends BaseController
         return $this->success($data);
     }
 
-    #[Route('/{id}/form', name: 'get', methods: ['GET'])]
+    #[Route('/{id}', name: 'get', methods: ['GET'], requirements: ['id' => '\d+'])]
     public function get(int $id): JsonResponse
     {
         $role = $this->roleRepo->findOneBy(['id' => $id]);
@@ -53,52 +53,26 @@ class RoleController extends BaseController
         }
     }
 
-
-    #[Route('', name: 'create', methods: ['POST'])]
-    public function create(Request $request): JsonResponse
+    #[Route('/{id}', name: 'set', methods: ['POST'], requirements: ['id' => '\d+'])]
+    public function set(int $id, Request $request): JsonResponse
     {
         $data = $request->toArray();
         if (empty($data)) {
             return $this->error("参数错误");
         }
-
-        $role = $this->roleRepo->create($data);
+        if ($id == 0) {
+            unset($data["id"]);
+            $role = $this->roleRepo->create($data);
+        } else {
+            $role = $this->roleRepo->update($id, $data);
+        }
         if ($role) {
             return $this->success($role->toArray());
         } else {
-            return $this->error("角色创建失败");
+            return $this->error("操作失败");
         }
     }
 
-    #[Route('/{id}', name: 'update', methods: ['PUT'])]
-    public function update(int $id, Request $request): JsonResponse
-    {
-        $data = $request->toArray();
-        if (empty($data)) {
-            return $this->error("参数错误");
-        }
-        $role = $this->roleRepo->update($id, $data);
-        if ($role) {
-            return $this->success($role->toArray());
-        } else {
-            return $this->error("更新失败");
-        }
-    }
-
-    #[Route('/{id}/status', name: 'setStatus', methods: ['PUT'])]
-    public function setStatus(int $id, Request $request): JsonResponse
-    {
-        $data = $request->toArray();
-        if (empty($data)) {
-            return $this->error("参数错误");
-        }
-        $dept = $this->roleRepo->update($id, $data);
-        if ($dept) {
-            return $this->success($dept->toArray());
-        } else {
-            return $this->error("更新失败");
-        }
-    }
 
     #[Route('/{ids}', name: 'delete', methods: ['DELETE'], requirements: ['ids' => '\w+'])]
     public function delete(string $ids): JsonResponse

@@ -34,36 +34,23 @@ const UserAPI = {
    * @param userId 用户ID
    * @returns 用户表单详情
    */
-  getFormData(userId: number) {
-    return request<any, UserForm>({
-      url: `${USER_BASE_URL}/${userId}/form`,
+  get(userId: number) {
+    return request<any, SysUserForm>({
+      url: `${USER_BASE_URL}/${userId}`,
       method: "get",
     });
   },
-
   /**
    * 添加用户
-   *
-   * @param data 用户表单数据
-   */
-  add(data: UserForm) {
-    return request({
-      url: `${USER_BASE_URL}/create`,
-      method: "post",
-      data,
-    });
-  },
-
-  /**
    * 修改用户
    *
    * @param id 用户ID
    * @param data 用户表单数据
    */
-  update(id: number, data: UserForm) {
+  set(id: number, data: SysUserForm) {
     return request({
       url: `${USER_BASE_URL}/${id}`,
-      method: "put",
+      method: "post",
       data,
     });
   },
@@ -209,16 +196,6 @@ const UserAPI = {
     });
   },
   /**
-   * 更改状态
-   */
-  setStatus(id: number, data: any) {
-    return request({
-      url: `${USER_BASE_URL}/${id}/status`,
-      method: "put",
-      data,
-    });
-  },
-  /**
    * 修改用户密码
    *
    * @param id
@@ -248,7 +225,14 @@ export interface UserInfo {
 }
 
 /** 用户分页对象 */
-export interface SysUserItem {
+export interface SysUserItem extends SysUserForm {
+  createTime?: Date;
+  deptName?: string;
+  updateTime?: Date;
+  username: string;
+}
+
+export interface SysUserForm {
   id: number;
   username: string;
   avatar?: string;
@@ -257,56 +241,18 @@ export interface SysUserItem {
   email?: string;
   gender?: number;
   mobile?: string;
+  dept?: number;
   nickname?: string;
   roleNames?: string;
+  roleIds?: number[];
   status?: number;
 }
 
-/** 用户表单类型 */
-export interface UserForm {
-  /**
-   * 用户头像
-   */
-  avatar?: string;
-  /**
-   * 部门ID
-   */
-  dept?: number;
-  /**
-   * 邮箱
-   */
-  email?: string;
-  /**
-   * 性别
-   */
-  gender?: number;
-  /**
-   * 用户ID
-   */
-  id?: number;
-  mobile?: string;
-  /**
-   * 昵称
-   */
-  nickname?: string;
-  /**
-   * 角色ID集合
-   */
-  roleIds?: number[];
-  /**
-   * 用户状态(1:正常;0:禁用)
-   */
-  status?: number;
-  /**
-   * 用户名
-   */
-  username?: string;
-}
 
 /** 个人中心用户信息 */
 export interface UserProfileVO {
   /** 用户ID */
-  id?: number;
+  id: number;
 
   /** 用户名 */
   username?: string;
@@ -340,7 +286,7 @@ export interface UserProfileVO {
 /** 个人中心用户信息表单 */
 export interface UserProfileForm {
   /** 用户ID */
-  id?: number;
+  id: number;
 
   /** 用户名 */
   username?: string;

@@ -38,7 +38,7 @@
           <template #default="scope">
             <el-button-group>
               <el-button v-hasPerm="['sys:config:update']" type="primary" size="small" v-icon="'vea-o-edit'"
-                @click="handleOpenDialog(scope.row.id)">
+                @click="handleOpenDialog(scope.row)">
                 {{ t('common.edit') }}
               </el-button>
               <el-button v-hasPerm="['sys:config:delete']" type="danger" size="small" v-icon="'vea-o-delete'"
@@ -56,18 +56,18 @@
 
     <!-- 系统配置表单弹窗 -->
     <el-dialog v-model="dialog.visible" :title="dialog.title" width="500px" @close="handleCloseDialog">
-      <el-form ref="dataFormRef" :model="formData" :rules="rules" label-suffix=":" label-width="100px">
+      <el-form ref="dataFormRef" :model="dialog.formData" :rules="rules" label-suffix=":" label-width="100px">
         <el-form-item label="配置名称" prop="configName">
-          <el-input v-model="formData.configName" placeholder="请输入配置名称" :maxlength="50" />
+          <el-input v-model="dialog.formData.configName" placeholder="请输入配置名称" :maxlength="50" />
         </el-form-item>
         <el-form-item label="配置键" prop="configKey">
-          <el-input v-model="formData.configKey" placeholder="请输入配置键" :maxlength="50" />
+          <el-input v-model="dialog.formData.configKey" placeholder="请输入配置键" :maxlength="50" />
         </el-form-item>
         <el-form-item label="配置值" prop="configValue">
-          <el-input v-model="formData.configValue" placeholder="请输入配置值" :maxlength="100" />
+          <el-input v-model="dialog.formData.configValue" placeholder="请输入配置值" :maxlength="100" />
         </el-form-item>
         <el-form-item label="描述" prop="remark">
-          <el-input v-model="formData.remark" :rows="4" :maxlength="100" show-word-limit type="textarea" placeholder="请输入描述" />
+          <el-input v-model="dialog.formData.remark" :rows="4" :maxlength="100" show-word-limit type="textarea" placeholder="请输入描述" />
         </el-form-item>
       </el-form>
       <template #footer>
@@ -97,7 +97,7 @@
 
   // 系统配置表格数据
   const pageData = reactive<PageResult<ConfigItem>>({
-    list: [],
+    list: [] as ConfigItem[],
     total: 0,
     params: {
       pageNum: 1,
@@ -109,14 +109,13 @@
   const dialog = reactive({
     title: "",
     visible: false,
-  });
-
-  const formData = reactive<ConfigForm>({
-    id: undefined,
-    configName: "",
-    configKey: "",
-    configValue: "",
-    remark: "",
+    formData: {
+      id: 0,
+      configName: "",
+      configKey: "",
+      configValue: "",
+      remark: "",
+    } as ConfigForm
   });
 
   const rules = reactive({
@@ -126,7 +125,7 @@
   });
 
   // 查询系统配置
-  function handleQuery() {
+  const handleQuery = () => {
     loading.value = true;
     ConfigAPI.getPage(pageData.params)
       .then((data: PageResult<ConfigItem>) => {
@@ -138,28 +137,25 @@
   }
 
   // 重置查询
-  function handleResetQuery() {
+  const handleResetQuery = () => {
     queryFormRef.value.resetFields();
     pageData.params.pageNum = 1;
     handleQuery();
   }
 
   // 行复选框选中项变化
-  function handleSelectionChange(selection: any) {
+  const handleSelectionChange = (selection: any) => {
     selectIds.value = selection.map((item: any) => item.id);
   }
 
-  // 打开系统配置弹窗
-  function handleOpenDialog(id?: number) {
+  // 新增加或修改时打开系统配置弹窗
+  const handleOpenDialog = (data?: ConfigItem) => {
     dialog.visible = true;
-    if (id) {
-      dialog.title = "修改系统配置";
-      ConfigAPI.getFormData(id).then((data: any) => {
-        Object.assign(formData, data);
-      });
+    dialog.title = data ? "修改系统配置" : "新增系统配置";
+    if (data !== undefined) {
+      Object.assign(dialog.formData, data);
     } else {
-      dialog.title = "新增系统配置";
-      formData.id = undefined;
+      resetForm();
     }
   }
 
@@ -171,54 +167,42 @@
   }, 1000);
 
   // 系统配置表单提交
-  function handleSubmit() {
+  const handleSubmit = () => {
     dataFormRef.value.validate((valid: any) => {
       if (valid) {
         loading.value = true;
-        const id = formData.id;
-        if (id) {
-          ConfigAPI.update(id, formData)
-            .then(() => {
-              ElMessage.success("修改成功");
-              handleCloseDialog();
-              handleResetQuery();
-            })
-            .finally(() => (loading.value = false));
-        } else {
-          ConfigAPI.add(formData)
-            .then(() => {
-              ElMessage.success("新增成功");
-              handleCloseDialog();
-              handleResetQuery();
-            })
-            .finally(() => (loading.value = false));
-        }
+        ConfigAPI.set(dialog.formData.id, dialog.formData)
+          .then((data) => {
+            ElMessage.success("操作成功");
+            handleCloseDialog();
+            handleResetQuery();
+          })
+          .finally(() => (loading.value = false));
       }
     });
   }
-
   // 重置表单
-  function resetForm() {
+  const resetForm = () => {
     dataFormRef.value.resetFields();
     dataFormRef.value.clearValidate();
-    formData.id = undefined;
+    dialog.formData.id = 0;
   }
 
   // 关闭系统配置弹窗
-  function handleCloseDialog() {
+  const handleCloseDialog = () => {
     dialog.visible = false;
     resetForm();
   }
 
   // 删除系统配置
-  function handleDelete(id: number) {
+  const handleDelete = (id: number) => {
     ElMessageBox.confirm("确认删除该项配置?", "警告", {
       confirmButtonText: "确定",
       cancelButtonText: "取消",
       type: "warning",
     }).then(() => {
       loading.value = true;
-      ConfigAPI.deleteById(id)
+      ConfigAPI.delete(id)
         .then(() => {
           ElMessage.success("删除成功");
           handleResetQuery();

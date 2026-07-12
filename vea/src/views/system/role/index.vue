@@ -37,16 +37,15 @@
         </el-table-column>
         <el-table-column label="排序" align="center" prop="sort" />
         <el-table-column fixed="right" label="操作">
-          <template #default="scope">
+          <template #default="{ row }">
             <el-button-group>
-              <el-button type="primary" size="small" v-icon="'vea-aim'" @click="handleOpenAssignPermDialog(scope.row)">
+              <el-button type="primary" size="small" v-icon="'vea-aim'" @click="handleOpenAssignPermDialog(row as RoleItem)">
                 分配权限
               </el-button>
-              <el-button type="primary" size="small" v-icon="'vea-o-edit'" @click="handleOpenDialog(scope.row.id)">
+              <el-button type="primary" size="small" v-icon="'vea-o-edit'" @click="handleOpenDialog(row.id)">
                 编辑
               </el-button>
-              <el-button :disabled="scope.row.userCount > 0" type="danger" size="small" v-icon="'vea-o-delete'"
-                @click="handleDelete(scope.row.id)">
+              <el-button :disabled="row.userCount > 0" type="danger" size="small" v-icon="'vea-o-delete'" @click="handleDelete(row.id)">
                 删除
               </el-button>
             </el-button-group>
@@ -60,17 +59,17 @@
 
     <!-- 角色表单弹窗 -->
     <el-dialog v-model="dialog.visible" :title="dialog.title" width="500px" @close="handleCloseDialog">
-      <el-form ref="roleFormRef" :model="formData" :rules="rules" label-width="100px">
+      <el-form ref="roleFormRef" :model="dialog.formData" :rules="rules" label-width="100px">
         <el-form-item label="角色名称" prop="name">
-          <el-input v-model="formData.name" placeholder="请输入角色名称" />
+          <el-input v-model="dialog.formData.name" placeholder="请输入角色名称" />
         </el-form-item>
 
         <el-form-item label="角色编码" prop="code">
-          <el-input v-model="formData.code" placeholder="请输入角色编码" />
+          <el-input v-model="dialog.formData.code" placeholder="请输入角色编码" />
         </el-form-item>
 
         <el-form-item label="数据权限" prop="dataScope">
-          <el-select v-model="formData.dataScope">
+          <el-select v-model="dialog.formData.dataScope">
             <el-option :key="0" label="全部数据" :value="0" />
             <el-option :key="1" label="部门及子部门数据" :value="1" />
             <el-option :key="2" label="本部门数据" :value="2" />
@@ -79,14 +78,14 @@
         </el-form-item>
 
         <el-form-item label="状态" prop="status">
-          <el-radio-group v-model="formData.status">
+          <el-radio-group v-model="dialog.formData.status">
             <el-radio :value="1">正常</el-radio>
             <el-radio :value="0">停用</el-radio>
           </el-radio-group>
         </el-form-item>
 
         <el-form-item label="排序" prop="sort">
-          <el-input-number v-model="formData.sort" controls-position="right" :min="0" style="width: 100px" />
+          <el-input-number v-model="dialog.formData.sort" controls-position="right" :min="0" style="width: 100px" />
         </el-form-item>
       </el-form>
 
@@ -174,15 +173,14 @@
   // 菜单权限下拉
   const menuPermOptions = ref<OptionItem[]>([]);
 
-  // 弹窗
+  // 弹窗 角色表单
   const dialog = reactive({
     title: "",
     visible: false,
-  });
-  // 角色表单
-  const formData = reactive<RoleForm>({
-    sort: 1,
-    status: 1,
+    formData: {
+      sort: 1,
+      status: 1,
+    } as RoleForm
   });
 
   const rules = reactive({
@@ -206,7 +204,7 @@
   const parentChildLinked = ref(true);
 
   // 查询
-  function handleQuery() {
+  const handleQuery = () => {
     loading.value = true;
     RoleAPI.getPage(pageData.params)
       .then((data: any) => {
@@ -215,75 +213,62 @@
       .finally(() => {
         loading.value = false;
       });
-  }
+  };
 
   // 重置查询
-  function handleResetQuery() {
+  const handleResetQuery = () => {
     queryFormRef.value.resetFields();
     pageData.params.pageNum = 1;
     pageData.params.keywords = "";
     handleQuery();
-  }
+  };
 
   // 行复选框选中
-  function handleSelectionChange(selection: any) {
+  const handleSelectionChange = (selection: any) => {
     ids.value = selection.map((item: any) => item.id);
-  }
+  };
 
   // 打开角色弹窗
-  function handleOpenDialog(roleId?: number) {
+  const handleOpenDialog = (roleId?: number) => {
     dialog.visible = true;
     if (roleId) {
       dialog.title = "修改角色";
-      RoleAPI.getFormData(roleId).then((data: any) => {
-        Object.assign(formData, data);
+      RoleAPI.get(roleId).then((data: any) => {
+        Object.assign(dialog.formData, data);
       });
     } else {
       dialog.title = "新增角色";
     }
-  }
+  };
 
   // 提交角色表单
-  function handleSubmit() {
+  const handleSubmit = () => {
     roleFormRef.value.validate((valid: any) => {
       if (valid) {
         loading.value = true;
-        const roleId = formData.id;
-        if (roleId) {
-          RoleAPI.update(roleId, formData)
-            .then(() => {
-              ElMessage.success("修改成功");
-              handleCloseDialog();
-              handleResetQuery();
-            })
-            .finally(() => (loading.value = false));
-        } else {
-          RoleAPI.add(formData)
-            .then(() => {
-              ElMessage.success("新增成功");
-              handleCloseDialog();
-              handleResetQuery();
-            })
-            .finally(() => (loading.value = false));
-        }
+        RoleAPI.set(dialog.formData.id, dialog.formData)
+          .then(() => {
+            ElMessage.success("操作成功");
+            handleCloseDialog();
+            handleResetQuery();
+          })
+          .finally(() => (loading.value = false));
       }
     });
-  }
+  };
 
   // 关闭弹窗
-  function handleCloseDialog() {
+  const handleCloseDialog = () => {
     dialog.visible = false;
-
     roleFormRef.value.resetFields();
     roleFormRef.value.clearValidate();
-
-    formData.id = undefined;
-    formData.sort = 1;
-    formData.status = 1;
-  }
+    dialog.formData.id = 0;
+    dialog.formData.sort = 1;
+    dialog.formData.status = 1;
+  };
 
   // 删除角色
-  function handleDelete(roleId?: number) {
+  const handleDelete = (roleId?: number) => {
     const roleIds = [roleId || ids.value].join(",");
     if (!roleIds) {
       ElMessage.warning("请勾选删除项");
@@ -308,10 +293,10 @@
         ElMessage.info("已取消删除");
       }
     );
-  }
+  };
 
   // 打开分配菜单权限弹窗
-  async function handleOpenAssignPermDialog(row: RoleItem) {
+  const handleOpenAssignPermDialog = async (row: RoleItem) => {
     const roleId = row.id;
     if (roleId) {
       assignPermDialogVisible.value = true;
@@ -333,10 +318,10 @@
           loading.value = false;
         });
     }
-  }
+  };
 
   // 分配菜单权限提交
-  function handleAssignPermSubmit() {
+  const handleAssignPermSubmit = () => {
     const roleId = checkedRole.value.id;
     if (roleId) {
       const checkedMenuIds: number[] = permTreeRef
@@ -354,10 +339,10 @@
           loading.value = false;
         });
     }
-  }
+  };
 
   // 展开/收缩 菜单权限树
-  function togglePermTree() {
+  const togglePermTree = () => {
     isExpanded.value = !isExpanded.value;
     if (permTreeRef.value) {
       Object.values(permTreeRef.value.store.nodesMap).forEach((node: any) => {
@@ -368,27 +353,27 @@
         }
       });
     }
-  }
+  };
 
   // 权限筛选
   watch(permKeywords, (val: string) => {
     permTreeRef.value!.filter(val);
   });
 
-  function handlePermFilter(
+  const handlePermFilter = (
     value: string,
     data: {
       [key: string]: any;
     }
-  ) {
+  ) => {
     if (!value) return true;
     return data.label.includes(value);
-  }
+  };
 
   // 父子菜单节点是否联动
-  function handleparentChildLinkedChange(val: any) {
+  const handleparentChildLinkedChange = (val: any) => {
     parentChildLinked.value = val;
-  }
+  };
 
   onMounted(() => {
     handleQuery();
