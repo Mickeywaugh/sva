@@ -16,14 +16,14 @@ export function setupPermissionGuard() {
 
   router.beforeEach(async (to, _from) => {
     NProgress.start();
-    let isPublic = false;
+    let noAuth = false;
     publicRoutes.find((item) => {
       let path = item.path.split(":")[0];
       if (to.path.startsWith(path)) {
-        isPublic = true;
+        noAuth = true;
       }
     });
-    if (isPublic || to.meta.isPublic) {
+    if (noAuth || to.meta.noAuth) {
       return;
     }
 
