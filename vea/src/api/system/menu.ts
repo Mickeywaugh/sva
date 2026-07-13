@@ -220,5 +220,5 @@ export interface Meta {
   blank?: boolean;
   /** 权限标识 */
   params?: {};
-  isPublic?: number;
+  noAuth?: number;
 }
