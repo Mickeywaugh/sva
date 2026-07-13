@@ -209,14 +209,9 @@ class SysUser extends BaseEntity implements UserInterface, PasswordAuthenticated
         return $this;
     }
 
-    public function setUserRoles(array $roles): static
+    public function setUserRoles(Collection $roles): static
     {
-        $roleEntities = new ArrayCollection();
-        if (!$roles) return $this;
-        foreach ($roles as $role) {
-            $roleEntities->add($role);
-        }
-        $this->userRoles = $roleEntities;
+        $this->userRoles = $roles;
         return $this;
     }
 

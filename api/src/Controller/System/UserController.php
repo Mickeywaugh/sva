@@ -7,6 +7,7 @@ use App\Repository\System\SysDeptRepository;
 use App\Repository\System\SysRoleRepository;
 use App\Repository\System\SysUserRepository;
 use App\Service\AuthService;
+use Doctrine\Common\Collections\ArrayCollection;
 use Symfony\Component\HttpFoundation\Request;
 use Symfony\Component\HttpFoundation\JsonResponse;
 use Symfony\Component\Routing\Attribute\Route;
@@ -90,7 +91,7 @@ class UserController extends BaseController
         return $this->success($data);
     }
 
-    #[Route('{id}/form', name: 'user.get', methods: ['GET'], requirements: ['id' => '\d+'])]
+    #[Route('{id}', name: 'get', methods: ['GET'], requirements: ['id' => '\d+'])]
     public function get(int $id): JsonResponse
     {
         $user = $this->userRepo->find($id);
@@ -110,7 +111,12 @@ class UserController extends BaseController
         }
 
         if (isset($data['roleIds']) && $data['roleIds']) {
-            $data['userRoles'] = $this->roleRepo->init()->findEntities(["id" => ["IN" => $data['roleIds']]]);
+            $roles = $this->roleRepo->init()->findEntities(["id" => ["IN" => $data['roleIds']]]);
+            $userRoles = new ArrayCollection();
+            foreach ($roles as $role) {
+                $userRoles->add($role);
+            }
+            $data['userRoles'] = $userRoles;
             unset($data['roleIds']);
         }
 
