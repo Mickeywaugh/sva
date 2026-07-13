@@ -33,9 +33,6 @@ class SysDept extends BaseEntity
     #[ORM\Column(type: Types::SMALLINT)]
     private ?int $status = null;
 
-    #[ORM\Column(type: Types::STRING)]
-    private ?string $treePath = null;
-
     #[ORM\ManyToOne(targetEntity: SysDept::class, inversedBy: 'children')]
     #[ORM\JoinColumn(name: 'parent_id', referencedColumnName: 'id', nullable: false, options: ['default' => 0])]
     private ?SysDept $parent = null;
@@ -78,7 +75,6 @@ class SysDept extends BaseEntity
     public function setParent(?SysDept $parent): static
     {
         $this->parent = $parent;
-        $this->setTreePath();
         return $this;
     }
 
@@ -106,22 +102,6 @@ class SysDept extends BaseEntity
         return $this->children ?: new ArrayCollection();
     }
 
-    public function setTreePath(): static
-    {   //
-        if ($this->parentId == 0) {
-            $treePathArray = [0];
-        } else {
-            $treePathArray = $this->parent->getTreePath() + [$this->parent->getId()];
-        }
-        $this->treePath = implode(",", $treePathArray);
-
-        return $this;
-    }
-
-    public function getTreePath(): ?array
-    {
-        return explode(",", $this->parentId == 0 ? "0" : $this->treePath);
-    }
 
     public function getSort(): ?int
     {
