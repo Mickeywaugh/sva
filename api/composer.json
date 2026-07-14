@@ -13,7 +13,7 @@
         "doctrine/doctrine-migrations-bundle": "^4.0",
         "doctrine/orm": "^3.6.7",
         "lexik/jwt-authentication-bundle": "^3.2",
-        "mickeywaugh/captcha": "^1.0.6",
+        "mickeywaugh/captcha": "^1.0.7",
         "monolog/monolog": "^3.10",
         "jenssegers/agent": "^2.6.4",
         "predis/predis": "^3.5.1",
