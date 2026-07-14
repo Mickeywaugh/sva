@@ -149,7 +149,7 @@
   });
 
   import SysApi, { SysApiForm, SysApiItem, SysApiMsg, SysApiResultMap } from "@/api/system/api";
-  import SysApiModuleSelect from "@/components/SelectCmps/sysApiModuleSelect.vue";
+  import SysApiModuleSelect from "./components/sysApiModuleSelect.vue";
 
   const queryFormRef = ref();
   const SysApiFormRef = ref();

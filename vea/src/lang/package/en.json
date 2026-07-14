@@ -227,6 +227,16 @@
     "notice": {
       "node": "Notice",
       "admin": "Notice Mgmt."
+    },
+    "api": {
+      "autoTest": "Auto Test",
+      "method": "Method",
+      "path": "Path",
+      "withJWT": "With JWT",
+      "params": "Parames.",
+      "responseRaw": "Response Content",
+      "responseCode": "Response Code",
+      "module": "Module"
     }
   },
   "common": {
@@ -372,6 +382,7 @@
     "startRun": "Start Run",
     "dataCollection": "Data Collection",
     "summary": "{s} Summary",
+    "sync": "同步{s}",
     "brife": "Brief Info",
     "download": "Download {s}",
     "template": "Template",

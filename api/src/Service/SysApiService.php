@@ -26,6 +26,7 @@ class SysApiService
   public function __construct(SysApiRepository $_sysApiRepo)
   {
     // 创建httpClient对象
+    $this->baseUrl = $_ENV['DEFAULT_URI'] ?? "http://localhost";
     $this->httpClient = HttpClient::createForBaseUri($this->baseUrl, $this->httpOptions);
     $this->sysApiRepo = $_sysApiRepo;
     // 获取jwt
