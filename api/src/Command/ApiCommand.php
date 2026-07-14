@@ -3,8 +3,6 @@
 namespace App\Command;
 
 use App\Repository\System\SysApiRepository;
-use App\Service\DbService;
-use App\Service\SysApiService;
 use Symfony\Component\Console\Attribute\AsCommand;
 use Symfony\Component\Routing\RouterInterface;
 
