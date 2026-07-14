@@ -498,4 +498,30 @@ INSERT INTO `sys_user_role` VALUES (1, 1);
 INSERT INTO `sys_user_role` VALUES (2, 2);
 INSERT INTO `sys_user_role` VALUES (3, 3);
 
+
+-- ----------------------------
+-- Table structure for sys_api
+-- ----------------------------
+DROP TABLE IF EXISTS `sys_api`;
+CREATE TABLE `sys_api`  (
+  `id` int NOT NULL AUTO_INCREMENT,
+  `module` varchar(255) CHARACTER SET utf8mb4 COLLATE utf8mb4_general_ci NULL DEFAULT NULL,
+  `name` varchar(255) CHARACTER SET utf8mb4 COLLATE utf8mb4_general_ci NOT NULL,
+  `path` varchar(255) CHARACTER SET utf8mb4 COLLATE utf8mb4_general_ci NOT NULL,
+  `method` varchar(255) CHARACTER SET utf8mb4 COLLATE utf8mb4_general_ci NOT NULL,
+  `route_params` json NULL,
+  `query_params` json NULL,
+  `body_params` json NULL,
+  `with_jwt` tinyint NULL DEFAULT NULL,
+  `step` int NULL DEFAULT NULL,
+  `disabled` tinyint NULL DEFAULT NULL,
+  `result` tinyint NULL DEFAULT NULL,
+  `response_code` int NULL DEFAULT NULL,
+  `response_context` json NULL,
+  `create_time` datetime NULL DEFAULT NULL,
+  `update_time` datetime NULL DEFAULT NULL,
+  PRIMARY KEY (`id`) USING BTREE
+) ENGINE = InnoDB AUTO_INCREMENT = 1 CHARACTER SET = utf8mb4 COLLATE = utf8mb4_general_ci ROW_FORMAT = Dynamic;
+
+
 SET FOREIGN_KEY_CHECKS = 1;
