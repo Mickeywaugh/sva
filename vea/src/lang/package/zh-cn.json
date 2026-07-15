@@ -227,9 +227,19 @@
     "config": {
       "admin": "配置管理"
     },
-    "notice":{
+    "notice": {
       "node": "通知",
       "admin": "通知管理"
+    },
+    "api": {
+      "autoTest": "自动测试",
+      "method": "请求方式",
+      "path": "请求路径",
+      "withJWT": "携带JWT",
+      "params": "请求体",
+      "responseRaw": "响应体",
+      "responseCode": "响应码",
+      "module": "模块"
     }
   },
   "common": {
@@ -375,6 +385,7 @@
     "startRun": "开工",
     "dataCollection": "数据采集",
     "summary": "{s}汇总",
+    "sync": "同步{s}",
     "brife": "简要信息",
     "download": "下载{s}",
     "template": "模板",

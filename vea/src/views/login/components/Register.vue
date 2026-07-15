@@ -105,7 +105,7 @@
     username: "admin",
     password: "123456",
     confirmPassword: "",
-    captchaKey: "",
+    captchaId: "",
     captchaCode: "",
   });
 
@@ -165,7 +165,7 @@
     codeLoading.value = true;
     AuthAPI.getCaptcha()
       .then((data: any) => {
-        model.captchaKey = data.captchaKey;
+        model.captchaId = data.captchaId;
         captchaBase64.value = data.captchaBase64;
       })
       .finally(() => (codeLoading.value = false));

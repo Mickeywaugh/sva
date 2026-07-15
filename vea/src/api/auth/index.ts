@@ -8,11 +8,11 @@ const AuthAPI = {
   login(data: LoginRequest) {
     const payload: Pick<
       LoginRequest,
-      "username" | "password" | "captchaKey" | "captchaCode" | "tenantId"
+      "username" | "password" | "captchaId" | "captchaCode" | "tenantId"
     > = {
       username: data.username,
       password: data.password,
-      captchaKey: data.captchaKey,
+      captchaId: data.captchaId,
       captchaCode: data.captchaCode,
     };
 

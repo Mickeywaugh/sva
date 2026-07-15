@@ -156,7 +156,7 @@
     codeLoading.value = true;
     AuthAPI.getCaptcha()
       .then((data: any) => {
-        loginFormData.value.captchaKey = data.captchaKey;
+        loginFormData.value.captchaId = data.captchaId;
         captchaBase64.value = data.captchaBase64;
       })
       .finally(() => (codeLoading.value = false));

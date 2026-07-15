@@ -15,7 +15,7 @@ use App\Service\RedisService;
 class SysAuthController extends BaseController
 {
     private AuthService $authService;
-    static string $captchaKey = "system:captchaKeys:";
+    static string $captchaKeyPrefix = "system:captchaIds:";
     public function __construct(AuthService $_authService)
     {
         $this->authService = $_authService;
@@ -31,18 +31,18 @@ class SysAuthController extends BaseController
             return $this->error('Invalid username or password');
         }
 
-        if (isset($captchaKey) && $captchaKey  && isset($captchaCode) && $captchaCode) {
+        if (isset($captchaId) && $captchaId  && isset($captchaCode) && $captchaCode) {
             // 验证码验证
-            if (!$captchaKey) return $this->error("验证码Key为空");
+            if (!$captchaId) return $this->error("验证码Key为空");
             if (!$captchaCode) return $this->error("验证码为空");
-            $redisCaptcha = RedisService::getInstance()->get(self::$captchaKey . $captchaKey);
+            $redisCaptcha = RedisService::getInstance()->get(self::$captchaKeyPrefix . $captchaId);
             if ($redisCaptcha == null) {
-                return $this->error("验证码已过期" . $captchaKey);
+                return $this->error("验证码已过期" . $captchaId);
             } else {
                 if (strtolower($redisCaptcha)  != strtolower($captchaCode)) {
                     return $this->error("验证码错误");
                 } else {
-                    RedisService::getInstance()->del("captcha:" . $captchaKey);
+                    RedisService::getInstance()->del(self::$captchaKeyPrefix . $captchaId);
                 }
             }
         }
@@ -80,13 +80,13 @@ class SysAuthController extends BaseController
         $base64 = $builder->setBackgroundColor(0, 0, 0,127)->build(120,30)->inline();
         $captchaPhrase = $builder->getPhrase(); //验证码
         // 生成验证码id
-        $captchaKey = md5(uniqid() . microtime());
+        $captchaId = md5(uniqid() . microtime());
         if ($captchaPhrase) {
             // 保存验证码至redis
             $redis = RedisService::getInstance();
-            $redis->setex(self::$captchaKey . $captchaKey, 60 * 5, $captchaPhrase);
+            $redis->setex(self::$captchaKeyPrefix . $captchaId, 60 * 5, $captchaPhrase);
             return $this->success(
-                ["captchaBase64" => $base64, "captchaKey" => $captchaKey],
+                ["captchaBase64" => $base64, "captchaId" => $captchaId],
                 "获取验证码码成功"
             );
         } else {
