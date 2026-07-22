@@ -26,7 +26,16 @@
         <el-table-column label="操作人" prop="operator" />
         <el-table-column label="请求路由" prop="requestUri" />
         <el-table-column label="请求方法" prop="requestMethod" />
-        <el-table-column label="请求参数" prop="requestParams" />
+        <el-table-column label="请求参数" prop="requestParams" >
+          <template #default="{ row }">
+            <el-popover v-if="row.requestParams" :width="480" trigger="click">
+              <template #reference>
+                <el-button v-icon="'vea-eye-open'"></el-button>
+              </template>
+              <slot>{{ JSON.stringify(row.requestParams) }}</slot>
+            </el-popover>
+          </template>
+        </el-table-column>
         <el-table-column label="响应码" prop="responseCode" />
         <el-table-column label="IP 地址" prop="ip" />
         <el-table-column label="地区" prop="region" />

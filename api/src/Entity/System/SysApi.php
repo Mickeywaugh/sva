@@ -142,7 +142,7 @@ class SysApi extends BaseEntity
 
   public function setRouteParams(?array $_routeParams): static
   {
-    $this->routeParams = $_routeParams ? json_encode($_routeParams) : NULL;
+    $this->routeParams = $_routeParams ? json_encode($_routeParams, JSON_UNESCAPED_SLASHES | JSON_UNESCAPED_UNICODE) : NULL;
     return $this;
   }
 
@@ -153,7 +153,7 @@ class SysApi extends BaseEntity
 
   public function setQueryParams(?array $_queryParams): static
   {
-    $this->queryParams = $_queryParams ? json_encode($_queryParams) : NULL;
+    $this->queryParams = $_queryParams ? json_encode($_queryParams, JSON_UNESCAPED_SLASHES | JSON_UNESCAPED_UNICODE) : NULL;
     return $this;
   }
 
@@ -164,7 +164,7 @@ class SysApi extends BaseEntity
 
   public function setBodyParams(?array $_bodyParams): static
   {
-    $this->bodyParams = $_bodyParams ? json_encode($_bodyParams) : NULL;
+    $this->bodyParams = $_bodyParams ? json_encode($_bodyParams, JSON_UNESCAPED_SLASHES | JSON_UNESCAPED_UNICODE) : NULL;
     return $this;
   }
 
