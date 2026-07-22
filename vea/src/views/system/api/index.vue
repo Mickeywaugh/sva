@@ -5,8 +5,8 @@
       <div class="toolbar">
         <div class="left-toolbar">
           <el-button-group class="inline flex">
-            <el-button :disabled="loading" type="success" v-icon="'bt-o-sync'" @click="handleSync">{{ t('common.sync') }}</el-button>
-            <el-button :disabled="loading" type="primary" v-icon="'bt-testing'" @click="handleAutotest">{{ t('sys.api.autoTest') }}</el-button>
+            <el-button :disabled="loading" type="success" v-icon="'vea-o-sync'" @click="handleSync">{{ t('common.sync') }}</el-button>
+            <el-button :disabled="loading" type="primary" v-icon="'vea-testing'" @click="handleAutotest">{{ t('sys.api.autoTest') }}</el-button>
           </el-button-group>
         </div>
         <div class="right-toolbar">
@@ -19,8 +19,8 @@
             </el-form-item>
             <el-form-item>
               <el-button-group>
-                <el-button type="primary" v-icon="'bt-search'" @click="handleQuery">{{ t('common.search') }}</el-button>
-                <el-button v-icon="'bt-refresh'" @click="handleResetQuery">{{ t('common.reset') }}</el-button>
+                <el-button type="primary" v-icon="'vea-search'" @click="handleQuery">{{ t('common.search') }}</el-button>
+                <el-button v-icon="'vea-refresh'" @click="handleResetQuery">{{ t('common.reset') }}</el-button>
               </el-button-group>
             </el-form-item>
           </el-form>
@@ -41,7 +41,7 @@
           <template #default="{ row }">
             <el-popover v-if="row.queryParams" :width="480" trigger="click">
               <template #reference>
-                <el-button v-icon="'bt-eye-open'"></el-button>
+                <el-button v-icon="'vea-eye-open'"></el-button>
               </template>
               <slot>{{ JSON.stringify(row.queryParams) }}</slot>
             </el-popover>
@@ -51,7 +51,7 @@
           <template #default="{ row }">
             <el-popover v-if="row.routeParams" :width="480" trigger="click">
               <template #reference>
-                <el-button v-icon="'bt-eye-open'"></el-button>
+                <el-button v-icon="'vea-eye-open'"></el-button>
               </template>
               <slot>{{ JSON.stringify(row.routeParams) }}</slot>
             </el-popover>
@@ -61,7 +61,7 @@
           <template #default="{ row }">
             <el-popover v-if="row.bodyParams" :width="480" trigger="click">
               <template #reference>
-                <el-button v-icon="'bt-eye-open'"></el-button>
+                <el-button v-icon="'vea-eye-open'"></el-button>
               </template>
               <slot>{{ JSON.stringify(row.bodyParams) }}</slot>
             </el-popover>
@@ -77,7 +77,7 @@
           <template #default="{ row }">
             <el-popover v-if="row.responseContext" :width="720" trigger="click">
               <template #reference>
-                <el-button v-icon="'bt-eye-open'"></el-button>
+                <el-button v-icon="'vea-eye-open'"></el-button>
               </template>
               <slot>{{ row.responseContext }}</slot>
             </el-popover>
@@ -93,13 +93,13 @@
         <el-table-column fixed="right" label="操作" min-width="220">
           <template #default="{ row }">
             <el-button-group>
-              <el-button type="danger" size="small" v-icon="'bt-o-delete'" @click="handleDelete(row.id)">
+              <el-button type="danger" size="small" v-icon="'vea-o-delete'" @click="handleDelete(row.id)">
                 {{ t('common.delete') }}
               </el-button>
-              <el-button type="primary" size="small" v-icon="'bt-o-edit'" @click="openDialog(row)">
+              <el-button type="primary" size="small" v-icon="'vea-o-edit'" @click="openDialog(row)">
                 {{ t('common.edit') }}
               </el-button>
-              <el-button :disabled="row.disabled ? true : false" type="success" size="small" v-icon="'bt-o-test'" @click="handleTest(row)">
+              <el-button :disabled="row.disabled" type="success" size="small" v-icon="'vea-o-test'" @click="handleTest(row)">
               测试
               </el-button>
             </el-button-group>
@@ -161,7 +161,7 @@
   });
 
   import SysApi, { SysApiForm, SysApiItem, SysApiMsg, SysApiResultMap } from "@/api/system/api";
-  import SysApiModuleSelect from "@/components/SelectCmps/sysApiModuleSelect.vue";
+  import SysApiModuleSelect from "./components/sysApiModuleSelect.vue";
 
   const queryFormRef = ref();
   const SysApiFormRef = ref();

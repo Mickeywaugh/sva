@@ -129,7 +129,7 @@ export interface SysApiForm {
   path: string;
   method: string;
   withJwt: number;
-  disabled: boolean;
+  disabled: number;
   routeParams: Record<string, any>;
   queryParams: Record<string, any>;
   bodyParams: Record<string, any>;

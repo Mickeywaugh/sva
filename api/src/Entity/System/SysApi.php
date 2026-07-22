@@ -190,9 +190,9 @@ class SysApi extends BaseEntity
     return $this;
   }
 
-  public function getDisabled(): ?bool
+  public function getDisabled(): ?int
   {
-    return $this->disabled ? true : false;
+    return $this->disabled ? 1 : 0;
   }
 
   public function getResult(): ?int
