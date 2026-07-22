@@ -27,29 +27,44 @@
         </div>
       </div>
 
-      <el-table ref="dataTableRef" v-loading="loading" :data="pageData.list" highlight-current-row fit>
+      <el-table ref="dataTableRef" v-loading="loading" :data="pageData.list" border highlight-current-row fit>
         <el-table-column type="index" label="No." width="60" />
-        <el-table-column label="模块" prop="module" min-width="80" />
-        <el-table-column label="名称" prop="name" min-width="100" />
+        <el-table-column label="模块" prop="module" width="96" />
+        <el-table-column label="名称" prop="name" min-width="120" />
         <el-table-column label="路由" prop="path" min-width="140" />
-        <el-table-column label="请求方法" prop="method" min-width="100">
+        <el-table-column label="请求方法" prop="method" width="80">
           <template #default="{ row }">
             <el-tag :type="row.withJwt ? 'success' : 'info'">{{ row.method }}</el-tag>
           </template>
         </el-table-column>
-        <el-table-column label="请求参数" prop="queryParams" min-width="100">
+        <el-table-column label="请求参数" prop="queryParams" width="80">
           <template #default="{ row }">
-            {{ JSON.stringify(row.queryParams) }}
+            <el-popover v-if="row.queryParams" :width="480" trigger="click">
+              <template #reference>
+                <el-button v-icon="'bt-eye-open'"></el-button>
+              </template>
+              <slot>{{ JSON.stringify(row.queryParams) }}</slot>
+            </el-popover>
           </template>
         </el-table-column>
-        <el-table-column label="路由参数" prop="routeParams" min-width="100">
+        <el-table-column label="路由参数" prop="routeParams" width="80">
           <template #default="{ row }">
-            {{ JSON.stringify(row.routeParams) }}
+            <el-popover v-if="row.routeParams" :width="480" trigger="click">
+              <template #reference>
+                <el-button v-icon="'bt-eye-open'"></el-button>
+              </template>
+              <slot>{{ JSON.stringify(row.routeParams) }}</slot>
+            </el-popover>
           </template>
         </el-table-column>
-        <el-table-column label="Body参数" prop="bodyParams" min-width="100">
+        <el-table-column label="Body参数" prop="bodyParams" width="80">
           <template #default="{ row }">
-            {{ JSON.stringify(row.bodyParams) }}
+            <el-popover v-if="row.bodyParams" :width="480" trigger="click">
+              <template #reference>
+                <el-button v-icon="'bt-eye-open'"></el-button>
+              </template>
+              <slot>{{ JSON.stringify(row.bodyParams) }}</slot>
+            </el-popover>
           </template>
         </el-table-column>
         <el-table-column label="最近结果" prop="result" width="96">
@@ -58,34 +73,34 @@
           </template>
         </el-table-column>
         <el-table-column label="响应码" prop="responseCode" width="80" />
-        <el-table-column label="响应内容" prop="responseContext" min-width="100">
+        <el-table-column label="响应内容" prop="responseContext" width="80">
           <template #default="{ row }">
-            <el-popover :width="720" trigger="click">
+            <el-popover v-if="row.responseContext" :width="720" trigger="click">
               <template #reference>
-                <el-button v-icon="'bt-eye-open'" type="primary">查看</el-button>
+                <el-button v-icon="'bt-eye-open'"></el-button>
               </template>
               <slot>{{ row.responseContext }}</slot>
             </el-popover>
           </template>
         </el-table-column>
-        <el-table-column label="启用" prop="disabled">
+        <el-table-column label="启用" prop="disabled" width="96">
           <template v-slot="{ row }">
             <el-switch v-model="row.disabled" :active-value="0" :inactive-value="1" inline-prompt :active-text="t('common.yes')"
-              :inactive-text="t('common.no')" :before-change="() => handleDisabled(row as SysApiItem)" />
+              :inactive-text="t('common.no')" :before-change="() => handleDisabled(row)" />
           </template>
         </el-table-column>
-        <el-table-column label="更新" prop="updateTime" />
-        <el-table-column fixed="right" label="操作" width="220">
+        <el-table-column label="更新" prop="updateTime" width="140" />
+        <el-table-column fixed="right" label="操作" min-width="220">
           <template #default="{ row }">
             <el-button-group>
               <el-button type="danger" size="small" v-icon="'bt-o-delete'" @click="handleDelete(row.id)">
                 {{ t('common.delete') }}
               </el-button>
-              <el-button type="primary" size="small" v-icon="'bt-o-edit'" @click="openDialog(row as SysApiItem)">
+              <el-button type="primary" size="small" v-icon="'bt-o-edit'" @click="openDialog(row)">
                 {{ t('common.edit') }}
               </el-button>
-              <el-button type="success" size="small" v-icon="'bt-o-test'" @click="handleTest(row as SysApiItem)">
-                测试
+              <el-button :disabled="row.disabled ? true : false" type="success" size="small" v-icon="'bt-o-test'" @click="handleTest(row)">
+              测试
               </el-button>
             </el-button-group>
           </template>
@@ -126,9 +141,6 @@
         <el-form-item label="Body请求参数" prop="bodyParams">
           <json-editor v-model="dialogData.formData.bodyParams" :rows="8" />
         </el-form-item>
-        <el-form-item label="步骤" prop="step">
-          <el-input-number v-model="dialogData.formData.step" :step="1" :min="0" controls-position="right" style="width: 100%;" />
-        </el-form-item>
         <el-form-item label="需要JWT" prop="withJwt">
           <el-switch v-model="dialogData.formData.withJwt" :active-value="1" :inactive-value="0" />
         </el-form-item>
@@ -149,7 +161,7 @@
   });
 
   import SysApi, { SysApiForm, SysApiItem, SysApiMsg, SysApiResultMap } from "@/api/system/api";
-  import SysApiModuleSelect from "./components/sysApiModuleSelect.vue";
+  import SysApiModuleSelect from "@/components/SelectCmps/sysApiModuleSelect.vue";
 
   const queryFormRef = ref();
   const SysApiFormRef = ref();
@@ -159,7 +171,7 @@
   const moduleOptions = ref<OptionItem[]>([]);
   // 系统配置表格数据
   const pageData = reactive<PageResult<SysApiItem>>({
-    list: [] as SysApiItem[],
+    list: [],
     total: 0,
     params: {
       pageNum: 1,
