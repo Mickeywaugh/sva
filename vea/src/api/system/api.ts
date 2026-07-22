@@ -133,7 +133,6 @@ export interface SysApiForm {
   routeParams: Record<string, any>;
   queryParams: Record<string, any>;
   bodyParams: Record<string, any>;
-  step: number;
 }
 
 export interface SysApiMsg {

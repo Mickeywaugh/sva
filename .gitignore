@@ -3,8 +3,9 @@
 .git/
 
 
-api/api/config/jwt/public.pem
-api/api/config/jwt/private.pem
+api/config/jwt/public.pem
+api/config/jwt/private.pem
+api/config/reference.php
 api/.env
 api/var/
 api/vendor/
