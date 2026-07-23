@@ -639,6 +639,12 @@ abstract class BaseRepository extends ServiceEntityRepository
         return $items;
     }
 
+    /** @return T */
+    public function findOne(array $criteria): object
+    {
+        return $this->parseWhere($criteria)->setMaxResult(1)->getFirst();
+    }
+
     // =========================================================================
     // 返回 object / mixed 的方法
     // =========================================================================
