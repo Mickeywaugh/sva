@@ -9,7 +9,7 @@ import { AuthStorage } from "@/utils/auth";
 import { usePermissionStoreHook } from "@/stores/permission";
 import { useDictStoreHook } from "@/stores/dict";
 import { useTagsViewStore } from "@/stores";
-import { cleanupSseServices } from "@/composables";
+import { cleanupSseServices, useHeartbeat } from "@/composables";
 import { STORAGE_KEYS } from "@/constants";
 
 export const useUserStore = defineStore("user", () => {
@@ -26,6 +26,8 @@ export const useUserStore = defineStore("user", () => {
     const { accessToken, refreshToken } = await AuthAPI.login(loginRequest);
     rememberMe.value = loginRequest.rememberMe ?? true;
     AuthStorage.setTokens(accessToken, refreshToken, rememberMe.value);
+    // 登录成功后启动心跳
+    useHeartbeat().start();
   }
 
   let refreshPromise: Promise<void> | null = null;
@@ -62,6 +64,8 @@ export const useUserStore = defineStore("user", () => {
    */
   async function logout(): Promise<void> {
     await AuthAPI.logout();
+    // 停止心跳
+    useHeartbeat().stop();
     resetAllState();
   }
 

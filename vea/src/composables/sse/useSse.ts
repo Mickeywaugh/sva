@@ -162,7 +162,11 @@ function createSseConnection(options: UseSseOptions = {}) {
       eventSource.onerror = () => {
         const state = eventSource?.readyState;
         if (state === EventSource.CLOSED) {
-          logError("SSE 连接已关闭");
+          logError("SSE 连接已关闭（通常是服务器/代理超时或心跳缺失导致）");
+        } else if (state === EventSource.CONNECTING) {
+          log("SSE 正在重连中（浏览器自动重连）...");
+          // EventSource 原生重连中，不要手动干预
+          return;
         } else {
           logError("SSE 连接错误");
         }

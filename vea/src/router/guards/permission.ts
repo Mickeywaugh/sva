@@ -3,6 +3,7 @@ import NProgress from "@/plugins/nprogress";
 import router from "@/router";
 import { usePermissionStore, useUserStore } from "@/stores";
 import { addRecentMenu } from "@/composables/useRecentMenus";
+import { useHeartbeat } from "@/composables";
 import { PublicRoutes } from "@/router/public";
 
 /**
@@ -16,14 +17,14 @@ export function setupPermissionGuard() {
 
   router.beforeEach(async (to, _from) => {
     NProgress.start();
-    let noAuth = false;
+    let isPublic = false;
     publicRoutes.find((item) => {
       let path = item.path.split(":")[0];
       if (to.path.startsWith(path)) {
-        noAuth = true;
+        isPublic = true;
       }
     });
-    if (noAuth || to.meta.noAuth) {
+    if (isPublic || to.meta.noAuth) {
       return;
     }
 
@@ -74,6 +75,10 @@ export function setupPermissionGuard() {
       if (title) {
         to.meta.title = title;
       }
+
+      // 页面刷新后自动恢复心跳（非首次登录也需触发）
+      useHeartbeat().start();
+
       return;
     } catch (error) {
       console.error("Route guard error:", error);
