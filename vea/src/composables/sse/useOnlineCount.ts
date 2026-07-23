@@ -13,7 +13,6 @@ function createOnlineCountComposable() {
 
   // 处理在线人数变更消息
   const handleOnlineCountMessage = (data: { count?: number }) => {
-    console.log(data);
     const count = data?.count;
     if (!Number.isFinite(count)) return;
     if (count! < 0) return;
@@ -37,6 +36,12 @@ function createOnlineCountComposable() {
     lastUpdateTime.value = 0;
   };
 
+  const updateCount = (count: number) => {
+    if (!Number.isFinite(count) || count < 0) return;
+    onlineUserCount.value = count;
+    lastUpdateTime.value = Date.now();
+  };
+
   return {
     onlineUserCount: readonly(onlineUserCount),
     lastUpdateTime: readonly(lastUpdateTime),
@@ -44,6 +49,7 @@ function createOnlineCountComposable() {
     connectionState: sse.connectionState,
     initialize,
     cleanup,
+    updateCount,
   };
 }
 

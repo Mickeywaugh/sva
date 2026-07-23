@@ -64,6 +64,12 @@ const AuthAPI = {
       method: "get",
     });
   },
+   heartbeat() {
+    return request<unknown, any>({
+      url: `${AUTH_BASE_URL}/heartbeat`,
+      method: "get",
+    });
+  }
 };
 
 export default AuthAPI;
