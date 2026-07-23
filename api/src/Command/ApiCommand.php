@@ -80,7 +80,7 @@ class ApiCommand extends BaseCommand
                 $this->error("同步失败 [$path]: " . $e->getMessage());
             }
         }
-        // DbService::table("sys_api")->wheres(["id" => ["NOT_IN" => $syncedIds]])->delete();
+        // DbService::table("sys_api")->wheres(["id" => ["!IN" => $syncedIds]])->delete();
         $this->success("路由同步完成: 同步 {$syncedCount} 条, 跳过 {$skippedCount} 条");
     }
 
