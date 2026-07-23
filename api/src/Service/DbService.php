@@ -28,13 +28,13 @@ class DbService
     '<',
     '<=',
     'BETWEEN',
-    'NOT_BETWEEN',
+    '!BETWEEN',
     'NULL',
-    'NOT_NULL',
+    '!NULL',
     'LIKE',
-    'NOT_LIKE',
+    '!LIKE',
     'IN',
-    'NOT_IN',
+    '!IN',
     'LT_TIME',
     'GT_TIME',
     'LTE_TIME',
@@ -269,7 +269,7 @@ class DbService
             case "NULL":
               $this->setQbWhere($this->qb->expr()->isNull("$rfield"));
               break;
-            case "NOT_NULL":
+            case "!NULL":
               $this->setQbWhere($this->qb->expr()->isNotNull("$rfield"));
               break;
             case "LIKE":
@@ -289,14 +289,14 @@ class DbService
                 $this->setQbWhere($orExpr)->setParameter($paramName, "%" . $condition . "%");
               }
               break;
-            case "NOT_LIKE":
+            case "!LIKE":
               $this->setQbWhere($this->qb->expr()->notLike("$rfield", ":$paramName"))
                 ->setParameter($paramName, "%" . $condition . "%");
               break;
             case "IN":
               $this->setQbWhere(sprintf("%s IN (%s)", $rfield, implode(",", (array)$condition)));
               break;
-            case "NOT_IN":
+            case "!IN":
               $this->setQbWhere(sprintf("%s NOT IN (%s)", $rfield, implode(",", (array)$condition)));
               break;
             case "FIND_IN":
@@ -310,7 +310,7 @@ class DbService
               );
               $this->setQbWhere($betweenExpr)->setParameter($start, $condition[0])->setParameter($end, $condition[1]);
               break;
-            case "NOT_BETWEEN":
+            case "!BETWEEN":
               $notBetweenExpr = $this->qb->expr()->or(
                 $this->qb->expr()->lt("$rfield", ":$start"),
                 $this->qb->expr()->gt("$rfield", ":$end")
@@ -331,7 +331,30 @@ class DbService
           }
         }
       } else {
-        $this->setQbWhere("$rfield = :$paramName")->setParameter($paramName, $expr);
+        // 处理多个字段or查询 $where["t.title|t.content"]="value"
+        if (str_contains($rfield, "|")) {
+          //按|分隔字符得到数组并以or条件进行搜索
+          $sfields = explode("|", $rfield);
+          $conditions = [];
+          foreach ($sfields as $f) {
+            $f = self::toSnakeCase($f);
+            $conditions[] = $this->qb->expr()->eq($f, ":$paramName");
+          }
+          // 使用 expr()->or() 组合多个字段的 OR 条件
+          if (count($conditions) > 0) {
+            $orExpr = $conditions[0];
+            for ($i = 1; $i < count($conditions); $i++) {
+              $orExpr = $this->qb->expr()->or($orExpr, $conditions[$i]);
+            }
+            $this->setQbWhere($orExpr)->setParameter($paramName, $expr);
+          }
+        } elseif ($expr === NULL || $expr === "NULL") {
+          $this->setQbWhere($this->qb->expr()->isNull("$rfield"));
+        } elseif (strtoupper($expr) == '!NULL') {
+          $this->setQbWhere($this->qb->expr()->isNotNull("$rfield"));
+        } else {
+          $this->setQbWhere("$rfield = :$paramName")->setParameter($paramName, $expr);
+        }
       }
       $this->whereCounter++;
     }
