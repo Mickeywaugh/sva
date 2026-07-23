@@ -72,6 +72,7 @@ class AuthService extends BaseService
         $jwt = substr($authHeader, 7);
         try {
             $payload = $this->jwtManager->parse($jwt);
+            // Logger::info('JWT parsed successfully', $payload);
         } catch (\Throwable) {
             return null;
         }
