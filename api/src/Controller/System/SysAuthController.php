@@ -93,4 +93,11 @@ class SysAuthController extends BaseController
             return $this->error("获取验证码码失败");
         }
     }
+
+    #[Route('/heartbeat', name: 'heartbeat', methods: ['GET'])]
+    public function heartbeat(): JsonResponse
+    {
+        $count = $this->authService->heartbeat();
+        return $this->success(['onlineCount' => $count]);
+    }
 }

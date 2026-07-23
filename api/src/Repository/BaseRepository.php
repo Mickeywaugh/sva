@@ -40,14 +40,14 @@ abstract class BaseRepository extends ServiceEntityRepository
         '<',
         '<=',
         'BETWEEN',
-        'NOT_BETWEEN',
+        '!BETWEEN',
         'NULL',
-        'NOT_NULL',
+        '!NULL',
         'LIKE',
-        'NOT_LIKE',
+        '!LIKE',
         'IN',
         'EMPTY',
-        'NOT_IN',
+        '!IN',
         'LT_TIME',
         'GT_TIME',
         'LTE_TIME',
@@ -348,7 +348,7 @@ abstract class BaseRepository extends ServiceEntityRepository
     }
 
     /**
-     * @param array $where ["field"=>"value"],[">="=>""],["NOT_NULL"=>true],["BETWEEN"=>["start","end"]],["OR"=>["A","B"]]
+     * @param array $where ["field"=>"value"],[">="=>""],["!NULL"=>true],["BETWEEN"=>["start","end"]],["OR"=>["A","B"]]
      * @return static
      */
     public function parseWhere(array $where): static
@@ -377,7 +377,7 @@ abstract class BaseRepository extends ServiceEntityRepository
                         case "NULL":
                             $this->setQbWhere($this->qb->expr()->isNull("$rfield"));
                             break;
-                        case "NOT_NULL":
+                        case "!NULL":
                             $this->setQbWhere($this->qb->expr()->isNotNull("$rfield"));
                             break;
                         case "LIKE":
@@ -389,7 +389,7 @@ abstract class BaseRepository extends ServiceEntityRepository
                             }
                             $this->setQbWhere($orX)->setParameter($paramName, "%" . $condition . "%");
                             break;
-                        case "NOT_LIKE":
+                        case "!LIKE":
                             $this->setQbWhere($this->qb->expr()->notLike("$rfield", ":$paramName"))
                                 ->setParameter($paramName, "%" . $condition . "%");
                             break;
@@ -397,7 +397,7 @@ abstract class BaseRepository extends ServiceEntityRepository
                             $this->setQbWhere($this->qb->expr()->in("$rfield", ":$paramName"))
                                 ->setParameter($paramName, $condition);
                             break;
-                        case "NOT_IN":
+                        case "!IN":
                             $this->setQbWhere($this->qb->expr()->notIn("$rfield", ":$paramName"))
                                 ->setParameter($paramName, $condition);
                             break;
@@ -409,7 +409,7 @@ abstract class BaseRepository extends ServiceEntityRepository
                             $subQb = $this->qb->expr()->between("$rfield", ":$start", ":$end");
                             $this->setQbWhere($subQb)->setParameter($start, $condition[0])->setParameter($end, $condition[1]);
                             break;
-                        case "NOT_BETWEEN":
+                        case "!BETWEEN":
                             $subQb = $this->qb->expr()->orX($this->qb->expr()->lt("$rfield", ":$start"), $this->qb->expr()->gt("$rfield", ":$end"));
                             $this->setQbWhere($subQb)->setParameter("$start", $condition[0])->setParameter($end, $condition[1]);
                             break;
@@ -437,6 +437,10 @@ abstract class BaseRepository extends ServiceEntityRepository
                         $orX->add($this->qb->expr()->eq("$sfield", ":$paramName"));
                     }
                     $this->setQbWhere($orX)->setParameter($paramName, $expr);
+                } elseif ($expr === NULL || strtoupper($expr) == '!NULL') {
+                    $this->setQbWhere($this->qb->expr()->isNull("$rfield"));
+                } elseif (strtoupper($expr) == '!NULL') {
+                    $this->setQbWhere($this->qb->expr()->isNotNull("$rfield"));
                 } else {
                     $this->setQbWhere("$rfield = :$paramName")->setParameter($paramName, $expr);
                 }
@@ -633,6 +637,12 @@ abstract class BaseRepository extends ServiceEntityRepository
             $items[$key]['meta'] = $meta;
         }
         return $items;
+    }
+
+    /** @return T */
+    public function findOne(array $criteria): object
+    {
+        return $this->parseWhere($criteria)->setMaxResult(1)->getFirst();
     }
 
     // =========================================================================

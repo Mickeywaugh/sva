@@ -86,7 +86,7 @@
         <el-table-column label="启用" prop="disabled" width="96">
           <template v-slot="{ row }">
             <el-switch v-model="row.disabled" :active-value="0" :inactive-value="1" inline-prompt :active-text="t('common.yes')"
-              :inactive-text="t('common.no')" :before-change="() => handleDisabled(row)" />
+              :inactive-text="t('common.no')" :before-change="() => handleDisabled(row as SysApiItem)" />
           </template>
         </el-table-column>
         <el-table-column label="更新" prop="updateTime" width="140" />
@@ -96,11 +96,11 @@
               <el-button type="danger" size="small" v-icon="'vea-o-delete'" @click="handleDelete(row.id)">
                 {{ t('common.delete') }}
               </el-button>
-              <el-button type="primary" size="small" v-icon="'vea-o-edit'" @click="openDialog(row)">
+              <el-button type="primary" size="small" v-icon="'vea-o-edit'" @click="openDialog(row as SysApiItem)">
                 {{ t('common.edit') }}
               </el-button>
-              <el-button :disabled="row.disabled" type="success" size="small" v-icon="'vea-o-test'" @click="handleTest(row)">
-              测试
+              <el-button :disabled="row.disabled" type="success" size="small" v-icon="'vea-o-test'" @click="handleTest(row as SysApiItem)">
+                测试
               </el-button>
             </el-button-group>
           </template>
